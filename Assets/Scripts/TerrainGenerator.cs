@@ -32,7 +32,7 @@ public class TerrainGenerator : MonoBehaviour {
                 Vector2 viewedChunkCoord = new Vector2(xOffset, yOffset);
 
                 TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, meshSettings, transform, mapMaterial);
-				newChunk.Load();
+				newChunk.Generate();
             }
         }
 

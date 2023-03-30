@@ -15,7 +15,6 @@ public class TerrainChunk
     Mesh chunkMesh;
 
     HeightMap heightMap;
-    bool heightMapReceived;
 
     HeightMapSettings heightMapSettings;
     MeshSettings meshSettings;
@@ -38,49 +37,20 @@ public class TerrainChunk
 
         meshObject.transform.position = new Vector3(position.x, 0, position.y);
         meshObject.transform.parent = parent;
-        SetVisible(false);
 
     }
 
-    public void Load()
+    public void Generate()
     {
 
         this.heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, sampleCentre);
-        heightMapReceived = true;
 
-        UpdateTerrainChunk();
-    }
+        MeshData meshData = MeshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, 0 /* lod */);
+        chunkMesh = meshData.CreateMesh();
 
-    public void UpdateTerrainChunk()
-    {
-        if (heightMapReceived)
-        {
-
-            MeshData meshData = MeshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, 0 /* lod */);
-            chunkMesh = meshData.CreateMesh();
-
-            meshFilter.mesh = chunkMesh;
-
-            UpdateCollisionMesh();
-
-            SetVisible(true);
-        }
-    }
-
-    public void UpdateCollisionMesh()
-    {
-
+        meshFilter.mesh = chunkMesh;
         meshCollider.sharedMesh = chunkMesh;
-    }
 
-    public void SetVisible(bool visible)
-    {
-        meshObject.SetActive(visible);
-    }
-
-    public bool IsVisible()
-    {
-        return meshObject.activeSelf;
     }
 
 }
