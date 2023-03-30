@@ -2,7 +2,6 @@
 
 public class TerrainChunk {
 	
-	const float colliderGenerationDistanceThreshold = 5;
 	public event System.Action<TerrainChunk, bool> onVisibilityChanged;
 	public Vector2 coord;
 	 
@@ -18,9 +17,6 @@ public class TerrainChunk {
 
 	HeightMap heightMap;
 	bool heightMapReceived;
-	int previousLODIndex = -1;
-	bool hasSetCollider;
-	float maxViewDst;
 
 	HeightMapSettings heightMapSettings;
 	MeshSettings meshSettings;
@@ -51,7 +47,6 @@ public class TerrainChunk {
         lodMeshes[0] = new LODMesh(0);
         lodMeshes[0].updateCallback += UpdateTerrainChunk;
         lodMeshes[0].updateCallback += UpdateCollisionMesh;
-
     }
 
 	public void Load() {
@@ -63,7 +58,7 @@ public class TerrainChunk {
 		heightMapReceived = true;
 
 		UpdateTerrainChunk ();
-	}
+    }
 
 	Vector2 viewerPosition {
 		get {
@@ -78,12 +73,9 @@ public class TerrainChunk {
 
 			bool wasVisible = IsVisible ();
 
-			int lodIndex = 0;
-
 			LODMesh lodMesh = lodMeshes[0];
 			if (lodMesh.hasMesh)
 			{
-				previousLODIndex = lodIndex;
 				meshFilter.mesh = lodMesh.mesh;
 			}
 			else if (!lodMesh.hasRequestedMesh)
@@ -92,19 +84,17 @@ public class TerrainChunk {
 			}
 
 			SetVisible(true);
-
-		}
+        }
 	}
 
 	public void UpdateCollisionMesh() {
 
-		if (!lodMeshes [colliderLODIndex].hasRequestedMesh) {
-			lodMeshes [colliderLODIndex].RequestMesh (heightMap, meshSettings);
+		if (!lodMeshes [0].hasRequestedMesh) {
+			lodMeshes [0].RequestMesh (heightMap, meshSettings);
 		}
 
-		if (lodMeshes [colliderLODIndex].hasMesh) {
-			meshCollider.sharedMesh = lodMeshes [colliderLODIndex].mesh;
-			hasSetCollider = true;
+		if (lodMeshes [0].hasMesh) {
+			meshCollider.sharedMesh = lodMeshes [0].mesh;
 		}
 	}
 
