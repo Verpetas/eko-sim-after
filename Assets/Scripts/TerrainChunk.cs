@@ -45,7 +45,7 @@ public class TerrainChunk
 
         this.heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, sampleCentre);
 
-        MeshData meshData = MeshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, 0 /* lod */);
+        MeshData meshData = MeshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, 0);
         chunkMesh = meshData.CreateMesh();
 
         meshFilter.mesh = chunkMesh;
