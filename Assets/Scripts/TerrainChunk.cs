@@ -3,12 +3,10 @@
 public class TerrainChunk
 {
 
-    public event System.Action<TerrainChunk, bool> onVisibilityChanged;
     public Vector2 coord;
 
     GameObject meshObject;
     Vector2 sampleCentre;
-    Bounds bounds;
 
     MeshRenderer meshRenderer;
     MeshFilter meshFilter;
@@ -21,20 +19,16 @@ public class TerrainChunk
 
     HeightMapSettings heightMapSettings;
     MeshSettings meshSettings;
-    Transform viewer;
 
-    public TerrainChunk(Vector2 coord, HeightMapSettings heightMapSettings, MeshSettings meshSettings, Transform parent, Transform viewer, Material material)
+    public TerrainChunk(Vector2 coord, HeightMapSettings heightMapSettings, MeshSettings meshSettings, Transform parent, Material material)
     {
 
         this.coord = coord;
         this.heightMapSettings = heightMapSettings;
         this.meshSettings = meshSettings;
-        this.viewer = viewer;
 
         sampleCentre = coord * meshSettings.meshWorldSize / meshSettings.meshScale;
         Vector2 position = coord * meshSettings.meshWorldSize;
-        bounds = new Bounds(position, Vector2.one * meshSettings.meshWorldSize);
-
 
         meshObject = new GameObject("Terrain Chunk");
         meshRenderer = meshObject.AddComponent<MeshRenderer>();
@@ -59,22 +53,10 @@ public class TerrainChunk
         UpdateTerrainChunk();
     }
 
-    Vector2 viewerPosition
-    {
-        get
-        {
-            return new Vector2(viewer.position.x, viewer.position.z);
-        }
-    }
-
     public void UpdateTerrainChunk()
     {
         if (heightMapReceived)
         {
-            float viewerDstFromNearestEdge = Mathf.Sqrt(bounds.SqrDistance(viewerPosition));
-
-            bool wasVisible = IsVisible();
-
             LODMesh lodMesh = lodMeshes[0];
 
             MeshData meshData = MeshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, 0 /* lod */);
