@@ -16,8 +16,6 @@ public class TerrainGenerator : MonoBehaviour {
 	float meshWorldSize;
 	int chunksVisibleInViewDst;
 
-	Dictionary<Vector2, TerrainChunk> terrainChunkDictionary = new Dictionary<Vector2, TerrainChunk>();
-
 	void Start()
 	{
 
@@ -42,7 +40,6 @@ public class TerrainGenerator : MonoBehaviour {
                 Vector2 viewedChunkCoord = new Vector2(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
 
                 TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, meshSettings, transform, viewer, mapMaterial);
-				terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
 				newChunk.Load();
             }
         }
