@@ -12,7 +12,7 @@ public class TerrainChunk
     MeshFilter meshFilter;
     MeshCollider meshCollider;
 
-    LODMesh[] lodMeshes;
+    Mesh chunkMesh;
 
     HeightMap heightMap;
     bool heightMapReceived;
@@ -40,8 +40,6 @@ public class TerrainChunk
         meshObject.transform.parent = parent;
         SetVisible(false);
 
-        lodMeshes = new LODMesh[1];
-        lodMeshes[0] = new LODMesh(0);
     }
 
     public void Load()
@@ -57,13 +55,11 @@ public class TerrainChunk
     {
         if (heightMapReceived)
         {
-            LODMesh lodMesh = lodMeshes[0];
 
             MeshData meshData = MeshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, 0 /* lod */);
-            lodMesh.mesh = meshData.CreateMesh();
-            lodMesh.hasMesh = true;
+            chunkMesh = meshData.CreateMesh();
 
-            meshFilter.mesh = lodMesh.mesh;
+            meshFilter.mesh = chunkMesh;
 
             UpdateCollisionMesh();
 
@@ -74,7 +70,7 @@ public class TerrainChunk
     public void UpdateCollisionMesh()
     {
 
-        meshCollider.sharedMesh = lodMeshes[0].mesh;
+        meshCollider.sharedMesh = chunkMesh;
     }
 
     public void SetVisible(bool visible)
@@ -88,35 +84,3 @@ public class TerrainChunk
     }
 
 }
-
-class LODMesh
-{
-
-    public Mesh mesh;
-    public bool hasRequestedMesh;
-    public bool hasMesh;
-    int lod;
-    public event System.Action updateCallback;
-
-    public LODMesh(int lod)
-    {
-        this.lod = lod;
-    }
-
-    void OnMeshDataReceived(object meshDataObject)
-    {
-        mesh = ((MeshData)meshDataObject).CreateMesh();
-        hasMesh = true;
-
-        updateCallback();
-    }
-
-    public void RequestMesh(HeightMap heightMap, MeshSettings meshSettings)
-    {
-        hasRequestedMesh = true;
-        ThreadedDataRequester.RequestData(() => MeshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, lod), OnMeshDataReceived);
-    }
-
-}
-
-
