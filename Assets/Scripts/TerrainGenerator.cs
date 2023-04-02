@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 
 public class TerrainGenerator : MonoBehaviour {
 
@@ -10,7 +11,7 @@ public class TerrainGenerator : MonoBehaviour {
 
 	public Material mapMaterial;
 
-	public int mapSize = 1;
+	public int chunksFromCenter = 1;
 
 	void Start()
 	{
@@ -25,17 +26,40 @@ public class TerrainGenerator : MonoBehaviour {
 	void UpdateVisibleChunks()
 	{
 
-		for (int yOffset = -mapSize; yOffset <= mapSize; yOffset++)
+		for (int yOffset = -chunksFromCenter; yOffset <= chunksFromCenter; yOffset++)
         {
-            for (int xOffset = -mapSize; xOffset <= mapSize; xOffset++)
+            for (int xOffset = -chunksFromCenter; xOffset <= chunksFromCenter; xOffset++)
             {
                 Vector2 viewedChunkCoord = new Vector2(xOffset, yOffset);
+				Vector2 borderPos = GetBorderPos(xOffset, yOffset);
 
-                TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, meshSettings, transform, mapMaterial);
+                TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, meshSettings, transform, mapMaterial, borderPos);
 				newChunk.Generate();
             }
         }
 
     }
+
+	Vector2 GetBorderPos(int xOffset, int yOffset)
+	{
+		return new Vector2(GetAxisBorderPos(-xOffset), GetAxisBorderPos(yOffset));
+	}
+
+	int GetAxisBorderPos(int offset)
+	{
+
+		if (offset == -chunksFromCenter)
+		{
+			return -1;
+		}
+		else if (offset == chunksFromCenter)
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
 
 }

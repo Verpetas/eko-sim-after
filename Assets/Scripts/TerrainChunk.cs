@@ -5,6 +5,8 @@ public class TerrainChunk
 
     public Vector2 coord;
 
+    Vector2 borderPos;
+
     GameObject meshObject;
     Vector2 sampleCentre;
 
@@ -19,12 +21,13 @@ public class TerrainChunk
     HeightMapSettings heightMapSettings;
     MeshSettings meshSettings;
 
-    public TerrainChunk(Vector2 coord, HeightMapSettings heightMapSettings, MeshSettings meshSettings, Transform parent, Material material)
+    public TerrainChunk(Vector2 coord, HeightMapSettings heightMapSettings, MeshSettings meshSettings, Transform parent, Material material, Vector2 borderPos)
     {
 
         this.coord = coord;
         this.heightMapSettings = heightMapSettings;
         this.meshSettings = meshSettings;
+        this.borderPos = borderPos;
 
         sampleCentre = coord * meshSettings.meshWorldSize / meshSettings.meshScale;
         Vector2 position = coord * meshSettings.meshWorldSize;
@@ -43,7 +46,7 @@ public class TerrainChunk
     public void Generate()
     {
 
-        this.heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, sampleCentre);
+        this.heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, sampleCentre, borderPos);
 
         MeshData meshData = MeshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, 0);
         chunkMesh = meshData.CreateMesh();

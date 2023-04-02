@@ -4,28 +4,30 @@ using UnityEngine;
 
 public static class HeightMapGenerator {
 
-	public static HeightMap GenerateHeightMap(int width, int height, HeightMapSettings settings, Vector2 sampleCentre) {
-		float[,] values = Noise.GenerateNoiseMap (width, height, settings.noiseSettings, sampleCentre);
+	public static HeightMap GenerateHeightMap(int width, int height, HeightMapSettings settings, Vector2 sampleCentre, Vector2 chunkBorderPos) {
+		float[,] noiseValues = Noise.GenerateNoiseMap (width, height, settings.noiseSettings, sampleCentre);
+		//float[,] falloffValues = FalloffGenerator.GenerateFalloffMap(width, chunkBorderPos);
 
-		AnimationCurve heightCurve_threadsafe = new AnimationCurve (settings.heightCurve.keys);
+        AnimationCurve heightCurve_threadsafe = new AnimationCurve (settings.heightCurve.keys);
 
 		float minValue = float.MaxValue;
 		float maxValue = float.MinValue;
 
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
-				values [i, j] *= heightCurve_threadsafe.Evaluate (values [i, j]) * settings.heightMultiplier;
+				//noiseValues[i, j] = Mathf.Clamp(noiseValues[i, j] - falloffValues[i, j], 0, float.MaxValue); 
+                noiseValues[i, j] *= heightCurve_threadsafe.Evaluate (noiseValues[i, j]) * settings.heightMultiplier;
 
-				if (values [i, j] > maxValue) {
-					maxValue = values [i, j];
+				if (noiseValues[i, j] > maxValue) {
+					maxValue = noiseValues[i, j];
 				}
-				if (values [i, j] < minValue) {
-					minValue = values [i, j];
+				if (noiseValues[i, j] < minValue) {
+					minValue = noiseValues[i, j];
 				}
 			}
 		}
 
-		return new HeightMap (values, minValue, maxValue);
+		return new HeightMap (noiseValues, minValue, maxValue);
 	}
 
 }
