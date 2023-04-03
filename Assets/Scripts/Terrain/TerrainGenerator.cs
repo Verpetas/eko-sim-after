@@ -16,12 +16,28 @@ public class TerrainGenerator : MonoBehaviour {
 	void Start()
 	{
 
-		textureSettings.ApplyToMaterial(mapMaterial);
+        foreach (Transform child in transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        textureSettings.ApplyToMaterial(mapMaterial);
 		textureSettings.UpdateMeshHeights(mapMaterial, heightMapSettings.minHeight, heightMapSettings.maxHeight);
 
 		UpdateVisibleChunks();
 
-    }
+	}
+
+	// for testing
+	//void OnValidate()
+	//{
+
+	//	textureSettings.ApplyToMaterial(mapMaterial);
+	//	textureSettings.UpdateMeshHeights(mapMaterial, heightMapSettings.minHeight, heightMapSettings.maxHeight);
+
+	//	UpdateVisibleChunks();
+
+	//}
 
 	void UpdateVisibleChunks()
 	{
@@ -42,7 +58,10 @@ public class TerrainGenerator : MonoBehaviour {
 
 	Vector2 GetBorderPos(int xOffset, int yOffset)
 	{
-		return new Vector2(GetAxisBorderPos(-xOffset), GetAxisBorderPos(yOffset));
+		if (chunksFromCenter > 0)
+			return new Vector2(GetAxisBorderPos(-xOffset), GetAxisBorderPos(yOffset));
+		else
+			return new Vector2(0, 0);
 	}
 
 	int GetAxisBorderPos(int offset)
