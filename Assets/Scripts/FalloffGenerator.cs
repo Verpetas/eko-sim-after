@@ -26,10 +26,10 @@ public static class FalloffGenerator {
                 }
                 else if (borderPosIndex == 1)
                 {
-                    value = x + y;
+                    value = Mathf.Clamp01(x + y);
                 }
                 map[i, j] = Evaluate(value);
-
+                //map[i, j] = value;
             }
         }
 

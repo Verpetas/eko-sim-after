@@ -30,7 +30,7 @@ public class MapPreview : MonoBehaviour {
 		} else if (drawMode == DrawMode.Mesh) {
 			DrawMesh (MeshGenerator.GenerateTerrainMesh (heightMap.values,meshSettings, editorPreviewLOD));
 		} else if (drawMode == DrawMode.FalloffMap) {
-            DrawTexture(TextureGenerator.TextureFromHeightMap(new HeightMap(FalloffGenerator.GenerateFalloffMap(meshSettings.numVertsPerLine, new Vector2(1, 1)), 0, 1)));
+            DrawTexture(TextureGenerator.TextureFromHeightMap(new HeightMap(FalloffGenerator.GenerateFalloffMap(meshSettings.numVertsPerLine, Vector2.up), 0, 1)));
         }
 	}
 
