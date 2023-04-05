@@ -14,12 +14,15 @@ public class TerrainChunk
     MeshFilter meshFilter;
     MeshCollider meshCollider;
 
-    Mesh chunkMesh;
+    [HideInInspector]
+    public Mesh chunkMesh;
 
     HeightMap heightMap;
 
     HeightMapSettings heightMapSettings;
     MeshSettings meshSettings;
+
+    MeshData meshData;
 
     public TerrainChunk(Vector2 coord, HeightMapSettings heightMapSettings, MeshSettings meshSettings, Transform parent, Material material, Vector2 borderPos)
     {
@@ -48,12 +51,17 @@ public class TerrainChunk
 
         this.heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, sampleCentre, borderPos);
 
-        MeshData meshData = MeshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, 0);
+        meshData = MeshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, 0);
         chunkMesh = meshData.CreateMesh();
 
         meshFilter.mesh = chunkMesh;
         meshCollider.sharedMesh = chunkMesh;
 
+    }
+
+    public Vector3[,] GetVertices()
+    {
+        return meshData.GetVertices2D();
     }
 
 }

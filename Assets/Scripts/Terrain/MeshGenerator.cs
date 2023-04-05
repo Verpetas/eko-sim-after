@@ -58,7 +58,7 @@ public static class MeshGenerator {
 						height = heightMainVertexA * (1 - dstPercentFromAToB) + heightMainVertexB * dstPercentFromAToB;
 					}
 
-					meshData.AddVertex (new Vector3(vertexPosition2D.x, height, vertexPosition2D.y), percent, vertexIndex);
+					meshData.AddVertex (new Vector3(vertexPosition2D.x, height, vertexPosition2D.y), percent, vertexIndex, x - 1, y - 1);
 
 					bool createTriangle = x < numVertsPerLine - 1 && y < numVertsPerLine - 1 && (!isEdgeConnectionVertex || (x != 2 && y != 2));
 
@@ -85,6 +85,7 @@ public static class MeshGenerator {
 
 public class MeshData {
 	Vector3[] vertices;
+	Vector3[,] vertices2D;
 	int[] triangles;
 	Vector2[] uvs;
 	Vector3[] bakedNormals;
@@ -105,8 +106,15 @@ public class MeshData {
 		int numMainVerticesPerLine = (numVertsPerLine - 5) / skipIncrement + 1;
 		int numMainVertices = numMainVerticesPerLine * numMainVerticesPerLine;
 
-		vertices = new Vector3[numMeshEdgeVertices + numEdgeConnectionVertices + numMainVertices];
+		// set vertex count
+		int vertexCount = numMeshEdgeVertices + numEdgeConnectionVertices + numMainVertices;
+		int vertexCountSqr = (int)Mathf.Sqrt(vertexCount);
+        //Debug.Log("Vertex count: " + vertexCount);
+        //Debug.Log("Square vertex count: " + vertexCountSqr);
+
+        vertices = new Vector3[vertexCount];
 		uvs = new Vector2[vertices.Length];
+		vertices2D = new Vector3[vertexCountSqr, vertexCountSqr];
 
 		int numMeshEdgeTriangles = 8 * (numVertsPerLine - 4);
 		int numMainTriangles = (numMainVerticesPerLine - 1) * (numMainVerticesPerLine - 1) * 2;
@@ -116,12 +124,13 @@ public class MeshData {
 		outOfMeshTriangles = new int[24 * (numVertsPerLine-2)];
 	}
 
-	public void AddVertex(Vector3 vertexPosition, Vector2 uv, int vertexIndex) {
+	public void AddVertex(Vector3 vertexPosition, Vector2 uv, int vertexIndex, int x, int y) {
 		if (vertexIndex < 0) {
 			outOfMeshVertices [-vertexIndex - 1] = vertexPosition;
 		} else {
 			vertices [vertexIndex] = vertexPosition;
-			uvs [vertexIndex] = uv;
+			vertices2D[x, y] = vertexPosition;
+            uvs [vertexIndex] = uv;
 		}
 	}
 
@@ -230,6 +239,11 @@ public class MeshData {
 			mesh.normals = bakedNormals;
 		}
 		return mesh;
+	}
+
+	public Vector3[,] GetVertices2D()
+	{
+		return vertices2D;
 	}
 
 }

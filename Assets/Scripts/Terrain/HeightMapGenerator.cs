@@ -8,7 +8,7 @@ public static class HeightMapGenerator {
 		float[,] noiseValues = Noise.GenerateNoiseMap (width, height, settings.noiseSettings, sampleCentre);
 		float[,] falloffValues = FalloffGenerator.GenerateFalloffMap(width, chunkBorderPos);
 
-        AnimationCurve heightCurve_threadsafe = new AnimationCurve (settings.heightCurve.keys);
+        AnimationCurve heightCurve = new AnimationCurve (settings.heightCurve.keys);
 
 		float minValue = float.MaxValue;
 		float maxValue = float.MinValue;
@@ -16,7 +16,7 @@ public static class HeightMapGenerator {
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
 				noiseValues[i, j] = Mathf.Clamp(noiseValues[i, j] - falloffValues[i, j], 0, float.MaxValue); 
-                noiseValues[i, j] *= heightCurve_threadsafe.Evaluate (noiseValues[i, j]) * settings.heightMultiplier;
+                noiseValues[i, j] *= heightCurve.Evaluate (noiseValues[i, j]) * settings.heightMultiplier;
 
 				if (noiseValues[i, j] > maxValue) {
 					maxValue = noiseValues[i, j];
