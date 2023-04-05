@@ -7,10 +7,14 @@ public class Pathfinding : MonoBehaviour {
 	
 	PathRequestManager requestManager;
 	Grid grid;
-	
-	void Awake() {
+
+	TerrainGenerator terrainGenScript;
+
+	void Start() {
 		requestManager = GetComponent<PathRequestManager>();
-		grid = GetComponent<Grid>();
+		terrainGenScript = GameObject.Find("Map Generator").GetComponent<TerrainGenerator>();
+		grid = terrainGenScript.GetTerrainGrid();
+		//grid = GetComponent<Grid>();
 	}
 	
 	

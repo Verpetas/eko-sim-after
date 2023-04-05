@@ -88,8 +88,6 @@ public class Grid {
 		int x = Mathf.RoundToInt((nodeCountX - 1) * percentX);
 		int y = Mathf.RoundToInt((nodeCountY - 1) * percentY);
 
-		Debug.Log(percentX + ", " + percentY);
-
 		GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 		sphere.transform.position = grid[0, 0].worldPosition;
 

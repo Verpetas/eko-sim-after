@@ -21,7 +21,7 @@ public class TerrainGenerator : MonoBehaviour {
     TerrainChunk chunk;
 	Bounds chunkBounds;
 
-    void Start()
+    void Awake()
 	{
 
         foreach (Transform child in transform)
@@ -113,14 +113,13 @@ public class TerrainGenerator : MonoBehaviour {
 
     void AdjustMapPosition()
     {
-        //Debug.Log("Chunk bounds: " + chunkBounds);
         transform.position = new Vector3(chunkBounds.extents.x, 0, chunkBounds.extents.z);
     }
 
     Vector2 GetBorderPos(int xOffset, int yOffset)
 	{
 		if (mapSize > 1)
-			return new Vector2(-GetAxisBorderPos(xOffset), GetAxisBorderPos(yOffset));
+			return new Vector2(-GetAxisBorderPos(xOffset), -GetAxisBorderPos(yOffset));
 		else
 			return Vector2.zero;
 	}
@@ -140,6 +139,11 @@ public class TerrainGenerator : MonoBehaviour {
 		{
 			return 0;
 		}
+	}
+
+	public Grid GetTerrainGrid()
+	{
+		return terrain;
 	}
 
 }
