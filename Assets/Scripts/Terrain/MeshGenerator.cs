@@ -9,9 +9,10 @@ public static class MeshGenerator {
 		int skipIncrement = (levelOfDetail == 0)?1:levelOfDetail * 2;
 		int numVertsPerLine = meshSettings.numVertsPerLine;
 
-		Vector2 topLeft = new Vector2 (-1, 1) * meshSettings.meshWorldSize / 2f;
+        //Vector2 topLeft = new Vector2 (-1, 1) * meshSettings.meshWorldSize / 2f;
+        Vector2 bottomLeft = new Vector2(-1, -1) * meshSettings.meshWorldSize / 2f;
 
-		MeshData meshData = new MeshData (numVertsPerLine, skipIncrement, meshSettings.useFlatShading);
+        MeshData meshData = new MeshData (numVertsPerLine, skipIncrement, meshSettings.useFlatShading);
 
 		int[,] vertexIndicesMap = new int[numVertsPerLine, numVertsPerLine];
 		int meshVertexIndex = 0;
@@ -43,8 +44,9 @@ public static class MeshGenerator {
 
 					int vertexIndex = vertexIndicesMap [x, y];
 					Vector2 percent = new Vector2 (x - 1, y - 1) / (numVertsPerLine - 3);
-					Vector2 vertexPosition2D = topLeft + new Vector2(percent.x,-percent.y) * meshSettings.meshWorldSize;
-					float height = heightMap [x, y];
+                    //Vector2 vertexPosition2D = topLeft + new Vector2(percent.x,-percent.y) * meshSettings.meshWorldSize;
+                    Vector2 vertexPosition2D = bottomLeft + new Vector2(percent.x, percent.y) * meshSettings.meshWorldSize;
+                    float height = heightMap [x, y];
 
 					if (isEdgeConnectionVertex) {
 						bool isVertical = x == 2 || x == numVertsPerLine - 3;
@@ -134,8 +136,10 @@ public class MeshData {
 		}
 	}
 
-	public void AddTriangle(int a, int b, int c) {
-		if (a < 0 || b < 0 || c < 0) {
+    //public void AddTriangle(int a, int b, int c) {
+    public void AddTriangle(int c, int b, int a)
+    {
+        if (a < 0 || b < 0 || c < 0) {
 			outOfMeshTriangles [outOfMeshTriangleIndex] = a;
 			outOfMeshTriangles [outOfMeshTriangleIndex + 1] = b;
 			outOfMeshTriangles [outOfMeshTriangleIndex + 2] = c;

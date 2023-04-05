@@ -11,7 +11,9 @@ public class Grid {
 	Node[,] grid;
 
 	//float nodeDiameter;
-	int gridSizeX, gridSizeY;
+	int nodeCountX, nodeCountY;
+
+	float terrainSize;
 
 	//void Awake() {
 	//	nodeDiameter = nodeRadius*2;
@@ -20,17 +22,18 @@ public class Grid {
 	//	CreateGrid();
 	//}
 
-	public Grid(Node[,] grid, int gridSize)
+	public Grid(Node[,] grid, int gridSize, float terrainSize)
 	{
 		this.grid = grid;
-		this.gridSizeX = gridSize;
+		this.nodeCountX = this.nodeCountY = gridSize;
+		this.terrainSize = terrainSize;
 	}
 
 	public int MaxSize
 	{
 		get
 		{
-			return gridSizeX * gridSizeY;
+			return nodeCountX * nodeCountY;
 		}
 	}
 
@@ -58,7 +61,7 @@ public class Grid {
 				int checkX = node.gridX + x;
 				int checkY = node.gridY + y;
 
-				if (checkX >= 0 && checkX < gridSizeX && checkY >= 0 && checkY < gridSizeY) {
+				if (checkX >= 0 && checkX < nodeCountX && checkY >= 0 && checkY < nodeCountY) {
 					neighbours.Add(grid[checkX,checkY]);
 				}
 			}
@@ -78,8 +81,26 @@ public class Grid {
 		//int y = Mathf.RoundToInt((gridSizeY-1) * percentY);
 		//return grid[x,y];
 
-		return grid[0, 0];
-	}
+		float percentX = worldPosition.x / terrainSize;
+		float percentY = worldPosition.z / terrainSize;
+		percentX = Mathf.Clamp01(percentX);
+		percentY = Mathf.Clamp01(percentY);
+		int x = Mathf.RoundToInt((nodeCountX - 1) * percentX);
+		int y = Mathf.RoundToInt((nodeCountY - 1) * percentY);
+
+		Debug.Log(percentX + ", " + percentY);
+
+		GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+		sphere.transform.position = grid[0, 0].worldPosition;
+
+		//GameObject sphere2 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+		//sphere2.transform.position = grid[242, 242].worldPosition;
+
+		GameObject sphere2 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+		sphere2.transform.position = grid[x, y].worldPosition;
+
+		return grid[x, y];
+    }
 	
 	//void OnDrawGizmos() {
 	//	Gizmos.DrawWireCube(transform.position,new Vector3(gridWorldSize.x,1,gridWorldSize.y));

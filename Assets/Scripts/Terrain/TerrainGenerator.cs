@@ -11,12 +11,15 @@ public class TerrainGenerator : MonoBehaviour {
 
 	public Material mapMaterial;
 
-	public int mapSize = 3;
+	public int mapSize = 1;
+
+	public Transform testObject;
 
 	Node[,] nodeGrid;
 	Grid terrain;
 
     TerrainChunk chunk;
+	Bounds chunkBounds;
 
     void Start()
 	{
@@ -71,8 +74,12 @@ public class TerrainGenerator : MonoBehaviour {
             }
         }
 
-        CreateNodeGrid(chunk);
+        chunkBounds = chunk.chunkMesh.bounds;
         AdjustMapPosition();
+        CreateNodeGrid(chunk);
+
+        // check given transform loc on grid
+        terrain.NodeFromWorldPoint(testObject.transform.position);
 
     }
 
@@ -80,24 +87,33 @@ public class TerrainGenerator : MonoBehaviour {
 	{
 		Vector3[,] vertices = chunk.GetVertices();
 		int vertsPerLine = vertices.GetLength(0);
+		float chunkSize = chunkBounds.extents.x * 2;
 
 		nodeGrid = new Node[vertsPerLine, vertsPerLine];
-		//Debug.Log(vertices[0, 0] + ", " + vertices[50, 50]);
 
 		for (int y = 0; y < vertsPerLine; y++)
 		{
 			for (int x = 0; x < vertsPerLine; x++)
 			{
-                nodeGrid[x, y] = new Node(true, vertices[x, y], x, y);
-			}
+				Vector3 vertexPosActual = vertices[x, y] + GetVertexOffset(chunkSize);
+                nodeGrid[x, y] = new Node(true, vertexPosActual, x, y);
+
+                //GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                //sphere.transform.position = vertexPosActual;
+            }
         }
 
-        terrain = new Grid(nodeGrid, vertsPerLine);
+        terrain = new Grid(nodeGrid, vertsPerLine, chunkBounds.extents.x * 2);
+    }
+
+	Vector3 GetVertexOffset(float chunkSize)
+	{
+		return new Vector3(0.5f * chunkSize, 0, 0.5f * chunkSize);
     }
 
     void AdjustMapPosition()
     {
-        Bounds chunkBounds = chunk.chunkMesh.bounds;
+        //Debug.Log("Chunk bounds: " + chunkBounds);
         transform.position = new Vector3(chunkBounds.extents.x, 0, chunkBounds.extents.z);
     }
 
