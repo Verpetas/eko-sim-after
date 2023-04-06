@@ -91,12 +91,6 @@ public class Grid {
 		GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 		sphere.transform.position = grid[0, 0].worldPosition;
 
-		//GameObject sphere2 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-		//sphere2.transform.position = grid[242, 242].worldPosition;
-
-		GameObject sphere2 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-		sphere2.transform.position = grid[x, y].worldPosition;
-
 		return grid[x, y];
     }
 	

@@ -3,23 +3,48 @@ using System.Collections;
 
 public class Unit : MonoBehaviour {
 
+	const float minPathUpdateTime = 0.2f;
+	const float pathUpdateMoveThreshold = 0.5f;
 
 	public Transform target;
 	float speed = 20;
 	Vector3[] path;
 	int targetIndex;
 
-	void Start() {
-		PathRequestManager.RequestPath(transform.position,target.position, OnPathFound);
-	}
+    void Start()
+    {
+        StartCoroutine(UpdatePath());
+    }
 
-	public void OnPathFound(Vector3[] newPath, bool pathSuccessful) {
+    public void OnPathFound(Vector3[] newPath, bool pathSuccessful) {
 		if (pathSuccessful) {
 			path = newPath;
 			targetIndex = 0;
 			StopCoroutine("FollowPath");
 			StartCoroutine("FollowPath");
 		}
+	}
+
+	IEnumerator UpdatePath()
+	{
+		if(Time.timeSinceLevelLoad < 0.3f)
+		{
+			yield return new WaitForSeconds(0.3f);
+		}
+        PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
+
+        float sqrMoveThreshold = pathUpdateMoveThreshold * pathUpdateMoveThreshold;
+		Vector3 targetPosOld = target.position;
+
+		while (true)
+		{
+			yield return new WaitForSeconds(minPathUpdateTime);
+			if ((target.position - targetPosOld).sqrMagnitude > sqrMoveThreshold)
+			{
+                PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
+				targetPosOld = target.position;
+            }
+        }
 	}
 
 	IEnumerator FollowPath() {
