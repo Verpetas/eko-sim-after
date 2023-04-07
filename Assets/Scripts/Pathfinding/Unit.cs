@@ -6,8 +6,10 @@ public class Unit : MonoBehaviour {
 	const float minPathUpdateTime = 0.2f;
 	const float pathUpdateMoveThreshold = 0.5f;
 
+	public float waypointDistanceThreshold = 1.5f; 
+
 	public Transform target;
-	float speed = 20;
+	public float speed = 10;
 	Vector3[] path;
 	int targetIndex;
 
@@ -31,7 +33,7 @@ public class Unit : MonoBehaviour {
 		{
 			yield return new WaitForSeconds(0.3f);
 		}
-        PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
+        PathRequestManager.RequestPath(new PathRequest(transform.position, target.position, OnPathFound));
 
         float sqrMoveThreshold = pathUpdateMoveThreshold * pathUpdateMoveThreshold;
 		Vector3 targetPosOld = target.position;
@@ -41,18 +43,23 @@ public class Unit : MonoBehaviour {
 			yield return new WaitForSeconds(minPathUpdateTime);
 			if ((target.position - targetPosOld).sqrMagnitude > sqrMoveThreshold)
 			{
-                PathRequestManager.RequestPath(transform.position, target.position, OnPathFound);
+                PathRequestManager.RequestPath(new PathRequest(transform.position, target.position, OnPathFound));
 				targetPosOld = target.position;
             }
         }
 	}
 
-	IEnumerator FollowPath() {
+	IEnumerator FollowPath()
+	{
 		Vector3 currentWaypoint = path[0];
-		while (true) {
-			if (transform.position == currentWaypoint) {
-				targetIndex ++;
-				if (targetIndex >= path.Length) {
+		while (true)
+		{
+            //if (transform.position == currentWaypoint) {
+            if (Vector3.Distance(transform.position, currentWaypoint) < waypointDistanceThreshold)
+            {
+                targetIndex ++;
+				if (targetIndex >= path.Length)
+				{
 					yield break;
 				}
 				currentWaypoint = path[targetIndex];

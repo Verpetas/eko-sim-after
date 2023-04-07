@@ -78,9 +78,6 @@ public class TerrainGenerator : MonoBehaviour {
         AdjustMapPosition();
         CreateNodeGrid(chunk);
 
-        // check given transform loc on grid
-        terrain.NodeFromWorldPoint(testObject.transform.position);
-
     }
 
 	void CreateNodeGrid(TerrainChunk chunk)
