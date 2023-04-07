@@ -21,7 +21,7 @@ public class BodyController : MonoBehaviour
     void Start()
     {
         //colliderExtents = collider.bounds.extents;
-        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        rb.constraints = RigidbodyConstraints.FreezeRotation;
     }
 
     // Update is called once per frame

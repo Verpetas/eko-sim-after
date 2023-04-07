@@ -9,9 +9,20 @@ public class Unit : MonoBehaviour {
 	public float waypointDistanceThreshold = 1.5f; 
 
 	public Transform target;
-	public float speed = 10;
-	Vector3[] path;
+	public float moveForce = 1750f;
+	public float turnSpeed = 0.5f;
+	public LayerMask groundMask;
+    public bool touchingGround = false;
+    public float groundedDrag = 1;
+
+    Vector3[] path;
 	int targetIndex;
+	Rigidbody seekerRB;
+
+    private void Awake()
+    {
+        seekerRB = GetComponent<Rigidbody>();
+    }
 
     void Start()
     {
@@ -54,8 +65,13 @@ public class Unit : MonoBehaviour {
 		Vector3 currentWaypoint = path[0];
 		while (true)
 		{
-            //if (transform.position == currentWaypoint) {
-            if (Vector3.Distance(transform.position, currentWaypoint) < waypointDistanceThreshold)
+            Vector3 groundPoint = new Vector3();
+            if (Physics.Raycast(transform.position, -transform.up, out RaycastHit hit, 500f, groundMask))
+            {
+                groundPoint = hit.point;
+            }
+
+            if (Vector3.Distance(groundPoint, currentWaypoint) < waypointDistanceThreshold)
             {
                 targetIndex ++;
 				if (targetIndex >= path.Length)
@@ -65,13 +81,65 @@ public class Unit : MonoBehaviour {
 				currentWaypoint = path[targetIndex];
 			}
 
-			transform.position = Vector3.MoveTowards(transform.position,currentWaypoint,speed * Time.deltaTime);
-			yield return null;
+            //transform.position = Vector3.MoveTowards(transform.position,currentWaypoint,speed * Time.deltaTime);
+            if (touchingGround)
+            {
+                TurnTowardsWaypoint(currentWaypoint);
+                seekerRB.AddForce(DirectForce(transform.forward) * moveForce * Time.deltaTime);
+            }
+
+            yield return null;
 
 		}
 	}
 
-	public void OnDrawGizmos() {
+    void TurnTowardsWaypoint(Vector3 target)
+    {
+        Vector3 direction = target - transform.position;
+        Vector3 targetDir = Vector3.ProjectOnPlane(direction, transform.up);
+        float angle = Vector3.SignedAngle(targetDir, transform.forward, transform.up);
+
+        if (angle > 0.5f)
+        {
+            transform.rotation = Quaternion.AngleAxis(-turnSpeed, transform.up) * transform.rotation;
+        }
+        else if (angle < -0.5f)
+        {
+            transform.rotation = Quaternion.AngleAxis(turnSpeed, transform.up) * transform.rotation;
+        }
+    }
+
+    Vector3 DirectForce(Vector3 waypoint)
+    {
+        Vector3 bodyUp = transform.up;
+        RaycastHit hit;
+        Physics.Raycast(transform.position, -bodyUp, out hit, 500f, groundMask);
+
+        Vector3 bodyDirection = Vector3.ProjectOnPlane(waypoint, bodyUp);
+        Vector3 forceDirection = (Quaternion.FromToRotation(bodyUp, hit.normal) * bodyDirection).normalized;
+
+        return forceDirection;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
+		{
+			touchingGround = true;
+            seekerRB.drag = groundedDrag;
+		}
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
+        {
+            touchingGround = false;
+            seekerRB.drag = 0;
+        }
+    }
+
+    public void OnDrawGizmos() {
 		if (path != null) {
 			for (int i = targetIndex; i < path.Length; i ++) {
 				Gizmos.color = Color.black;
