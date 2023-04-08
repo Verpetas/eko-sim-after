@@ -8,13 +8,13 @@ public class BodyController : MonoBehaviour
     public float gravity = -10;
 
     Rigidbody rb;
-    CapsuleCollider collider;
-    Vector3 colliderExtents;
+    //CapsuleCollider collider;
+    //Vector3 colliderExtents;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        collider = GetComponent<CapsuleCollider>();
+        //collider = GetComponent<CapsuleCollider>();
     }
 
     // Start is called before the first frame update

@@ -15,18 +15,17 @@ public class TerrainGenerator : MonoBehaviour {
 
 	Node[,] nodeGrid;
 	Grid terrain;
-    TerrainChunk chunk;
 
 	int chunkVertsPerLine;
     int mapVertsPerLine;
 
-	Vector3 chunkExtents;
-	bool chunkExtentsReceived = false;
+	float chunkWidth;
+	bool chunkWidthFound = false;
 
     void Awake()
 	{
 		chunkVertsPerLine = meshSettings.numVertsPerLine - 2;
-        mapVertsPerLine = chunkVertsPerLine * mapSize;
+        mapVertsPerLine = chunkVertsPerLine * mapSize - (mapSize - 1);
 		nodeGrid = new Node[mapVertsPerLine, mapVertsPerLine];
 
         foreach (Transform child in transform)
@@ -40,31 +39,8 @@ public class TerrainGenerator : MonoBehaviour {
 		GenerateChunks();
 	}
 
-	// for testing
-	//void OnValidate()
-	//{
-
-	//	textureSettings.ApplyToMaterial(mapMaterial);
-	//	textureSettings.UpdateMeshHeights(mapMaterial, heightMapSettings.minHeight, heightMapSettings.maxHeight);
-
-	//	UpdateVisibleChunks();
-
-	//}
-
 	void GenerateChunks()
 	{
-
-		//for (int yOffset = -chunksFromCenter; yOffset <= chunksFromCenter; yOffset++)
-		//{
-		//	for (int xOffset = -chunksFromCenter; xOffset <= chunksFromCenter; xOffset++)
-		//	{
-		//		Vector2 viewedChunkCoord = new Vector2(xOffset, yOffset);
-		//		Vector2 borderPos = GetBorderPos(xOffset, yOffset);
-
-		//		TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, meshSettings, transform, mapMaterial, borderPos);
-		//		newChunk.Generate();
-		//	}
-		//}
 
 		for (int yOffset = 0; yOffset < mapSize; yOffset++)
         {
@@ -73,35 +49,39 @@ public class TerrainGenerator : MonoBehaviour {
                 Vector2 viewedChunkCoord = new Vector2(xOffset, yOffset);
                 Vector2 borderPos = GetBorderPos(xOffset, yOffset);
 
-                chunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, meshSettings, transform, mapMaterial, borderPos);
+                TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, meshSettings, transform, mapMaterial, borderPos);
                 chunk.Generate();
 				AddToNodeGrid(chunk);
             }
         }
 
         AdjustMapPosition();
-        float mapWidth = chunkExtents.x * 2 * mapSize;
+        float mapWidth = chunkWidth * mapSize;
         terrain = new Grid(nodeGrid, mapVertsPerLine, mapWidth);
     }
 
 	void AddToNodeGrid(TerrainChunk chunk)
 	{
 		Vector3[,] vertices = chunk.GetVertices();
-		FindChunkExtents();
-		float chunkSize = chunkExtents.x * 2;
+		FindChunkWidth(chunk);
 
-        int startNodeX = chunkVertsPerLine * (int)chunk.coord.x;
-        int startNodeY = chunkVertsPerLine * (int)chunk.coord.y;
+        int startNodeX = (chunkVertsPerLine - 1) * (int)chunk.coord.x;
+        int startNodeY = (chunkVertsPerLine - 1) * (int)chunk.coord.y;
 
         for (int y = 0; y < chunkVertsPerLine; y++)
 		{
 			for (int x = 0; x < chunkVertsPerLine; x++)
 			{
-				Vector3 vertexPosActual = vertices[x, y] + GetVertexOffset(chunkSize, chunk.coord);
-                nodeGrid[startNodeX + x, startNodeY + y] = new Node(true, vertexPosActual, startNodeX + x, startNodeY + y);
-			}
+                AddNode(vertices[x, y], startNodeX + x, startNodeY + y, chunk.coord);
+            }
         }
     }
+
+	void AddNode(Vector3 vertex, int nodeX, int nodeY, Vector2 chunkCoord)
+	{
+        Vector3 vertexPosActual = vertex + GetVertexOffset(chunkWidth, chunkCoord);
+        nodeGrid[nodeX, nodeY] = new Node(true, vertexPosActual, nodeX, nodeY);
+	}
 
 	Vector3 GetVertexOffset(float chunkSize, Vector2 chunkCoord)
 	{
@@ -110,7 +90,7 @@ public class TerrainGenerator : MonoBehaviour {
 
     void AdjustMapPosition()
     {
-        transform.position = new Vector3(chunkExtents.x, 0, chunkExtents.z);
+        transform.position = new Vector3(chunkWidth/2, 0, chunkWidth/2);
     }
 
     Vector2 GetBorderPos(int xOffset, int yOffset)
@@ -131,12 +111,12 @@ public class TerrainGenerator : MonoBehaviour {
 			return 0;
 	}
 
-	void FindChunkExtents()
+	void FindChunkWidth(TerrainChunk chunk)
 	{
-		if (!chunkExtentsReceived)
+		if (!chunkWidthFound)
 		{
-			chunkExtents = chunk.chunkMesh.bounds.extents;
-			chunkExtentsReceived = true;
+			chunkWidth = chunk.chunkMesh.bounds.extents.x * 2;
+			chunkWidthFound = true;
         }
 	}
 
