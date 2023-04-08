@@ -4,23 +4,9 @@ using System.Collections.Generic;
 
 public class Grid {
 
-	//public bool displayGridGizmos;
-	//public LayerMask unwalkableMask;
-	//public Vector2 gridWorldSize;
-	//public float nodeRadius;
 	Node[,] grid;
-
-	//float nodeDiameter;
 	int nodeCountX, nodeCountY;
-
 	float terrainSize;
-
-	//void Awake() {
-	//	nodeDiameter = nodeRadius*2;
-	//	gridSizeX = Mathf.RoundToInt(gridWorldSize.x/nodeDiameter);
-	//	gridSizeY = Mathf.RoundToInt(gridWorldSize.y/nodeDiameter);
-	//	CreateGrid();
-	//}
 
 	public Grid(Node[,] grid, int gridSize, float terrainSize)
 	{
@@ -36,19 +22,6 @@ public class Grid {
 			return nodeCountX * nodeCountY;
 		}
 	}
-
-	//void CreateGrid() {
-	//	grid = new Node[gridSizeX,gridSizeY];
-	//	Vector3 worldBottomLeft = transform.position - Vector3.right * gridWorldSize.x/2 - Vector3.forward * gridWorldSize.y/2;
-
-	//	for (int x = 0; x < gridSizeX; x ++) {
-	//		for (int y = 0; y < gridSizeY; y ++) {
-	//			Vector3 worldPoint = worldBottomLeft + Vector3.right * (x * nodeDiameter + nodeRadius) + Vector3.forward * (y * nodeDiameter + nodeRadius);
-	//			bool walkable = !(Physics.CheckSphere(worldPoint,nodeRadius,unwalkableMask));
-	//			grid[x,y] = new Node(walkable,worldPoint, x,y);
-	//		}
-	//	}
-	//}
 
 	public List<Node> GetNeighbours(Node node) {
 		List<Node> neighbours = new List<Node>();
@@ -88,19 +61,7 @@ public class Grid {
 		int x = Mathf.RoundToInt((nodeCountX - 1) * percentX);
 		int y = Mathf.RoundToInt((nodeCountY - 1) * percentY);
 
-		//GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-		//sphere.transform.position = grid[0, 0].worldPosition;
-
 		return grid[x, y];
     }
 	
-	//void OnDrawGizmos() {
-	//	Gizmos.DrawWireCube(transform.position,new Vector3(gridWorldSize.x,1,gridWorldSize.y));
-	//	if (grid != null && displayGridGizmos) {
-	//		foreach (Node n in grid) {
-	//			Gizmos.color = (n.walkable)?Color.white:Color.red;
-	//			Gizmos.DrawCube(n.worldPosition, Vector3.one * (nodeDiameter-.1f));
-	//		}
-	//	}
-	//}
 }

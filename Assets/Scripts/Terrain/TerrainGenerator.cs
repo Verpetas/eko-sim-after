@@ -99,9 +99,6 @@ public class TerrainGenerator : MonoBehaviour {
 			{
 				Vector3 vertexPosActual = vertices[x, y] + GetVertexOffset(chunkSize, chunk.coord);
                 nodeGrid[startNodeX + x, startNodeY + y] = new Node(true, vertexPosActual, startNodeX + x, startNodeY + y);
-
-				GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-				sphere.transform.position = vertexPosActual;
 			}
         }
     }
