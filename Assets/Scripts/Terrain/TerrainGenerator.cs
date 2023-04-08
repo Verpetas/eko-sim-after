@@ -80,7 +80,14 @@ public class TerrainGenerator : MonoBehaviour {
 	void AddNode(Vector3 vertex, int nodeX, int nodeY, Vector2 chunkCoord)
 	{
         Vector3 vertexPosActual = vertex + GetVertexOffset(chunkWidth, chunkCoord);
-        nodeGrid[nodeX, nodeY] = new Node(true, vertexPosActual, nodeX, nodeY);
+		bool walkable = vertexPosActual.y > 10;
+        nodeGrid[nodeX, nodeY] = new Node(walkable, vertexPosActual, nodeX, nodeY);
+
+		//if (walkable)
+		//{
+		//	GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+		//	sphere.transform.position = vertexPosActual;
+		//}
 	}
 
 	Vector3 GetVertexOffset(float chunkSize, Vector2 chunkCoord)
