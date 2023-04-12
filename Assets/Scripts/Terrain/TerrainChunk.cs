@@ -5,7 +5,7 @@ public class TerrainChunk
 
     public Vector2 coord;
 
-    Vector2 borderPos;
+    bool[,] borderPos;
 
     GameObject meshObject;
     Vector2 sampleCentre;
@@ -24,7 +24,7 @@ public class TerrainChunk
 
     MeshData meshData;
 
-    public TerrainChunk(Vector2 coord, HeightMapSettings heightMapSettings, MeshSettings meshSettings, Transform parent, Material material, Vector2 borderPos)
+    public TerrainChunk(Vector2 coord, HeightMapSettings heightMapSettings, MeshSettings meshSettings, Transform parent, Material material, bool[,] borderPos)
     {
 
         this.coord = coord;

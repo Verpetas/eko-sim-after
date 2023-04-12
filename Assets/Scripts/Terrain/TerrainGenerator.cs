@@ -11,7 +11,7 @@ public class TerrainGenerator : MonoBehaviour {
 
 	public Material mapMaterial;
 
-	public int mapSize = 1;
+	public int mapSize = 21;
 
 	Node[,] nodeGrid;
 	Grid terrain;
@@ -22,11 +22,16 @@ public class TerrainGenerator : MonoBehaviour {
 	float chunkWidth;
 	bool chunkWidthFound = false;
 
+	bool[,] chunkLocations;
+    List<Vector2> chunkCoords = new List<Vector2>();
+
     void Awake()
 	{
 		chunkVertsPerLine = meshSettings.numVertsPerLine - 2;
         mapVertsPerLine = chunkVertsPerLine * mapSize - (mapSize - 1);
 		nodeGrid = new Node[mapVertsPerLine, mapVertsPerLine];
+
+        chunkLocations = new bool[mapSize, mapSize];
 
         foreach (Transform child in transform)
         {
@@ -41,17 +46,37 @@ public class TerrainGenerator : MonoBehaviour {
 
 	void GenerateChunks()
 	{
+		GenerateChunkLocations();
 
-		for (int yOffset = 0; yOffset < mapSize; yOffset++)
+        for (int y = 0; y < mapSize; y++)
         {
-            for (int xOffset = 0; xOffset < mapSize; xOffset++)
+            for (int x = 0; x < mapSize; x++)
             {
-                Vector2 viewedChunkCoord = new Vector2(xOffset, yOffset);
-                Vector2 borderPos = GetBorderPos(xOffset, yOffset);
+				if (chunkLocations[x, y])
+				{
+					Vector2 viewedChunkCoord = new Vector2(x, y);
+					//Vector2 borderPos = Vector2.zero; //GetBorderPos(x, y);
+					bool[,] borderPos = new bool[3, 3];
+					for(int offsetY = -1; offsetY <= 1; offsetY++)
+					{
+                        for (int offsetX = -1; offsetX <= 1; offsetX++)
+                        {
+							int borderX = x + offsetX;
+                            int borderY = y + offsetY;
 
-                TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, meshSettings, transform, mapMaterial, borderPos);
-                chunk.Generate();
-				AddToNodeGrid(chunk);
+							if (borderX < 0 || borderY < 0)
+								borderPos[offsetX + 1, offsetY + 1] = false;
+							else
+								borderPos[offsetX + 1, offsetY + 1] = chunkLocations[borderX, borderY];
+                        }
+                    }
+
+					//Debug.Log("****************************");
+
+                    TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, meshSettings, transform, mapMaterial, borderPos);
+					chunk.Generate();
+					AddToNodeGrid(chunk);
+				}
             }
         }
 
@@ -60,7 +85,33 @@ public class TerrainGenerator : MonoBehaviour {
         terrain = new Grid(nodeGrid, mapVertsPerLine, mapWidth);
     }
 
-	void AddToNodeGrid(TerrainChunk chunk)
+	void GenerateChunkLocations()
+	{
+		int centerCoord = mapSize / 2;
+		AddChunkPoint(new Vector2(centerCoord, centerCoord));
+
+		int chunkCount = 1;
+		var random = new System.Random();
+		while (chunkCount < mapSize)
+		{
+			int chunkIndex = random.Next(chunkCoords.Count);
+			Vector2 newChunkCoords = RandomOffset(chunkCoords[chunkIndex]);
+
+            if (!chunkLocations[(int)newChunkCoords.x, (int)newChunkCoords.y])
+            {
+                AddChunkPoint(newChunkCoords);
+                chunkCount++;
+            }
+        }		
+	}
+
+    void AddChunkPoint(Vector2 chunkPoint)
+    {
+        chunkCoords.Add(chunkPoint);
+        chunkLocations[(int)chunkPoint.x, (int)chunkPoint.y] = true;
+    }
+
+    void AddToNodeGrid(TerrainChunk chunk)
 	{
 		Vector3[,] vertices = chunk.GetVertices();
 		FindChunkWidth(chunk);
@@ -127,7 +178,14 @@ public class TerrainGenerator : MonoBehaviour {
         }
 	}
 
-	public Grid GetTerrainGrid()
+    Vector2 RandomOffset(Vector2 baseVector)
+    {
+        Vector2 offset = ((Random.value < 0.5f) ? Vector2.up : Vector2.left) * ((Random.value < 0.5f) ? 1 : -1);
+
+        return baseVector + offset;
+    }
+
+    public Grid GetTerrainGrid()
 	{
 		return terrain;
 	}

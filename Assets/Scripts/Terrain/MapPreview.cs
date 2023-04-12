@@ -21,16 +21,19 @@ public class MapPreview : MonoBehaviour {
 	public bool autoUpdate;
 
     public void DrawMapInEditor() {
+		//FalloffGenerator falloffGenerator = new FalloffGenerator();
+
 		textureData.ApplyToMaterial (terrainMaterial);
 		textureData.UpdateMeshHeights (terrainMaterial, heightMapSettings.minHeight, heightMapSettings.maxHeight);
-		HeightMap heightMap = HeightMapGenerator.GenerateHeightMap (meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, Vector2.zero, Vector2.zero);
+		HeightMap heightMap = HeightMapGenerator.GenerateHeightMap (meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, Vector2.zero, /*Vector2.zero*/ new bool[3, 3]);
 
 		if (drawMode == DrawMode.NoiseMap) {
 			DrawTexture (TextureGenerator.TextureFromHeightMap (heightMap));
 		} else if (drawMode == DrawMode.Mesh) {
 			DrawMesh (MeshGenerator.GenerateTerrainMesh (heightMap.values,meshSettings, editorPreviewLOD));
 		} else if (drawMode == DrawMode.FalloffMap) {
-            DrawTexture(TextureGenerator.TextureFromHeightMap(new HeightMap(FalloffGenerator.GenerateFalloffMap(meshSettings.numVertsPerLine, Vector2.up), 0, 1)));
+			bool[,] testBools = { { true, true, true }, { true, true, true }, { true, true, true } };
+            DrawTexture(TextureGenerator.TextureFromHeightMap(new HeightMap(FalloffGenerator.GenerateFalloffMap(meshSettings.numVertsPerLine, testBools), 0, 1)));
         }
 	}
 

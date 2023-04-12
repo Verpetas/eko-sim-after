@@ -4,7 +4,9 @@ using UnityEngine;
 
 public static class HeightMapGenerator {
 
-	public static HeightMap GenerateHeightMap(int width, int height, HeightMapSettings settings, Vector2 sampleCentre, Vector2 chunkBorderPos) {
+	public static HeightMap GenerateHeightMap(int width, int height, HeightMapSettings settings, Vector2 sampleCentre, bool[,] chunkBorderPos) {
+		//FalloffGenerator falloffGenerator = new FalloffGenerator();
+
 		float[,] noiseValues = Noise.GenerateNoiseMap (width, height, settings.noiseSettings, sampleCentre);
 		float[,] falloffValues = FalloffGenerator.GenerateFalloffMap(width, chunkBorderPos);
 
