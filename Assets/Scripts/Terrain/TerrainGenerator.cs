@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using UnityEngine.UIElements;
 
 public class TerrainGenerator : MonoBehaviour {
 
@@ -25,7 +26,10 @@ public class TerrainGenerator : MonoBehaviour {
 	bool[,] chunkLocations;
     List<Vector2> chunkCoords = new List<Vector2>();
 
-    void Awake()
+	Vector2 closestChunkCoord; // <-- MOVE TO A SEPARATE CLASS / SCRIPT
+	Vector2 farthestChunkCoord;
+
+	void Awake()
 	{
 		chunkVertsPerLine = meshSettings.numVertsPerLine - 2;
         mapVertsPerLine = chunkVertsPerLine * mapSize - (mapSize - 1);
@@ -48,14 +52,17 @@ public class TerrainGenerator : MonoBehaviour {
 	{
 		GenerateChunkLocations();
 
-        for (int y = 0; y < mapSize; y++)
+		(int, int) yBounds = ((int)closestChunkCoord.y - 1, (int)farthestChunkCoord.y + 2);
+		(int, int) xBounds = ((int)closestChunkCoord.x - 1, (int)farthestChunkCoord.x + 2);
+
+        for (int y = yBounds.Item1; y < yBounds.Item2; y++)
         {
-            for (int x = 0; x < mapSize; x++)
+            for (int x = xBounds.Item1; x < xBounds.Item2; x++)
             {
 				if (chunkLocations[x, y])
 				{
-					Vector2 viewedChunkCoord = new Vector2(x, y);
-					//Vector2 borderPos = Vector2.zero; //GetBorderPos(x, y);
+					Vector2 viewedChunkCoord = new Vector2(x, y) + Vector2.one - closestChunkCoord; // bring closer to zero coord
+					
 					bool[,] borderPos = new bool[3, 3];
 					for(int offsetY = -1; offsetY <= 1; offsetY++)
 					{
@@ -70,8 +77,6 @@ public class TerrainGenerator : MonoBehaviour {
 								borderPos[offsetX + 1, offsetY + 1] = chunkLocations[borderX, borderY];
                         }
                     }
-
-					//Debug.Log("****************************");
 
                     TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, meshSettings, transform, mapMaterial, borderPos);
 					chunk.Generate();
@@ -90,20 +95,37 @@ public class TerrainGenerator : MonoBehaviour {
 		int centerCoord = mapSize / 2;
 		AddChunkPoint(new Vector2(centerCoord, centerCoord));
 
-		int chunkCount = 1;
+		float minX, minY, maxX, maxY;
+		minX = minY = mapSize;
+		maxX = maxY = 0;
+
+        int chunkCount = 1;
 		var random = new System.Random();
 		while (chunkCount < mapSize)
 		{
 			int chunkIndex = random.Next(chunkCoords.Count);
-			Vector2 newChunkCoords = RandomOffset(chunkCoords[chunkIndex]);
+			Vector2 newChunkCoord = RandomOffset(chunkCoords[chunkIndex]);
 
-            if (!chunkLocations[(int)newChunkCoords.x, (int)newChunkCoords.y])
+            if (!chunkLocations[(int)newChunkCoord.x, (int)newChunkCoord.y])
             {
-                AddChunkPoint(newChunkCoords);
+                AddChunkPoint(newChunkCoord);
                 chunkCount++;
+
+				if (newChunkCoord.x < minX)
+					minX = newChunkCoord.x;
+                else if (newChunkCoord.x > maxX)
+                    maxX = newChunkCoord.x;
+
+                if (newChunkCoord.y < minY)
+					minY = newChunkCoord.y;
+                else if (newChunkCoord.y > maxY)
+                    maxY = newChunkCoord.y;
             }
-        }		
-	}
+        }
+
+		closestChunkCoord = new Vector2(minX, minY);
+        farthestChunkCoord = new Vector2(maxX, maxY);
+    }
 
     void AddChunkPoint(Vector2 chunkPoint)
     {
@@ -132,6 +154,7 @@ public class TerrainGenerator : MonoBehaviour {
 	{
         Vector3 vertexPosActual = vertex + GetVertexOffset(chunkWidth, chunkCoord);
 		bool walkable = vertexPosActual.y > 10;
+		//Debug.Log(nodeX + " and " + nodeY);
         nodeGrid[nodeX, nodeY] = new Node(walkable, vertexPosActual, nodeX, nodeY);
 
 		//if (walkable)
@@ -150,24 +173,6 @@ public class TerrainGenerator : MonoBehaviour {
     {
         transform.position = new Vector3(chunkWidth/2, 0, chunkWidth/2);
     }
-
-    Vector2 GetBorderPos(int xOffset, int yOffset)
-	{
-		if (mapSize > 1)
-			return new Vector2(-GetAxisBorderPos(xOffset), -GetAxisBorderPos(yOffset));
-		else
-			return Vector2.zero;
-	}
-
-	int GetAxisBorderPos(int offset)
-	{
-		if (offset == 0)
-			return -1;
-		else if (offset == mapSize - 1)
-			return 1;
-		else
-			return 0;
-	}
 
 	void FindChunkWidth(TerrainChunk chunk)
 	{
