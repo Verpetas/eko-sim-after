@@ -80,7 +80,7 @@ public class TerrainGenerator : MonoBehaviour {
 
                     TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, meshSettings, transform, mapMaterial, borderPos);
 					chunk.Generate();
-					AddToNodeGrid(chunk);
+					//AddToNodeGrid(chunk);
 				}
             }
         }
