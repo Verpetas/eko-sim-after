@@ -12,12 +12,12 @@ public class TerrainGenerator : MonoBehaviour {
 
 	public Material mapMaterial;
 
-	public int mapSize = 21;
+	public int chunksToGenerateNo = 21;
 
 	Node[,] nodeGrid;
 	Grid terrain;
 
-	int chunkVertsPerLine;
+	const int chunkVertsPerLine = 126;
     int mapVertsPerLine;
 
 	float chunkWidth;
@@ -29,13 +29,16 @@ public class TerrainGenerator : MonoBehaviour {
 	Vector2 closestChunkCoord; // <-- MOVE TO A SEPARATE CLASS / SCRIPT
 	Vector2 farthestChunkCoord;
 
+	int mapMaxSize;
+
 	void Awake()
 	{
-		chunkVertsPerLine = meshSettings.numVertsPerLine - 2;
-        mapVertsPerLine = chunkVertsPerLine * mapSize - (mapSize - 1);
-		nodeGrid = new Node[mapVertsPerLine, mapVertsPerLine];
+        mapMaxSize = (chunksToGenerateNo % 2 == 0) ? chunksToGenerateNo + 5 : chunksToGenerateNo + 4;
+        chunkLocations = new bool[mapMaxSize, mapMaxSize];
 
-        chunkLocations = new bool[mapSize, mapSize];
+        //chunkVertsPerLine = meshSettings.numVertsPerLine - 2;
+        mapVertsPerLine = chunkVertsPerLine * chunksToGenerateNo - (chunksToGenerateNo - 1); // <-- still to change
+		nodeGrid = new Node[mapVertsPerLine, mapVertsPerLine];
 
         foreach (Transform child in transform)
         {
@@ -80,28 +83,27 @@ public class TerrainGenerator : MonoBehaviour {
 
                     TerrainChunk chunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, meshSettings, transform, mapMaterial, borderPos);
 					chunk.Generate();
-					//AddToNodeGrid(chunk);
+					AddToNodeGrid(chunk);
 				}
             }
         }
 
         AdjustMapPosition();
-        float mapWidth = chunkWidth * mapSize;
+        float mapWidth = chunkWidth * mapMaxSize;
         terrain = new Grid(nodeGrid, mapVertsPerLine, mapWidth);
     }
 
 	void GenerateChunkLocations()
 	{
-		int centerCoord = mapSize / 2;
+		int centerCoord = (mapMaxSize - 1) / 2;
 		AddChunkPoint(new Vector2(centerCoord, centerCoord));
 
 		float minX, minY, maxX, maxY;
-		minX = minY = mapSize;
-		maxX = maxY = 0;
+		minX = minY = maxX = maxY = centerCoord;
 
         int chunkCount = 1;
 		var random = new System.Random();
-		while (chunkCount < mapSize)
+		while (chunkCount < chunksToGenerateNo)
 		{
 			int chunkIndex = random.Next(chunkCoords.Count);
 			Vector2 newChunkCoord = RandomOffset(chunkCoords[chunkIndex]);
@@ -137,13 +139,14 @@ public class TerrainGenerator : MonoBehaviour {
 	{
 		Vector3[,] vertices = chunk.GetVertices();
 		FindChunkWidth(chunk);
+		//Debug.Log("Vertex count: " + vertices.GetLength(1));
 
         int startNodeX = (chunkVertsPerLine - 1) * (int)chunk.coord.x;
         int startNodeY = (chunkVertsPerLine - 1) * (int)chunk.coord.y;
 
-        for (int y = 0; y < chunkVertsPerLine; y++)
+        for (int y = 0; y < 126/*chunkVertsPerLine*/; y++)
 		{
-			for (int x = 0; x < chunkVertsPerLine; x++)
+			for (int x = 0; x < 126/*chunkVertsPerLine*/; x++)
 			{
                 AddNode(vertices[x, y], startNodeX + x, startNodeY + y, chunk.coord);
             }
@@ -154,14 +157,10 @@ public class TerrainGenerator : MonoBehaviour {
 	{
         Vector3 vertexPosActual = vertex + GetVertexOffset(chunkWidth, chunkCoord);
 		bool walkable = vertexPosActual.y > 10;
-		//Debug.Log(nodeX + " and " + nodeY);
         nodeGrid[nodeX, nodeY] = new Node(walkable, vertexPosActual, nodeX, nodeY);
 
-		//if (walkable)
-		//{
-		//	GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-		//	sphere.transform.position = vertexPosActual;
-		//}
+		//GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+		//sphere.transform.position = vertexPosActual;
 	}
 
 	Vector3 GetVertexOffset(float chunkSize, Vector2 chunkCoord)
@@ -171,7 +170,8 @@ public class TerrainGenerator : MonoBehaviour {
 
     void AdjustMapPosition()
     {
-        transform.position = new Vector3(chunkWidth/2, 0, chunkWidth/2);
+		//Debug.Log(chunkWidth);
+        transform.position = new Vector3(chunkWidth / 2, 0, chunkWidth / 2);
     }
 
 	void FindChunkWidth(TerrainChunk chunk)

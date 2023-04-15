@@ -62,7 +62,7 @@ public class TerrainChunk
 
     public Vector3[,] GetVertices()
     {
-        return meshData.GetVertices2D();
+        return meshData.GetNodeVertices();
     }
 
 }

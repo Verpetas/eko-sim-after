@@ -62,9 +62,11 @@ public static class MeshGenerator {
 
 					int nodeX = x / skipIncrement - (levelOfDetail == 0 ? 1 : 0);
                     int nodeY = y / skipIncrement - (levelOfDetail == 0 ? 1 : 0);
-                    meshData.AddVertex (new Vector3(vertexPosition2D.x, height, vertexPosition2D.y), percent, vertexIndex, nodeX, nodeY);
+					Vector3 vertextPosition3D = new Vector3(vertexPosition2D.x, height, vertexPosition2D.y);
+                    meshData.AddVertex (vertextPosition3D, percent, vertexIndex);
+					if (isMainVertex) meshData.AddNodeVertex(vertextPosition3D, nodeX, nodeY);
 
-					bool createTriangle = x < numVertsPerLine - 1 && y < numVertsPerLine - 1 && (!isEdgeConnectionVertex || (x != 2 && y != 2));
+                    bool createTriangle = x < numVertsPerLine - 1 && y < numVertsPerLine - 1 && (!isEdgeConnectionVertex || (x != 2 && y != 2));
 
 					if (createTriangle) {
 						int currentIncrement = (isMainVertex && x != numVertsPerLine - 3 && y != numVertsPerLine - 3) ? skipIncrement : 1;
@@ -89,7 +91,7 @@ public static class MeshGenerator {
 
 public class MeshData {
 	Vector3[] vertices;
-	Vector3[,] vertices2D;
+	Vector3[,] nodeVertices;
 	int[] triangles;
 	Vector2[] uvs;
 	Vector3[] bakedNormals;
@@ -116,7 +118,7 @@ public class MeshData {
 
         vertices = new Vector3[vertexCount];
 		uvs = new Vector2[vertices.Length];
-		vertices2D = new Vector3[vertexCountSqrt, vertexCountSqrt];
+		nodeVertices = new Vector3[vertexCountSqrt, vertexCountSqrt];
 
 		int numMeshEdgeTriangles = 8 * (numVertsPerLine - 4);
 		int numMainTriangles = (numMainVerticesPerLine - 1) * (numMainVerticesPerLine - 1) * 2;
@@ -126,14 +128,18 @@ public class MeshData {
 		outOfMeshTriangles = new int[24 * (numVertsPerLine-2)];
 	}
 
-	public void AddVertex(Vector3 vertexPosition, Vector2 uv, int vertexIndex, int x, int y) {
+	public void AddVertex(Vector3 vertexPosition, Vector2 uv, int vertexIndex) {
 		if (vertexIndex < 0) {
 			outOfMeshVertices [-vertexIndex - 1] = vertexPosition;
 		} else {
-			//Debug.Log(x + " and " + y);
-			vertices [vertexIndex] = vertices2D[x, y] = vertexPosition;
+			vertices [vertexIndex] = vertexPosition;
             uvs [vertexIndex] = uv;
 		}
+	}
+
+	public void AddNodeVertex(Vector3 vertexPosition, int x, int y)
+	{
+		nodeVertices[x, y] = vertexPosition;
 	}
 
     //public void AddTriangle(int a, int b, int c) {
@@ -245,9 +251,9 @@ public class MeshData {
 		return mesh;
 	}
 
-	public Vector3[,] GetVertices2D()
+	public Vector3[,] GetNodeVertices()
 	{
-		return vertices2D;
+		return nodeVertices;
 	}
 
 }
