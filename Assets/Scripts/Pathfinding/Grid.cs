@@ -6,14 +6,16 @@ public class Grid {
 
 	Node[,] grid;
 	int nodeCountX, nodeCountY;
-	float terrainSize;
+	float terrainSizeX, terrainSizeY;
 
-	public Grid(Node[,] grid, int gridSize, float terrainSize)
+	public Grid(Node[,] grid, (int, int) gridSize, (float, float) terrainSize)
 	{
 		this.grid = grid;
-		this.nodeCountX = this.nodeCountY = gridSize;
-		this.terrainSize = terrainSize;
-	}
+		this.nodeCountX = gridSize.Item1;
+        this.nodeCountY = gridSize.Item2;
+        this.terrainSizeX = terrainSize.Item1;
+        this.terrainSizeY = terrainSize.Item2;
+    }
 
 	public int MaxSize
 	{
@@ -54,8 +56,8 @@ public class Grid {
 		//int y = Mathf.RoundToInt((gridSizeY-1) * percentY);
 		//return grid[x,y];
 
-		float percentX = worldPosition.x / terrainSize;
-		float percentY = worldPosition.z / terrainSize;
+		float percentX = worldPosition.x / terrainSizeX;
+		float percentY = worldPosition.z / terrainSizeY;
 		percentX = Mathf.Clamp01(percentX);
 		percentY = Mathf.Clamp01(percentY);
 		int x = Mathf.RoundToInt((nodeCountX - 1) * percentX);
