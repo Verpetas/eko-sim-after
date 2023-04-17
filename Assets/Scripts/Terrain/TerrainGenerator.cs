@@ -17,12 +17,10 @@ public class TerrainGenerator : MonoBehaviour {
 
     public GameObject oceanTile;
 
-	Mesh oceanMesh;
-
     Node[,] nodeGrid;
 	Grid terrain;
 
-	const int chunkVertsPerLine = 126;
+	const int chunkVertsPerLine = 122;
     (int, int) mapVertsPerLine;
 
     float chunkWidth;
@@ -90,11 +88,11 @@ public class TerrainGenerator : MonoBehaviour {
 					chunk.Generate();
 					AddToNodeGrid(chunk);
 				}
-				//else
-				//{
-				//	CreateOceanChunk(viewedChunkCoord);
-				//}
-			}
+                else
+                {
+                    AssignOceanNodes(viewedChunkCoord);
+                }
+            }
         }
 
         AdjustMapPosition();
@@ -102,12 +100,18 @@ public class TerrainGenerator : MonoBehaviour {
         terrain = new Grid(nodeGrid, mapVertsPerLine, mapSize);
     }
 
-	void CreateOceanChunk(Vector2 coord)
+	void AssignOceanNodes(Vector2 chunkCoord)
 	{
-		Debug.Log("Creating ocean chunks");
-		//Instantiate(oceanTile, new Vector3(coord.x, 0, coord.y) * chunkWidth, Quaternion.identity, transform);
-		GameObject oceanTileInstance = Instantiate(oceanTile, transform);
-		oceanTileInstance.transform.localPosition = new Vector3(coord.x, 0, coord.y) * chunkWidth;
+        int startNodeX = chunkVertsPerLine * (int)chunkCoord.x;
+        int startNodeY = chunkVertsPerLine * (int)chunkCoord.y;
+
+        for (int y = startNodeY; y < startNodeY + chunkVertsPerLine; y++)
+        {
+            for (int x = startNodeX; x < startNodeX + chunkVertsPerLine; x++)
+            {
+                nodeGrid[x, y] = new Node(false, Vector3.zero, 0, 0);
+            }
+        }
     }
 
     void GenerateChunkLocations()
@@ -159,9 +163,9 @@ public class TerrainGenerator : MonoBehaviour {
         int startNodeX = chunkVertsPerLine * (int)chunk.coord.x;
         int startNodeY = chunkVertsPerLine * (int)chunk.coord.y;
 
-        for (int y = 0; y < chunkVertsPerLine; y++)
+        for (int y = 1; y < chunkVertsPerLine; y++)
 		{
-			for (int x = 0; x < chunkVertsPerLine; x++)
+			for (int x = 1; x < chunkVertsPerLine; x++)
 			{
                 AddNode(vertices[x, y], startNodeX + x, startNodeY + y, chunk.coord);
             }
@@ -174,9 +178,12 @@ public class TerrainGenerator : MonoBehaviour {
 		bool walkable = true; //vertexPosActual.y > 10;
         nodeGrid[nodeX, nodeY] = new Node(walkable, vertexPosActual, nodeX, nodeY);
 
-		//GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-		//sphere.transform.position = vertexPosActual;
-	}
+        if (vertexPosActual == new Vector3(242, 0, 242))
+            Debug.Log("Weird node added: " + nodeX + " and " + nodeY);
+
+        //GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        //sphere.transform.position = vertexPosActual;
+    }
 
 	Vector3 GetVertexOffset(float chunkSize, Vector2 chunkCoord)
 	{

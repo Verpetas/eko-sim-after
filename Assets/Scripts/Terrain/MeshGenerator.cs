@@ -139,6 +139,7 @@ public class MeshData {
 
 	public void AddNodeVertex(Vector3 vertexPosition, int x, int y)
 	{
+		Debug.Log("Node vertex added");
 		nodeVertices[x, y] = vertexPosition;
 	}
 
