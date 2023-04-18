@@ -47,17 +47,10 @@ public class Grid {
 	
 
 	public Node NodeFromWorldPoint(Vector3 worldPosition) {
-		//float percentX = (worldPosition.x + gridWorldSize.x/2) / gridWorldSize.x;
-		//float percentY = (worldPosition.z + gridWorldSize.y/2) / gridWorldSize.y;
-		//percentX = Mathf.Clamp01(percentX);
-		//percentY = Mathf.Clamp01(percentY);
+		float gridOffset = 2f;
 
-		//int x = Mathf.RoundToInt((gridSizeX-1) * percentX);
-		//int y = Mathf.RoundToInt((gridSizeY-1) * percentY);
-		//return grid[x,y];
-
-		float percentX = worldPosition.x / terrainSizeX;
-		float percentY = worldPosition.z / terrainSizeY;
+		float percentX = (worldPosition.x - gridOffset) / (terrainSizeX - (gridOffset * 2));
+		float percentY = (worldPosition.z - gridOffset) / (terrainSizeY - (gridOffset * 2));
 		percentX = Mathf.Clamp01(percentX);
 		percentY = Mathf.Clamp01(percentY);
 		int x = Mathf.RoundToInt((nodeCountX - 1) * percentX);

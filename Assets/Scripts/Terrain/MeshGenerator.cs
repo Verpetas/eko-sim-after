@@ -60,11 +60,12 @@ public static class MeshGenerator {
 						height = heightMainVertexA * (1 - dstPercentFromAToB) + heightMainVertexB * dstPercentFromAToB;
 					}
 
-					int nodeX = x / skipIncrement - (levelOfDetail == 0 ? 1 : 0);
-                    int nodeY = y / skipIncrement - (levelOfDetail == 0 ? 1 : 0);
+					int nodeX = x / skipIncrement - 1;
+                    int nodeY = y / skipIncrement - 1;
 					Vector3 vertextPosition3D = new Vector3(vertexPosition2D.x, height, vertexPosition2D.y);
                     meshData.AddVertex (vertextPosition3D, percent, vertexIndex);
-					if (isMainVertex) meshData.AddNodeVertex(vertextPosition3D, nodeX, nodeY);
+					if (isMainVertex)
+                        meshData.AddNodeVertex(vertextPosition3D, nodeX, nodeY);
 
                     bool createTriangle = x < numVertsPerLine - 1 && y < numVertsPerLine - 1 && (!isEdgeConnectionVertex || (x != 2 && y != 2));
 
@@ -113,12 +114,12 @@ public class MeshData {
 		int numMainVertices = numMainVerticesPerLine * numMainVerticesPerLine;
 
 		// set vertex count
-		int vertexCount = numMeshEdgeVertices + numEdgeConnectionVertices + numMainVertices;
-		int vertexCountSqrt = (int)Mathf.Sqrt(vertexCount);
+		int vertexCountPerLine = numMeshEdgeVertices + numEdgeConnectionVertices + numMainVertices;
+		int nodeVertexCountPerLine = (int)Mathf.Sqrt(numMainVertices);
 
-        vertices = new Vector3[vertexCount];
+        vertices = new Vector3[vertexCountPerLine];
 		uvs = new Vector2[vertices.Length];
-		nodeVertices = new Vector3[vertexCountSqrt, vertexCountSqrt];
+		nodeVertices = new Vector3[nodeVertexCountPerLine, nodeVertexCountPerLine];
 
 		int numMeshEdgeTriangles = 8 * (numVertsPerLine - 4);
 		int numMainTriangles = (numMainVerticesPerLine - 1) * (numMainVerticesPerLine - 1) * 2;
@@ -139,7 +140,6 @@ public class MeshData {
 
 	public void AddNodeVertex(Vector3 vertexPosition, int x, int y)
 	{
-		Debug.Log("Node vertex added");
 		nodeVertices[x, y] = vertexPosition;
 	}
 

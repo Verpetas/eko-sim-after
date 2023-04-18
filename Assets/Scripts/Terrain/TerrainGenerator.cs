@@ -20,7 +20,7 @@ public class TerrainGenerator : MonoBehaviour {
     Node[,] nodeGrid;
 	Grid terrain;
 
-	const int chunkVertsPerLine = 122;
+	const int chunkVertsPerLine = 121;
     (int, int) mapVertsPerLine;
 
     float chunkWidth;
@@ -163,9 +163,9 @@ public class TerrainGenerator : MonoBehaviour {
         int startNodeX = chunkVertsPerLine * (int)chunk.coord.x;
         int startNodeY = chunkVertsPerLine * (int)chunk.coord.y;
 
-        for (int y = 1; y < chunkVertsPerLine; y++)
+        for (int y = 0; y < chunkVertsPerLine; y++)
 		{
-			for (int x = 1; x < chunkVertsPerLine; x++)
+			for (int x = 0; x < chunkVertsPerLine; x++)
 			{
                 AddNode(vertices[x, y], startNodeX + x, startNodeY + y, chunk.coord);
             }
@@ -175,14 +175,14 @@ public class TerrainGenerator : MonoBehaviour {
 	void AddNode(Vector3 vertex, int nodeX, int nodeY, Vector2 chunkCoord)
 	{
         Vector3 vertexPosActual = vertex + GetVertexOffset(chunkWidth, chunkCoord);
-		bool walkable = true; //vertexPosActual.y > 10;
+        bool walkable = vertexPosActual.y > 6 && vertexPosActual.y < 25;
         nodeGrid[nodeX, nodeY] = new Node(walkable, vertexPosActual, nodeX, nodeY);
 
-        if (vertexPosActual == new Vector3(242, 0, 242))
-            Debug.Log("Weird node added: " + nodeX + " and " + nodeY);
-
-        //GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        //sphere.transform.position = vertexPosActual;
+        //if (walkable)
+        //{
+        //    GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        //    sphere.transform.position = vertexPosActual;
+        //}
     }
 
 	Vector3 GetVertexOffset(float chunkSize, Vector2 chunkCoord)

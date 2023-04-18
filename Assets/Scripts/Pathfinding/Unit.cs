@@ -3,8 +3,8 @@ using System.Collections;
 
 public class Unit : MonoBehaviour {
 
-	const float minPathUpdateTime = 0.2f;
-	const float pathUpdateMoveThreshold = 0.5f;
+    const float minPathUpdateTime = 0.2f;
+    const float pathUpdateMoveThreshold = 0.5f;
 
 	public float waypointDistanceThreshold = 1.5f; 
 
@@ -51,7 +51,8 @@ public class Unit : MonoBehaviour {
 
 		while (true)
 		{
-			yield return new WaitForSeconds(minPathUpdateTime);
+            yield return new WaitForSeconds(minPathUpdateTime);
+            //yield return null;
 			if ((target.position - targetPosOld).sqrMagnitude > sqrMoveThreshold)
 			{
                 PathRequestManager.RequestPath(new PathRequest(transform.position, target.position, OnPathFound));
