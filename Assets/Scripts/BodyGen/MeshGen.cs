@@ -13,8 +13,7 @@ public class MeshGen : MonoBehaviour
     [SerializeField] int boneCount = 10;
 
     [SerializeField] Material bodyMaterial;
-    [SerializeField] GameObject boneTool; // <-- rename
-    //[SerializeField] bool legGen; <-- look into after
+    [SerializeField] bool legGen;
 
     Transform root;
     [NonSerialized] public SkinnedMeshRenderer skinnedMeshRenderer;
@@ -52,15 +51,15 @@ public class MeshGen : MonoBehaviour
 
         for(int i = 0; i < boneCount; i++)
         {
-            GameObject boneGameObject = Instantiate(boneTool, root, false);
-            boneGameObject.name = "Bone_" + i;
-            boneTransforms[i] = boneGameObject.transform;
+            GameObject boneInstance = new GameObject("Bone_" + i);
+            boneInstance.transform.parent = root;
+            boneTransforms[i] = boneInstance.transform;
         }
 
         skinnedMeshRenderer = model.AddComponent<SkinnedMeshRenderer>();
         skinnedMeshRenderer.sharedMesh = mesh = model.AddComponent<MeshFilter>().sharedMesh = new Mesh();
         skinnedMeshRenderer.rootBone = root.transform;
-        skinnedMeshRenderer.updateWhenOffscreen = true; // <-- is this necessary?
+        skinnedMeshRenderer.updateWhenOffscreen = true;
         skinnedMeshRenderer.sharedMaterial = bodyMaterial;
 
         //if (!legGen)
@@ -86,8 +85,8 @@ public class MeshGen : MonoBehaviour
 
         CalculateBones();
 
-        mesh.bindposes = bindPoses; 
-        skinnedMeshRenderer.bones = boneTransforms; // <-- switch this and up?
+        mesh.bindposes = bindPoses;
+        skinnedMeshRenderer.bones = boneTransforms;
         mesh.boneWeights = boneWeights.ToArray();
 
         mesh.RecalculateNormals();
@@ -142,8 +141,8 @@ public class MeshGen : MonoBehaviour
             //}
             //else
             //{
-            weight0 = (boneIndex > 0) ? (1f - bonePercent) * 0.5f : 0f;
-            weight2 = (boneIndex < boneCount - 1) ? bonePercent * 0.5f : 0f;
+                weight0 = (boneIndex > 0) ? (1f - bonePercent) * 0.5f : 0f;
+                weight2 = (boneIndex < boneCount - 1) ? bonePercent * 0.5f : 0f;
             //}
             float weight1 = 1f - (weight0 + weight2);
 
@@ -203,7 +202,7 @@ public class MeshGen : MonoBehaviour
             triangles.Add(i + 1);
         }
 
-        // middle
+        // middle cap
         int ringCount = (rings * boneCount) + (2 * (segments / 2 - 1));
         for (int ringIndex = 0; ringIndex < ringCount; ringIndex++)
         {
