@@ -13,12 +13,13 @@ public class MeshGen : MonoBehaviour
     [SerializeField] int boneCount = 10;
 
     [SerializeField] Material bodyMaterial;
-    [SerializeField] bool legGen;
+    //[SerializeField] bool legGen;
 
-    Transform root;
     [NonSerialized] public SkinnedMeshRenderer skinnedMeshRenderer;
     [NonSerialized] public MeshCollider meshCollider;
     [NonSerialized] public Mesh mesh;
+
+    Transform root;
 
     List<Vector3> vertices = new List<Vector3>();
     List<int> triangles = new List<int>();
@@ -90,6 +91,9 @@ public class MeshGen : MonoBehaviour
         mesh.boneWeights = boneWeights.ToArray();
 
         mesh.RecalculateNormals();
+
+        // initialize body shaping
+        GetComponent<BodyPrep>().ShapeBody();
 
         //// enable shaping process
         //if (!legGen) GetComponent<BodyPrep>().enabled = true;
@@ -271,7 +275,7 @@ public class MeshGen : MonoBehaviour
 
                 // Smooth - https://www.desmos.com/calculator/wmpvvtmor8
                 float maxDistanceAlongBone = length * 2f;
-                float maxHeightAboveBone = radius * 2f;
+                float maxHeightAboveBone = radius * 8f;
 
                 float displacementAlongBone = vertices[vertIndex].z - boneTransforms[boneIndex].localPosition.z;
 
@@ -292,7 +296,7 @@ public class MeshGen : MonoBehaviour
             mesh.AddBlendShapeFrame("BoneY." + boneIndex, 100, deltaVerticesY, deltaZeroArray, deltaZeroArray);
         }
 
-        for(int i = 1; i < boneCount; i++)
+        for (int i = 1; i < boneCount; i++)
         {
             boneTransforms[i].parent = boneTransforms[i - 1];
         }
