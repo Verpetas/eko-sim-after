@@ -10,6 +10,8 @@ public class Dinosaur : ScriptableObject
     public bool bipedal;
     public float[] spineBends;
     public float[] spineStretches;
+    public float[] spineStretchesX;
+    public float[] spineStretchesY;
     public float[] legStretches;
 
 }

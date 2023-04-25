@@ -93,7 +93,7 @@ public class MeshGen : MonoBehaviour
         mesh.RecalculateNormals();
 
         // initialize body shaping
-        GetComponent<BodyPrep>().ShapeBody();
+        GetComponent<BodyMerge>().FormOffspring();
 
         //// enable shaping process
         //if (!legGen) GetComponent<BodyPrep>().enabled = true;
