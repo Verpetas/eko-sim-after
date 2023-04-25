@@ -14,13 +14,13 @@ public class BodyMerge : MonoBehaviour
     MeshGen meshGen;
     static int boneCount = 23;
     Gene[] genes;
-    WidthHeredity[] widthHeredity; // false means second dino, true - first
+    Heredity[] heredity; // true means first dino, false - second
 
     private void Awake()
     {
         meshGen = GetComponent<MeshGen>();
         genes = new Gene[boneCount];
-        widthHeredity = new WidthHeredity[boneCount];
+        heredity = new Heredity[boneCount];
     }
 
     public void FormOffspring()
@@ -36,7 +36,7 @@ public class BodyMerge : MonoBehaviour
     {
         for (int i = 0; i < boneCount; i++)
         {
-            widthHeredity[i] = new WidthHeredity(Random.value < 0.5f, Random.value < 0.5f);
+            heredity[i] = new Heredity(Random.value < 0.5f, Random.value < 0.5f, Random.value < 0.5f);
         }
     }
 
@@ -44,23 +44,28 @@ public class BodyMerge : MonoBehaviour
     {
         for (int i = 0; i < boneCount; i++)
         {
-            float spineBendVal = (Random.value < 0.5f) ? dinosaur1st.spineBends[i] : dinosaur2nd.spineBends[i];
-            float widthValXPassed, widthValYPassed, widthValXActual, widthValYActual;
+            float localBendVal = heredity[i].bend ? dinosaur1st.spineBends[i] : dinosaur2nd.spineBends[i];
 
-            widthValXPassed = (widthHeredity[i].x) ? dinosaur1st.spineStretchesX[i] : dinosaur2nd.spineStretchesX[i];
-            widthValYPassed = (widthHeredity[i].y) ? dinosaur1st.spineStretchesY[i] : dinosaur2nd.spineStretchesY[i];
+            if (i == 0)
+            {
+                genes[i] = new Gene(localBendVal, 1f, 1f);
+                continue;
+            }
 
-            if (i > 0 && widthHeredity[i].x != widthHeredity[i - 1].x)
-                widthValXActual = (dinosaur1st.spineStretchesX[i] + dinosaur2nd.spineStretchesX[i]) / 2;
+            float relativeWidthValX;
+            if (heredity[i].widthX)
+                relativeWidthValX = dinosaur1st.spineStretchesX[i] - dinosaur1st.spineStretchesX[i - 1];
             else
-                widthValXActual = widthValXPassed;
+                relativeWidthValX = dinosaur2nd.spineStretchesX[i] - dinosaur2nd.spineStretchesX[i - 1];
 
-            if (i > 0 && widthHeredity[i].y != widthHeredity[i - 1].y)
-                widthValYActual = (dinosaur1st.spineStretchesY[i] + dinosaur2nd.spineStretchesY[i]) / 2;
+            float relativeWidthValY;
+            if (heredity[i].widthY)
+                relativeWidthValY = dinosaur1st.spineStretchesY[i] - dinosaur1st.spineStretchesY[i - 1];
             else
-                widthValYActual = widthValYPassed;
+                relativeWidthValY = dinosaur2nd.spineStretchesY[i] - dinosaur2nd.spineStretchesY[i - 1];
 
-            genes[i] = new Gene(spineBendVal, widthValXPassed, widthValYPassed, widthValXActual, widthValYActual);
+
+            genes[i] = new Gene(localBendVal, relativeWidthValX, relativeWidthValY);
         }
     }
 
@@ -75,7 +80,7 @@ public class BodyMerge : MonoBehaviour
 
     void BendBody(int boneIndex)
     {
-        meshGen.boneTransforms[boneIndex].localRotation = Quaternion.Euler(genes[boneIndex].spineBendVal + Random.Range(-bendRandomness, bendRandomness), 0, 0);
+        meshGen.boneTransforms[boneIndex].localRotation = Quaternion.Euler(genes[boneIndex].localBendVal + Random.Range(-bendRandomness, bendRandomness), 0, 0);
     }
 
     void StretchBody(int boneIndex)
@@ -93,35 +98,31 @@ public class BodyMerge : MonoBehaviour
 
 }
 
-public struct WidthHeredity
+public struct Heredity
 {
-    public bool x { get; }
-    public bool y { get; }
+    public bool bend { get; }
+    public bool widthX { get; }
+    public bool widthY { get; }
 
-    public WidthHeredity(bool x, bool y)
+    public Heredity(bool bend, bool widthX, bool widthY)
     {
-        this.x = x;
-        this.y = y;
+        this.bend = bend;
+        this.widthX = widthX;
+        this.widthY = widthY;
     }
 }
 
 public class Gene
 {
-    public float spineBendVal { get; }
+    public float localBendVal { get; }
 
-    public float thicknessValXPassed { get; }
-    public float thicknessValYPassed { get; }
-    public float thicknessValXActual { get; }
-    public float thicknessValYActual { get; }
+    public float relativeWidthValX { get; }
+    public float relativeWidthValY { get; }
 
-    public Gene(float spineBendVal, float thicknessValXPassed, float thicknessValYPassed, float thicknessValXActual, float thicknessValYActual)
+    public Gene(float localBendVal, float relativeWidthValX, float relativeWidthValY)
     {
-        this.spineBendVal = spineBendVal;
-
-        this.thicknessValXPassed = thicknessValXPassed;
-        this.thicknessValYPassed = thicknessValYPassed;
-
-        this.thicknessValXActual = thicknessValXActual;
-        this.thicknessValYActual = thicknessValYActual;
+        this.localBendVal = localBendVal;
+        this.relativeWidthValX = relativeWidthValX;
+        this.relativeWidthValY = relativeWidthValY;
     }
 }
