@@ -58,13 +58,13 @@ public class BodyMerge : MonoBehaviour
 
         for (int i = 0; i < boneCount; i++)
         {
-            heredityRatio = Random.Range(0.1f, 0.9f);
+            heredityRatio = Random.Range(0.25f, 0.75f);
             float bendVal = globalBends1st[i] * heredityRatio + globalBends2nd[i] * (1 - heredityRatio);
 
-            heredityRatio = Random.Range(0.1f, 0.9f);
+            heredityRatio = Random.Range(0.25f, 0.75f);
             float widthValX = dinosaur1st.spineStretchesX[i] * heredityRatio + dinosaur2nd.spineStretchesX[i] * (1 - heredityRatio);
 
-            heredityRatio = Random.Range(0.1f, 0.9f);
+            heredityRatio = Random.Range(0.25f, 0.75f);
             float widthValY = dinosaur1st.spineStretchesY[i] * heredityRatio + dinosaur2nd.spineStretchesY[i] * (1 - heredityRatio);
 
             genes[i] = new Gene(bendVal, widthValX, widthValY);
