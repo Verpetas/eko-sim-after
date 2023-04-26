@@ -11,11 +11,25 @@ public class BodyPrep : MonoBehaviour
 
     MeshGen meshGen;
     int boneCount;
+    float[] globalBends;
 
     private void Awake()
     {
         meshGen = GetComponent<MeshGen>();
         boneCount = dinosaur.spineBends.Length;
+
+        globalBends = new float[boneCount];
+        CalculateGlobalRots();
+    }
+
+    void CalculateGlobalRots()
+    {
+        globalBends[0] = 360f + dinosaur.spineBends[0];
+
+        for (int i = 1; i < boneCount; i++)
+        {
+            globalBends[i] = globalBends[i - 1] + dinosaur.spineBends[i];
+        }
     }
 
     public void ShapeBody()
@@ -31,7 +45,8 @@ public class BodyPrep : MonoBehaviour
 
     void BendBody(int boneIndex)
     {
-        meshGen.boneTransforms[boneIndex].localRotation = Quaternion.Euler(dinosaur.spineBends[boneIndex] + Random.Range(-bendRandomness, bendRandomness), 0, 0);
+        //meshGen.boneTransforms[boneIndex].localRotation = Quaternion.Euler(dinosaur.spineBends[boneIndex] + Random.Range(-bendRandomness, bendRandomness), 0, 0);
+        meshGen.boneTransforms[boneIndex].rotation = Quaternion.Euler(globalBends[boneIndex] + Random.Range(-bendRandomness, bendRandomness), 0, 0);
     }
 
     void StretchBody(int boneIndex)

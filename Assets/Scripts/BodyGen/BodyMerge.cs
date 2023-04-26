@@ -14,58 +14,60 @@ public class BodyMerge : MonoBehaviour
     MeshGen meshGen;
     static int boneCount = 23;
     Gene[] genes;
-    Heredity[] heredity; // true means first dino, false - second
+
+    float[] globalBends1st;
+    float[] globalBends2nd;
 
     private void Awake()
     {
         meshGen = GetComponent<MeshGen>();
         genes = new Gene[boneCount];
-        heredity = new Heredity[boneCount];
+
+        globalBends1st = new float[boneCount];
+        globalBends2nd = new float[boneCount];
     }
 
     public void FormOffspring()
     {
-        DetermineHeredity();
+        //Debug.Log(dinosaur1st.name);
+        //Debug.Log(dinosaur2nd.name);
+
+        CalculateGlobalRots();
+
         DetermineGenes();
         ShapeBody();
 
         //AdjustRotation();
     }
 
-    void DetermineHeredity()
+    void CalculateGlobalRots()
     {
-        for (int i = 0; i < boneCount; i++)
+        globalBends1st[0] = 360f + dinosaur1st.spineBends[0];
+        globalBends2nd[0] = 360f + dinosaur2nd.spineBends[0];
+
+        for (int i = 1; i < boneCount; i++)
         {
-            heredity[i] = new Heredity(Random.value < 0.5f, Random.value < 0.5f, Random.value < 0.5f);
+            globalBends1st[i] = globalBends1st[i - 1] + dinosaur1st.spineBends[i];
+            globalBends2nd[i] = globalBends2nd[i - 1] + dinosaur2nd.spineBends[i];
         }
     }
 
     void DetermineGenes()
     {
+        float heredityRatio;
+
         for (int i = 0; i < boneCount; i++)
         {
-            float localBendVal = heredity[i].bend ? dinosaur1st.spineBends[i] : dinosaur2nd.spineBends[i];
+            heredityRatio = Random.Range(0.1f, 0.9f);
+            float bendVal = globalBends1st[i] * heredityRatio + globalBends2nd[i] * (1 - heredityRatio);
 
-            if (i == 0)
-            {
-                genes[i] = new Gene(localBendVal, 1f, 1f);
-                continue;
-            }
+            heredityRatio = Random.Range(0.1f, 0.9f);
+            float widthValX = dinosaur1st.spineStretchesX[i] * heredityRatio + dinosaur2nd.spineStretchesX[i] * (1 - heredityRatio);
 
-            float relativeWidthValX;
-            if (heredity[i].widthX)
-                relativeWidthValX = dinosaur1st.spineStretchesX[i] - dinosaur1st.spineStretchesX[i - 1];
-            else
-                relativeWidthValX = dinosaur2nd.spineStretchesX[i] - dinosaur2nd.spineStretchesX[i - 1];
+            heredityRatio = Random.Range(0.1f, 0.9f);
+            float widthValY = dinosaur1st.spineStretchesY[i] * heredityRatio + dinosaur2nd.spineStretchesY[i] * (1 - heredityRatio);
 
-            float relativeWidthValY;
-            if (heredity[i].widthY)
-                relativeWidthValY = dinosaur1st.spineStretchesY[i] - dinosaur1st.spineStretchesY[i - 1];
-            else
-                relativeWidthValY = dinosaur2nd.spineStretchesY[i] - dinosaur2nd.spineStretchesY[i - 1];
-
-
-            genes[i] = new Gene(localBendVal, relativeWidthValX, relativeWidthValY);
+            genes[i] = new Gene(bendVal, widthValX, widthValY);
         }
     }
 
@@ -80,13 +82,13 @@ public class BodyMerge : MonoBehaviour
 
     void BendBody(int boneIndex)
     {
-        meshGen.boneTransforms[boneIndex].localRotation = Quaternion.Euler(genes[boneIndex].localBendVal + Random.Range(-bendRandomness, bendRandomness), 0, 0);
+        meshGen.boneTransforms[boneIndex].rotation = Quaternion.Euler(genes[boneIndex].bendVal + Random.Range(-bendRandomness, bendRandomness), 0, 0);
     }
 
     void StretchBody(int boneIndex)
     {
-        meshGen.skinnedMeshRenderer.SetBlendShapeWeight(boneIndex * 2, genes[boneIndex].thicknessValXActual * Random.Range(1 - stretchRandomness, 1 + stretchRandomness));
-        meshGen.skinnedMeshRenderer.SetBlendShapeWeight(boneIndex * 2 + 1, genes[boneIndex].thicknessValYActual * Random.Range(1 - stretchRandomness, 1 + stretchRandomness));
+        meshGen.skinnedMeshRenderer.SetBlendShapeWeight(boneIndex * 2, genes[boneIndex].widthValX * Random.Range(1 - stretchRandomness, 1 + stretchRandomness));
+        meshGen.skinnedMeshRenderer.SetBlendShapeWeight(boneIndex * 2 + 1, genes[boneIndex].widthValY * Random.Range(1 - stretchRandomness, 1 + stretchRandomness));
     }
 
     void AdjustRotation()
@@ -98,31 +100,17 @@ public class BodyMerge : MonoBehaviour
 
 }
 
-public struct Heredity
-{
-    public bool bend { get; }
-    public bool widthX { get; }
-    public bool widthY { get; }
-
-    public Heredity(bool bend, bool widthX, bool widthY)
-    {
-        this.bend = bend;
-        this.widthX = widthX;
-        this.widthY = widthY;
-    }
-}
-
 public class Gene
 {
-    public float localBendVal { get; }
+    public float bendVal { get; }
 
-    public float relativeWidthValX { get; }
-    public float relativeWidthValY { get; }
+    public float widthValX { get; }
+    public float widthValY { get; }
 
-    public Gene(float localBendVal, float relativeWidthValX, float relativeWidthValY)
+    public Gene(float bendVal, float widthValX, float widthValY)
     {
-        this.localBendVal = localBendVal;
-        this.relativeWidthValX = relativeWidthValX;
-        this.relativeWidthValY = relativeWidthValY;
+        this.bendVal = bendVal;
+        this.widthValX = widthValX;
+        this.widthValY = widthValY;
     }
 }
