@@ -51,8 +51,8 @@ public class BodyPrep : MonoBehaviour
 
     void StretchBody(int boneIndex)
     {
-        meshGen.skinnedMeshRenderer.SetBlendShapeWeight(boneIndex * 2, dinosaur.spineStretches[boneIndex * 2] * Random.Range(1 - stretchRandomness, 1 + stretchRandomness));
-        meshGen.skinnedMeshRenderer.SetBlendShapeWeight(boneIndex * 2 + 1, dinosaur.spineStretches[boneIndex * 2 + 1] * Random.Range(1 - stretchRandomness, 1 + stretchRandomness));
+        meshGen.skinnedMeshRenderer.SetBlendShapeWeight(boneIndex * 2, dinosaur.spineStretchesX[boneIndex] * Random.Range(1 - stretchRandomness, 1 + stretchRandomness));
+        meshGen.skinnedMeshRenderer.SetBlendShapeWeight(boneIndex * 2 + 1, dinosaur.spineStretchesY[boneIndex] * Random.Range(1 - stretchRandomness, 1 + stretchRandomness));
     }
 
     void AdjustRotation()

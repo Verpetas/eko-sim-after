@@ -8,6 +8,7 @@ public class BodyMerge : MonoBehaviour
 
     public Dinosaur dinosaur1st;
     public Dinosaur dinosaur2nd;
+    public int tailLength = 11;
     public float bendRandomness = 15f;
     public float stretchRandomness = 0.4f;
 
@@ -29,15 +30,32 @@ public class BodyMerge : MonoBehaviour
 
     public void FormOffspring()
     {
-        //Debug.Log(dinosaur1st.name);
-        //Debug.Log(dinosaur2nd.name);
-
         CalculateGlobalRots();
 
         DetermineGenes();
         ShapeBody();
 
         //AdjustRotation();
+
+        RestructureBones();
+    }
+
+    void RestructureBones()
+    {
+        meshGen.boneTransforms[tailLength - 1].parent = meshGen.root;
+        meshGen.boneTransforms[tailLength].parent = meshGen.root;
+
+        // structure tail bones
+        for (int i = tailLength - 2; i >= 0; i--)
+        {
+            meshGen.boneTransforms[i].parent = meshGen.boneTransforms[i + 1];
+        }
+
+        // structure bones for the rest of the body
+        for (int i = tailLength + 1; i < boneCount; i++)
+        {
+            meshGen.boneTransforms[i].parent = meshGen.boneTransforms[i - 1];
+        }
     }
 
     void CalculateGlobalRots()

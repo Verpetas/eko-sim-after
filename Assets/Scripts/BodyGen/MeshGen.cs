@@ -13,13 +13,12 @@ public class MeshGen : MonoBehaviour
     [SerializeField] int boneCount = 10;
 
     [SerializeField] Material bodyMaterial;
-    //[SerializeField] bool legGen;
+    [SerializeField] bool legGen;
 
     [NonSerialized] public SkinnedMeshRenderer skinnedMeshRenderer;
     [NonSerialized] public MeshCollider meshCollider;
     [NonSerialized] public Mesh mesh;
-
-    Transform root;
+    [NonSerialized] public Transform root;
 
     List<Vector3> vertices = new List<Vector3>();
     List<int> triangles = new List<int>();
@@ -63,16 +62,17 @@ public class MeshGen : MonoBehaviour
         skinnedMeshRenderer.updateWhenOffscreen = true;
         skinnedMeshRenderer.sharedMaterial = bodyMaterial;
 
+        // to move to different script
         //if (!legGen)
         //{
         //    meshCollider = gameObject.AddComponent<MeshCollider>();
         //    meshCollider.convex = true;
         //}
 
-        //if (legGen)
-        //{ mesh.name = "Leg"; gameObject.tag = "Creature_Leg"; }
-        //else
-        //{ mesh.name = "Body"; gameObject.tag = "Creature_Body"; }
+        if (legGen)
+        { mesh.name = "Leg"; gameObject.tag = "Dinosaur_Leg"; }
+        else
+        { mesh.name = "Body"; gameObject.tag = "Dinosaur_Body"; }
     }
 
     void Start()
@@ -93,7 +93,7 @@ public class MeshGen : MonoBehaviour
         mesh.RecalculateNormals();
 
         // initialize body shaping
-        GetComponent<BodyMerge>().FormOffspring();
+        //GetComponent<BodyMerge>().FormOffspring();
 
         //// enable shaping process
         //if (!legGen) GetComponent<BodyPrep>().enabled = true;
@@ -138,16 +138,16 @@ public class MeshGen : MonoBehaviour
 
             float weight0;
             float weight2;
-            //if (legGen)
-            //{
-            //    weight0 = (boneIndex > 0) ? (1f - bonePercent) * 0.25f : 0f;
-            //    weight2 = (boneIndex < boneCount - 1) ? bonePercent * 0.25f : 0f;
-            //}
-            //else
-            //{
+            if (legGen)
+            {
+                weight0 = (boneIndex > 0) ? (1f - bonePercent) * 0.25f : 0f;
+                weight2 = (boneIndex < boneCount - 1) ? bonePercent * 0.25f : 0f;
+            }
+            else
+            {
                 weight0 = (boneIndex > 0) ? (1f - bonePercent) * 0.5f : 0f;
                 weight2 = (boneIndex < boneCount - 1) ? bonePercent * 0.5f : 0f;
-            //}
+            }
             float weight1 = 1f - (weight0 + weight2);
 
             for (int i = 0; i < segments; i++)
@@ -248,9 +248,8 @@ public class MeshGen : MonoBehaviour
 
         for (int boneIndex = 0; boneIndex < boneCount; boneIndex++)
         {
-            //if(legGen) boneTransforms[boneIndex].localPosition = Vector3.forward * (radius + length * (boneIndex == 0 ? 0.2f : boneIndex));
-            //else
-            boneTransforms[boneIndex].localPosition = Vector3.forward * (radius + length * (0.5f + boneIndex));
+            if (legGen) boneTransforms[boneIndex].localPosition = Vector3.forward * (radius + length * (boneIndex == 0 ? 0.2f : boneIndex));
+            else boneTransforms[boneIndex].localPosition = Vector3.forward * (radius + length * (0.5f + boneIndex));
             boneTransforms[boneIndex].localRotation = Quaternion.identity;
             bindPoses[boneIndex] = boneTransforms[boneIndex].worldToLocalMatrix * transform.localToWorldMatrix;
 
@@ -284,6 +283,11 @@ public class MeshGen : MonoBehaviour
                 float b = 1f / a;
 
                 float heightAboveBone = (Mathf.Cos(x * Mathf.PI) / b + a) / 2f;
+
+                //if (heightAboveBone < 0)
+                //{
+                //    Debug.Log("Theres negative");
+                //}
 
                 float vertexDst = Mathf.Sqrt(Mathf.Pow(vertices[vertIndex].x, 2) + Mathf.Pow(vertices[vertIndex].y, 2));
                 deltaVerticesX[vertIndex] = new Vector3(vertices[vertIndex].x / vertexDst, 0, 0) * heightAboveBone;
