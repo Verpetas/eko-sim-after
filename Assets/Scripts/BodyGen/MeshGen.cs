@@ -27,6 +27,8 @@ public class MeshGen : MonoBehaviour
     [NonSerialized] public Transform[] boneTransforms;
     Matrix4x4[] bindPoses;
 
+    Vector3[] deltaZeroArray;
+
     private void Awake()
     {
         Initialize();
@@ -240,7 +242,7 @@ public class MeshGen : MonoBehaviour
 
     void CalculateBones()
     {
-        Vector3[] deltaZeroArray = new Vector3[vertices.Count];
+        deltaZeroArray = new Vector3[vertices.Count];
         for (int vertIndex = 0; vertIndex < vertices.Count; vertIndex++)
         {
             deltaZeroArray[vertIndex] = Vector3.zero;
@@ -260,51 +262,65 @@ public class MeshGen : MonoBehaviour
             //    hingeJoint.connectedBody = boneTransforms[boneIndex - 1].GetComponent<Rigidbody>();
             //}
 
-            //Vector3[] deltaVertices = new Vector3[vertices.Count];
-            Vector3[] deltaVerticesX = new Vector3[vertices.Count];
-            Vector3[] deltaVerticesY = new Vector3[vertices.Count];
-            for (int vertIndex = 0; vertIndex < vertices.Count; vertIndex++)
+            CreateBlendshapesAtLength(boneIndex, boneTransforms[boneIndex].localPosition.z);
+
+            if (legGen && boneIndex == 1)
             {
-                // Round
-                //float distanceToBone = Mathf.Clamp(Vector3.Distance(vertices[vertIndex], boneTransforms[boneIndex].localPosition), 0, 2f * length);
-                //Vector3 directionToBone = (vertices[vertIndex] - boneTransforms[boneIndex].localPosition).normalized;
-
-                //deltaVertices[vertIndex] = directionToBone * (2f * length - distanceToBone);
-
-
-                // Smooth - https://www.desmos.com/calculator/wmpvvtmor8
-                float maxDistanceAlongBone = length * 2f;
-                float maxHeightAboveBone = radius * 8f;
-
-                float displacementAlongBone = vertices[vertIndex].z - boneTransforms[boneIndex].localPosition.z;
-
-                float x = Mathf.Clamp(displacementAlongBone / maxDistanceAlongBone, -1, 1);
-                float a = maxHeightAboveBone;
-                float b = 1f / a;
-
-                float heightAboveBone = (Mathf.Cos(x * Mathf.PI) / b + a) / 2f;
-
-                //if (heightAboveBone < 0)
-                //{
-                //    Debug.Log("Theres negative");
-                //}
-
-                float vertexDst = Mathf.Sqrt(Mathf.Pow(vertices[vertIndex].x, 2) + Mathf.Pow(vertices[vertIndex].y, 2));
-                deltaVerticesX[vertIndex] = new Vector3(vertices[vertIndex].x / vertexDst, 0, 0) * heightAboveBone;
-                deltaVerticesY[vertIndex] = new Vector3(0, vertices[vertIndex].y / vertexDst, 0) * heightAboveBone;
+                float lengthAlongSpine = radius + length * (0.75f + boneIndex);
+                CreateBlendshapesAtLength(boneIndex + 0.5f, lengthAlongSpine);
             }
-
-            mesh.AddBlendShapeFrame("BoneX." + boneIndex, 0, deltaZeroArray, deltaZeroArray, deltaZeroArray);
-            mesh.AddBlendShapeFrame("BoneX." + boneIndex, 100, deltaVerticesX, deltaZeroArray, deltaZeroArray);
-            mesh.AddBlendShapeFrame("BoneY." + boneIndex, 0, deltaZeroArray, deltaZeroArray, deltaZeroArray);
-            mesh.AddBlendShapeFrame("BoneY." + boneIndex, 100, deltaVerticesY, deltaZeroArray, deltaZeroArray);
         }
 
+        // arrange bones into hierarchy
         for (int i = 1; i < boneCount; i++)
         {
             boneTransforms[i].parent = boneTransforms[i - 1];
         }
 
+    }
+
+    void CreateBlendshapesAtLength(float boneIndex, float lengthAlongSpine)
+    {
+        //Vector3[] deltaVertices = new Vector3[vertices.Count];
+        Vector3[] deltaVerticesX = new Vector3[vertices.Count];
+        Vector3[] deltaVerticesY = new Vector3[vertices.Count];
+        for (int vertIndex = 0; vertIndex < vertices.Count; vertIndex++)
+        {
+            // Round
+            //float distanceToBone = Mathf.Clamp(Vector3.Distance(vertices[vertIndex], boneTransforms[boneIndex].localPosition), 0, 2f * length);
+            //Vector3 directionToBone = (vertices[vertIndex] - boneTransforms[boneIndex].localPosition).normalized;
+
+            //deltaVertices[vertIndex] = directionToBone * (2f * length - distanceToBone);
+
+            float dstAlongBoneMultiplier;
+            if (legGen)
+            {
+                dstAlongBoneMultiplier = (boneIndex == 0) ? 0.9f : 1.25f;
+            }
+            else
+                dstAlongBoneMultiplier = 2f;
+
+            // Smooth - https://www.desmos.com/calculator/wmpvvtmor8
+            float maxDistanceAlongBone = length * dstAlongBoneMultiplier;
+            float maxHeightAboveBone = radius * 8f;
+
+            float displacementAlongBone = vertices[vertIndex].z - lengthAlongSpine;
+
+            float x = Mathf.Clamp(displacementAlongBone / maxDistanceAlongBone, -1, 1);
+            float a = maxHeightAboveBone;
+            float b = 1f / a;
+
+            float heightAboveBone = (Mathf.Cos(x * Mathf.PI) / b + a) / 2f;
+
+            float vertexDst = Mathf.Sqrt(Mathf.Pow(vertices[vertIndex].x, 2) + Mathf.Pow(vertices[vertIndex].y, 2));
+            deltaVerticesX[vertIndex] = new Vector3(vertices[vertIndex].x / vertexDst, 0, 0) * heightAboveBone;
+            deltaVerticesY[vertIndex] = new Vector3(0, vertices[vertIndex].y / vertexDst, 0) * heightAboveBone;
+        }
+
+        mesh.AddBlendShapeFrame("BoneX." + boneIndex, 0, deltaZeroArray, deltaZeroArray, deltaZeroArray);
+        mesh.AddBlendShapeFrame("BoneX." + boneIndex, 100, deltaVerticesX, deltaZeroArray, deltaZeroArray);
+        mesh.AddBlendShapeFrame("BoneY." + boneIndex, 0, deltaZeroArray, deltaZeroArray, deltaZeroArray);
+        mesh.AddBlendShapeFrame("BoneY." + boneIndex, 100, deltaVerticesY, deltaZeroArray, deltaZeroArray);
     }
 
     public void UpdateMeshCollider()
