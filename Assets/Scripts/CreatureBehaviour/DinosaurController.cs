@@ -42,11 +42,11 @@ public class DinosaurController : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.LeftArrow))
         {
-            transform.Rotate(Vector3.up * 100 * Time.deltaTime);
+            transform.Rotate(-Vector3.up * 100 * Time.deltaTime);
         }
         if (Input.GetKey(KeyCode.RightArrow))
         {
-            transform.Rotate(-Vector3.up * 100 * Time.deltaTime);
+            transform.Rotate(Vector3.up * 100 * Time.deltaTime);
         }
     }
 
