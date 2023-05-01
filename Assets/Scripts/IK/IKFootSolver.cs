@@ -12,14 +12,20 @@ public class IKFootSolver : MonoBehaviour
     [SerializeField] float stepLength = 4;
     [SerializeField] float stepHeight = 1;
     [SerializeField] Vector3 footOffset = default;
-    float footSpacing;
+    //float footSpacing;
     Vector3 oldPosition, currentPosition, newPosition;
     Vector3 oldNormal, currentNormal, newNormal;
     float lerp;
 
+    // added
+    Vector3 gizmoPoint;
+
+    [SerializeField] Transform legRoot;
+    [SerializeField] float bodyBobAmount;
+
     private void Start()
     {
-        footSpacing = transform.localPosition.x;
+        //footSpacing = transform.localPosition.x;
         currentPosition = newPosition = oldPosition = transform.position;
         currentNormal = newNormal = oldNormal = transform.up;
         lerp = 1;
@@ -32,11 +38,13 @@ public class IKFootSolver : MonoBehaviour
         transform.position = currentPosition;
         transform.up = currentNormal;
 
-        Ray ray = new Ray(body.position + (body.right * footSpacing), Vector3.down);
+        //Ray ray = new Ray(body.position + (body.right * footSpacing), Vector3.down);
+        Ray ray = new Ray(legRoot.position, Vector3.down);
 
-        if (Physics.Raycast(ray, out RaycastHit info, 10, terrainLayer.value))
+        if (Physics.Raycast(ray, out RaycastHit info, Mathf.Infinity, terrainLayer.value))
         {
             //Debug.Log("Got here");
+            gizmoPoint = info.point;
 
             if (Vector3.Distance(newPosition, info.point) > stepDistance && !otherFoot.IsMoving() && lerp >= 1)
             {
@@ -55,6 +63,10 @@ public class IKFootSolver : MonoBehaviour
             currentPosition = tempPosition;
             currentNormal = Vector3.Lerp(oldNormal, newNormal, lerp);
             lerp += Time.deltaTime * speed;
+
+            // put into separate script
+            float currBobheight = Mathf.Sin(lerp * Mathf.PI) * -bodyBobAmount;
+            body.localPosition = new Vector3(body.localPosition.x, currBobheight, body.localPosition.z);
         }
         else
         {
@@ -67,7 +79,10 @@ public class IKFootSolver : MonoBehaviour
     {
 
         Gizmos.color = Color.red;
-        Gizmos.DrawSphere(newPosition, 0.5f);
+        Gizmos.DrawSphere(newPosition, 5f);
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawSphere(gizmoPoint, 5f);
     }
 
 
