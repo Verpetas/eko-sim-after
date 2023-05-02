@@ -40,24 +40,6 @@ public class BodyMerge : MonoBehaviour
         RestructureBones();
     }
 
-    void RestructureBones()
-    {
-        meshGen.boneTransforms[tailLength - 1].parent = meshGen.root;
-        meshGen.boneTransforms[tailLength].parent = meshGen.root;
-
-        // structure tail bones
-        for (int i = tailLength - 2; i >= 0; i--)
-        {
-            meshGen.boneTransforms[i].parent = meshGen.boneTransforms[i + 1];
-        }
-
-        // structure bones for the rest of the body
-        for (int i = tailLength + 1; i < boneCount; i++)
-        {
-            meshGen.boneTransforms[i].parent = meshGen.boneTransforms[i - 1];
-        }
-    }
-
     void CalculateGlobalRots()
     {
         globalBends1st[0] = 360f + dinosaur1st.spineBends[0];
@@ -80,10 +62,10 @@ public class BodyMerge : MonoBehaviour
             float bendVal = globalBends1st[i] * heredityRatio + globalBends2nd[i] * (1 - heredityRatio);
 
             heredityRatio = Random.Range(0.25f, 0.75f);
-            float widthValX = dinosaur1st.spineStretchesX[i] * heredityRatio + dinosaur2nd.spineStretchesX[i] * (1 - heredityRatio);
+            float widthValX = dinosaur1st.spineWidthsX[i] * heredityRatio + dinosaur2nd.spineWidthsX[i] * (1 - heredityRatio);
 
             heredityRatio = Random.Range(0.25f, 0.75f);
-            float widthValY = dinosaur1st.spineStretchesY[i] * heredityRatio + dinosaur2nd.spineStretchesY[i] * (1 - heredityRatio);
+            float widthValY = dinosaur1st.spineWidthsY[i] * heredityRatio + dinosaur2nd.spineWidthsY[i] * (1 - heredityRatio);
 
             genes[i] = new Gene(bendVal, widthValX, widthValY);
         }
@@ -107,6 +89,24 @@ public class BodyMerge : MonoBehaviour
     {
         meshGen.skinnedMeshRenderer.SetBlendShapeWeight(boneIndex * 2, genes[boneIndex].widthValX * Random.Range(1 - stretchRandomness, 1 + stretchRandomness));
         meshGen.skinnedMeshRenderer.SetBlendShapeWeight(boneIndex * 2 + 1, genes[boneIndex].widthValY * Random.Range(1 - stretchRandomness, 1 + stretchRandomness));
+    }
+
+    void RestructureBones()
+    {
+        meshGen.boneTransforms[tailLength - 1].parent = meshGen.root;
+        meshGen.boneTransforms[tailLength].parent = meshGen.root;
+
+        // structure tail bones
+        for (int i = tailLength - 2; i >= 0; i--)
+        {
+            meshGen.boneTransforms[i].parent = meshGen.boneTransforms[i + 1];
+        }
+
+        // structure bones for the rest of the body
+        for (int i = tailLength + 1; i < boneCount; i++)
+        {
+            meshGen.boneTransforms[i].parent = meshGen.boneTransforms[i - 1];
+        }
     }
 
     void AdjustRotation()

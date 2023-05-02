@@ -94,12 +94,14 @@ public class MeshGen : MonoBehaviour
 
         mesh.RecalculateNormals();
 
-        // initialize body shaping
-        GetComponent<BodyMerge>().FormOffspring();
+        //GetComponent<BodyMerge>().FormOffspring();
 
-        //// enable shaping process
-        //if (!legGen) GetComponent<BodyPrep>().enabled = true;
-        //else GetComponent<LegPrep>().enabled = true;
+        // initialize shaping process
+        if (legGen)
+            GetComponent<LegPrep>().PrepareLeg();
+        else
+            GetComponent<BodyPrep>().PrepareBody();
+
     }
 
     void CalculateVertices()

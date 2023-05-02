@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class DinosaurController : MonoBehaviour
 {
-    [SerializeField] float speed = 50f;
-    [SerializeField] float gravity = -50f;
+    [SerializeField] float speed = 1500f;
+    [SerializeField] float gravity = -10f;
     [SerializeField] bool touchingGround = false;
 
     float groundedDrag = 1;
@@ -13,64 +13,73 @@ public class DinosaurController : MonoBehaviour
 
     private void Awake()
     {
-        rb = GetComponent<Rigidbody>();
-        rb.constraints = RigidbodyConstraints.FreezeRotation;
-        rb.useGravity = false;
+        //rb = gameObject.AddComponent<Rigidbody>();
+        //rb.constraints = RigidbodyConstraints.FreezeRotation;
+        //rb.useGravity = false;
     }
 
-    void Update()
-    {
-        UpdateDinosaurPos();
-        UpdateDinosaurRot();
-        ApplyGravity();
-    }
+    //public void CreateTriggerCollider(SkinnedMeshRenderer skinnedMesh)
+    //{
+    //    Mesh bakedMesh = new Mesh();
+    //    skinnedMesh.BakeMesh(bakedMesh);
 
-    void UpdateDinosaurPos()
-    {
-        if (Input.GetKey(KeyCode.UpArrow))
-        {
-            rb.AddForce(transform.forward * speed * Time.deltaTime);
-        }
+    //    MeshCollider meshCollider = gameObject.AddComponent<MeshCollider>();
+    //    meshCollider.sharedMesh = bakedMesh;
+    //}
 
-        if (Input.GetKey(KeyCode.DownArrow))
-        {
-            rb.AddForce(-transform.forward * speed * Time.deltaTime);
-        }
-    }
+    //void Update()
+    //{
+    //    UpdateDinosaurPos();
+    //    UpdateDinosaurRot();
+    //    ApplyGravity();
+    //}
 
-    void UpdateDinosaurRot()
-    {
-        if (Input.GetKey(KeyCode.LeftArrow))
-        {
-            transform.Rotate(-Vector3.up * 100 * Time.deltaTime);
-        }
-        if (Input.GetKey(KeyCode.RightArrow))
-        {
-            transform.Rotate(Vector3.up * 100 * Time.deltaTime);
-        }
-    }
+    //void UpdateDinosaurPos()
+    //{
+    //    if (Input.GetKey(KeyCode.UpArrow))
+    //    {
+    //        rb.AddForce(transform.forward * speed * Time.deltaTime);
+    //    }
 
-    void ApplyGravity()
-    {
-        rb.AddForce(transform.up * gravity);
-    }
+    //    if (Input.GetKey(KeyCode.DownArrow))
+    //    {
+    //        rb.AddForce(-transform.forward * speed * Time.deltaTime);
+    //    }
+    //}
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
-        {
-            touchingGround = true;
-            rb.drag = groundedDrag;
-        }
-    }
+    //void UpdateDinosaurRot()
+    //{
+    //    if (Input.GetKey(KeyCode.LeftArrow))
+    //    {
+    //        transform.Rotate(-Vector3.up * 100 * Time.deltaTime);
+    //    }
+    //    if (Input.GetKey(KeyCode.RightArrow))
+    //    {
+    //        transform.Rotate(Vector3.up * 100 * Time.deltaTime);
+    //    }
+    //}
 
-    private void OnCollisionExit(Collision collision)
-    {
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
-        {
-            touchingGround = false;
-            rb.drag = 0;
-        }
-    }
+    //void ApplyGravity()
+    //{
+    //    rb.AddForce(transform.up * gravity);
+    //}
+
+    //private void OnCollisionEnter(Collision collision)
+    //{
+    //    if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
+    //    {
+    //        touchingGround = true;
+    //        rb.drag = groundedDrag;
+    //    }
+    //}
+
+    //private void OnCollisionExit(Collision collision)
+    //{
+    //    if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
+    //    {
+    //        touchingGround = false;
+    //        rb.drag = 0;
+    //    }
+    //}
 
 }
