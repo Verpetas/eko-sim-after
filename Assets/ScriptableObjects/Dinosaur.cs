@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,4 +17,17 @@ public class Dinosaur : ScriptableObject
     public float[] spineWidthsY;
 
     public Vector2[] legWidths;
+
+    public DinosaurWalkingProperties walkingProperties;
+}
+
+[Serializable]
+public class DinosaurWalkingProperties
+{
+    public float stepSpeed;
+    public float stepDistance;
+    public float stepLength;
+    public float stepHeight;
+    public Vector3 footOffset;
+    public float bodyBobAmount;
 }

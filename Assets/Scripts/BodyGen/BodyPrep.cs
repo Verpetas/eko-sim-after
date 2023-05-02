@@ -52,8 +52,6 @@ public class BodyPrep : MonoBehaviour
         CreateTempCollider();
         AttachLegs();
 
-        //AddRB();
-
         //AdjustRotation();
     }
 
@@ -144,11 +142,6 @@ public class BodyPrep : MonoBehaviour
                 legR.localPosition = new Vector3(-legL.localPosition.x, 0, 0);
             }
         }
-    }
-
-    void AddRB()
-    {
-
     }
 
     void AdjustRotation()
