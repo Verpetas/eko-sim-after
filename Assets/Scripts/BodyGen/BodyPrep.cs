@@ -11,7 +11,9 @@ public class BodyPrep : MonoBehaviour
     int boneCount;
     float[] spineBendsGlobal;
     Transform root;
-    Transform legs;
+    List<Transform> legBones = new List<Transform>();
+    LayerMask dinosaurLayerMask;
+    GameObject dinosaurModel;
 
     private void Awake()
     {
@@ -19,7 +21,6 @@ public class BodyPrep : MonoBehaviour
         boneCount = dinosaur.spineBends.Length;
 
         root = transform.parent;
-        legs = root.Find("Legs");
 
         spineBendsGlobal = new float[boneCount];
         CalculateGlobalSpineBends();
@@ -37,6 +38,8 @@ public class BodyPrep : MonoBehaviour
 
     public void PrepareBody()
     {
+        AssignLayer();
+
         for (int i = 0; i < boneCount; i++)
         {
             BendBody(i);
@@ -44,15 +47,22 @@ public class BodyPrep : MonoBehaviour
         }
 
         RestructureBones();
+        FindLegBones();
         CenterBody();
-
         CreateTempCollider();
-
         AttachLegs();
 
         //AddRB();
 
         //AdjustRotation();
+    }
+
+    void AssignLayer()
+    {
+        int dinosaurLayer = LayerMask.NameToLayer("Dinosaur");
+        dinosaurModel = transform.Find("Model").gameObject;
+        dinosaurModel.layer = dinosaurLayer;
+        dinosaurLayerMask |= (1 << dinosaurLayer);
     }
 
     void BendBody(int boneIndex)
@@ -86,41 +96,28 @@ public class BodyPrep : MonoBehaviour
         }
     }
 
+    void FindLegBones()
+    {
+        foreach (int index in dinosaur.legBoneIndices)
+        {
+            legBones.Add(meshGen.boneTransforms[index]);
+        }
+    }
+
     void CenterBody()
     {
-        //Transform firstBone = meshGen.boneTransforms[0];
-
-        //int legPairCount = dinosaur.legBoneIndices.Count;
-        //float distanceToLegsSum = 0;
-
-        //for (int i = 0; i < legPairCount; i++)
-        //{
-        //    Transform legBone = meshGen.boneTransforms[dinosaur.legBoneIndices[i]];
-        //    float distanceToLegs = Vector3.Distance(firstBone.position, legBone.position);
-        //    distanceToLegsSum += distanceToLegs;
-        //}
-
-        //float zOffset = - distanceToLegsSum / legPairCount;
-        //root.position += new Vector3(0, 0, zOffset);
-
         Transform firstBone = meshGen.boneTransforms[0];
 
-        Transform legBone = meshGen.boneTransforms[dinosaur.legBoneIndices[0]];
-        float distanceToLegs = Vector3.Distance(firstBone.position, legBone.position);
+        float distanceToLegs = Vector3.Distance(firstBone.position, legBones[0].position);
 
         if (!dinosaur.bipedal)
-        {
-            legBone = meshGen.boneTransforms[dinosaur.legBoneIndices[1]];
-            distanceToLegs = (distanceToLegs + Vector3.Distance(firstBone.position, legBone.position)) / 2f;
-        }
+            distanceToLegs = (distanceToLegs + Vector3.Distance(firstBone.position, legBones[1].position)) / 2f;
 
         root.position += new Vector3(0, 0, -distanceToLegs);
     }
 
     void CreateTempCollider()
     {
-        GameObject dinosaurModel = transform.Find("Model").gameObject;
-
         Mesh bakedMesh = new Mesh();
         meshGen.skinnedMeshRenderer.BakeMesh(bakedMesh);
 
@@ -130,7 +127,23 @@ public class BodyPrep : MonoBehaviour
 
     void AttachLegs()
     {
-        
+        for (int i = 0; i < legBones.Count; i++)
+        {
+            Transform legPair = root.Find("LegPair_" + i);
+            legPair.position = legBones[i].position + Vector3.up * 10f;
+
+            Vector3 rayStart = legPair.TransformPoint(Vector3.left * 300f);
+            Vector3 rayDir = legPair.TransformPoint(Vector3.zero) - rayStart;
+
+            Ray ray = new Ray(rayStart, rayDir);
+            if (Physics.Raycast(ray, out RaycastHit info, Mathf.Infinity, dinosaurLayerMask))
+            {
+                Transform legL = legPair.Find("Leg_L");
+                Transform legR = legPair.Find("Leg_R");
+                legL.position = info.point;
+                legR.localPosition = new Vector3(-legL.localPosition.x, 0, 0);
+            }
+        }
     }
 
     void AddRB()
