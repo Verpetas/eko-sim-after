@@ -1,11 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class BodyPrep : MonoBehaviour
 {
-
-    public Dinosaur dinosaur;
+    [SerializeField] Dinosaur dinosaur;
+    [SerializeField] float tailStiffness = 75f;
+    [SerializeField] float tailBounciness = 75f;
+    [SerializeField] float tailDampness = 0.2f;
 
     MeshGen meshGen;
     int boneCount;
@@ -51,6 +54,7 @@ public class BodyPrep : MonoBehaviour
         CenterBody();
         CreateTempCollider();
         AttachLegs();
+        AddTailPhysics();
 
         //AdjustRotation();
     }
@@ -86,6 +90,7 @@ public class BodyPrep : MonoBehaviour
         {
             meshGen.boneTransforms[i].parent = meshGen.boneTransforms[i + 1];
         }
+
 
         // structure bones for the rest of the body
         for (int i = tailLength + 1; i < boneCount; i++)
@@ -141,6 +146,21 @@ public class BodyPrep : MonoBehaviour
                 legL.position = info.point;
                 legR.localPosition = new Vector3(-legL.localPosition.x, 0, 0);
             }
+        }
+    }
+
+    void AddTailPhysics()
+    {
+        for (int i = 0; i < dinosaur.tailLength; i++)
+        {
+            SpringBone springBone = meshGen.boneTransforms[i].AddComponent<SpringBone>();
+
+            springBone.useSpecifiedRotation = true;
+            springBone.customRotation = meshGen.boneTransforms[i].localRotation.eulerAngles;
+            springBone.stiffness = tailStiffness;
+            springBone.bounciness = tailBounciness;
+            springBone.dampness = tailDampness;
+            springBone.springEnd = meshGen.boneTransforms[i].localRotation * -Vector3.forward * 50f;
         }
     }
 
