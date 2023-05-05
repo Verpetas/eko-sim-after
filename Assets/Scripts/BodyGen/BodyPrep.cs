@@ -70,8 +70,8 @@ public class BodyPrep : MonoBehaviour
 
     void StretchBody(int boneIndex)
     {
-        meshGen.skinnedMeshRenderer.SetBlendShapeWeight(boneIndex * 2, dinosaur.spineWidthsX[boneIndex]);
-        meshGen.skinnedMeshRenderer.SetBlendShapeWeight(boneIndex * 2 + 1, dinosaur.spineWidthsY[boneIndex]);
+        meshGen.skinnedMeshRenderer.SetBlendShapeWeight(boneIndex * 2, dinosaur.spineWidths[boneIndex].x);
+        meshGen.skinnedMeshRenderer.SetBlendShapeWeight(boneIndex * 2 + 1, dinosaur.spineWidths[boneIndex].y);
     }
 
     void RestructureBones()

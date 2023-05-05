@@ -62,10 +62,10 @@ public class BodyMerge : MonoBehaviour
             float bendVal = globalBends1st[i] * heredityRatio + globalBends2nd[i] * (1 - heredityRatio);
 
             heredityRatio = Random.Range(0.25f, 0.75f);
-            float widthValX = dinosaur1st.spineWidthsX[i] * heredityRatio + dinosaur2nd.spineWidthsX[i] * (1 - heredityRatio);
+            float widthValX = dinosaur1st.spineWidths[i].x * heredityRatio + dinosaur2nd.spineWidths[i].x * (1 - heredityRatio);
 
             heredityRatio = Random.Range(0.25f, 0.75f);
-            float widthValY = dinosaur1st.spineWidthsY[i] * heredityRatio + dinosaur2nd.spineWidthsY[i] * (1 - heredityRatio);
+            float widthValY = dinosaur1st.spineWidths[i].y * heredityRatio + dinosaur2nd.spineWidths[i].y * (1 - heredityRatio);
 
             genes[i] = new Gene(bendVal, widthValX, widthValY);
         }

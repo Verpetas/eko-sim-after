@@ -13,9 +13,7 @@ public class Dinosaur : ScriptableObject
 
     public float[] spineBends;
 
-    public float[] spineWidthsX;
-    public float[] spineWidthsY;
-
+    public Vector2[] spineWidths;
     public Vector2[] legWidths;
 
     public DinosaurWalkingProperties walkingProperties;

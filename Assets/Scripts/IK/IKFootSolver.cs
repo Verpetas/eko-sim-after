@@ -1,18 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 public class IKFootSolver : MonoBehaviour
 {
     [SerializeField] LayerMask terrainLayer = default;
-    [SerializeField] Transform body = default;
     [SerializeField] IKFootSolver otherFoot = default;
     [SerializeField] float speed = 1;
     [SerializeField] float stepDistance = 4;
     [SerializeField] float stepLength = 4;
     [SerializeField] float stepHeight = 1;
     [SerializeField] Vector3 footOffset = default;
-    //float footSpacing;
     Vector3 oldPosition, currentPosition, newPosition;
     Vector3 oldNormal, currentNormal, newNormal;
     float lerp;
@@ -20,15 +19,49 @@ public class IKFootSolver : MonoBehaviour
     // added
     Vector3 gizmoPoint;
 
-    [SerializeField] Transform legRoot;
     [SerializeField] float bodyBobAmount;
+    public Transform bodyRoot;
+    public Transform legRoot;
+
+    Transform hint;
+
+    private void Awake()
+    {
+        int groundLayer = LayerMask.NameToLayer("Ground");
+        terrainLayer |= (1 << groundLayer);
+    }
 
     private void Start()
     {
-        //footSpacing = transform.localPosition.x;
+        otherFoot = FindOtherFoot();
+        SetHintPosition();
+
         currentPosition = newPosition = oldPosition = transform.position;
         currentNormal = newNormal = oldNormal = transform.up;
         lerp = 1;
+    }
+
+    public void AssignWalkProperties(float speed, float stepDistance, float stepLength, float stepHeight, Vector3 footOffset, float bodyBobAmount)
+    {
+        this.speed = speed;
+        this.stepDistance = stepDistance;
+        this.stepLength = stepLength;
+        this.stepHeight = stepHeight;
+        this.footOffset = footOffset;
+        this.bodyBobAmount = bodyBobAmount;
+    }
+
+    IKFootSolver FindOtherFoot()
+    {
+        string otherFootName = "2BoneIK_Leg_" + (transform.parent.name.EndsWith("L") ? "R" : "L");
+        return transform.parent.parent.Find(otherFootName).Find("Target").GetComponent<IKFootSolver>();
+    }
+
+    void SetHintPosition()
+    {
+        TwoBoneIKConstraint legIKConstraint = transform.parent.GetComponent<TwoBoneIKConstraint>();
+        Transform hint = legIKConstraint.data.hint;
+        hint.position = legRoot.position + new Vector3(0, 0, 1000f);
     }
 
     // Update is called once per frame
@@ -43,14 +76,13 @@ public class IKFootSolver : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit info, Mathf.Infinity, terrainLayer.value))
         {
-            //Debug.Log("Got here");
             gizmoPoint = info.point;
 
             if (Vector3.Distance(newPosition, info.point) > stepDistance && !otherFoot.IsMoving() && lerp >= 1)
             {
                 lerp = 0;
-                int direction = body.InverseTransformPoint(info.point).z > body.InverseTransformPoint(newPosition).z ? 1 : -1;
-                newPosition = info.point + (body.forward * stepLength * direction) + footOffset;
+                int direction = bodyRoot.InverseTransformPoint(info.point).z > bodyRoot.InverseTransformPoint(newPosition).z ? 1 : -1;
+                newPosition = info.point + (bodyRoot.forward * stepLength * direction) + footOffset;
                 newNormal = info.normal;
             }
         }
@@ -66,7 +98,7 @@ public class IKFootSolver : MonoBehaviour
 
             // put into separate script
             float currBobheight = Mathf.Sin(lerp * Mathf.PI) * -bodyBobAmount;
-            body.localPosition = new Vector3(body.localPosition.x, currBobheight, body.localPosition.z);
+            bodyRoot.localPosition = new Vector3(bodyRoot.localPosition.x, currBobheight, bodyRoot.localPosition.z);
         }
         else
         {
