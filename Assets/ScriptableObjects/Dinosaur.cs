@@ -10,6 +10,7 @@ public class Dinosaur : ScriptableObject
     public List<int> legBoneIndices;
 
     public int tailLength;
+    public int neckLength;
 
     public float[] spineBends;
 

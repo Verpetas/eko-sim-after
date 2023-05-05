@@ -2,13 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 public class BodyPrep : MonoBehaviour
 {
     [SerializeField] Dinosaur dinosaur;
+    [SerializeField] Transform rig;
     [SerializeField] float tailStiffness = 75f;
     [SerializeField] float tailBounciness = 75f;
     [SerializeField] float tailDampness = 0.2f;
+
+    [SerializeField] Transform apple;
 
     MeshGen meshGen;
     int boneCount;
@@ -17,6 +21,7 @@ public class BodyPrep : MonoBehaviour
     List<Transform> legBones = new List<Transform>();
     LayerMask dinosaurLayerMask;
     GameObject dinosaurModel;
+    RigBuilder rigBuilder;
 
     private void Awake()
     {
@@ -24,6 +29,7 @@ public class BodyPrep : MonoBehaviour
         boneCount = dinosaur.spineBends.Length;
 
         root = transform.parent;
+        rigBuilder = root.GetComponent<RigBuilder>();
 
         spineBendsGlobal = new float[boneCount];
         CalculateGlobalSpineBends();
@@ -55,6 +61,7 @@ public class BodyPrep : MonoBehaviour
         CreateTempCollider();
         AttachLegs();
         AddTailPhysics();
+        AddNeckIK();
 
         //AdjustRotation();
     }
@@ -162,6 +169,22 @@ public class BodyPrep : MonoBehaviour
             springBone.dampness = tailDampness;
             springBone.springEnd = meshGen.boneTransforms[i].localRotation * -Vector3.forward * 50f;
         }
+    }
+
+    void AddNeckIK()
+    {
+        GameObject neckIKGO = new GameObject("ChainIK_Neck");
+        neckIKGO.transform.parent = rig;
+
+        ChainIKConstraint neckIK = neckIKGO.AddComponent<ChainIKConstraint>();
+        neckIK.Reset();
+
+        neckIK.data.tip = meshGen.boneTransforms[boneCount - 1];
+        neckIK.data.root = meshGen.boneTransforms[boneCount - dinosaur.neckLength - 1];
+        neckIK.data.chainRotationWeight = 0;
+        neckIK.data.target = apple;
+
+        rigBuilder.Build();
     }
 
     void AdjustRotation()
