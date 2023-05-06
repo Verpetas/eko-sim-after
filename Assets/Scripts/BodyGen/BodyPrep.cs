@@ -182,6 +182,7 @@ public class BodyPrep : MonoBehaviour
         neckIK.data.tip = meshGen.boneTransforms[boneCount - 1];
         neckIK.data.root = meshGen.boneTransforms[boneCount - dinosaur.neckLength - 1];
         neckIK.data.chainRotationWeight = 0;
+        neckIK.data.tipRotationWeight = 0;
         neckIK.data.target = apple;
 
         rigBuilder.Build();

@@ -80,10 +80,18 @@ public class IKFootSolver : MonoBehaviour
 
             if (Vector3.Distance(newPosition, info.point) > stepDistance && !otherFoot.IsMoving() && lerp >= 1)
             {
-                lerp = 0;
                 int direction = bodyRoot.InverseTransformPoint(info.point).z > bodyRoot.InverseTransformPoint(newPosition).z ? 1 : -1;
-                newPosition = info.point + (bodyRoot.forward * stepLength * direction) + footOffset;
-                newNormal = info.normal;
+
+                Vector3 rayStartFinal = legRoot.position + (bodyRoot.forward * stepLength * direction);
+                ray = new Ray(rayStartFinal, Vector3.down);
+
+                if (Physics.Raycast(ray, out RaycastHit infoFinal, Mathf.Infinity, terrainLayer.value))
+                {
+                    newPosition = infoFinal.point + footOffset;
+                    newNormal = infoFinal.normal;
+
+                    lerp = 0;
+                }
             }
         }
 
@@ -97,8 +105,8 @@ public class IKFootSolver : MonoBehaviour
             lerp += Time.deltaTime * speed;
 
             // put into separate script
-            float currBobheight = Mathf.Sin(lerp * Mathf.PI) * -bodyBobAmount;
-            bodyRoot.localPosition = new Vector3(bodyRoot.localPosition.x, currBobheight, bodyRoot.localPosition.z);
+            float currBobHeight = Mathf.Sin(lerp * Mathf.PI) * -bodyBobAmount;
+            bodyRoot.localPosition = new Vector3(bodyRoot.localPosition.x, currBobHeight, bodyRoot.localPosition.z);
         }
         else
         {
