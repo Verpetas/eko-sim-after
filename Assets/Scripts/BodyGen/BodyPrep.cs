@@ -22,7 +22,6 @@ public class BodyPrep : MonoBehaviour
     LayerMask dinosaurLayerMask;
     GameObject dinosaurModel;
     RigBuilder rigBuilder;
-    MeshCollider meshCollider;
 
     private void Awake()
     {
@@ -63,9 +62,6 @@ public class BodyPrep : MonoBehaviour
         AttachLegs();
         AddTailPhysics();
         AddNeckIK();
-        RemoveTempCollider();
-
-        InitializeDinosaurController();
 
         //AdjustRotation();
     }
@@ -122,15 +118,12 @@ public class BodyPrep : MonoBehaviour
     {
         Transform firstBone = meshGen.boneTransforms[0];
 
-        Vector3 legBoneRelativePos = legBones[0].position - firstBone.position;
+        float distanceToLegs = Vector3.Distance(firstBone.position, legBones[0].position);
 
         if (!dinosaur.bipedal)
-        {
-            Vector3 secondRelPos = legBones[1].position - firstBone.position;
-            legBoneRelativePos = (legBoneRelativePos + secondRelPos) / 2f;
-        }
+            distanceToLegs = (distanceToLegs + Vector3.Distance(firstBone.position, legBones[1].position)) / 2f;
 
-        root.position -= legBoneRelativePos;
+        root.position += new Vector3(0, 0, -distanceToLegs);
     }
 
     void CreateTempCollider()
@@ -138,7 +131,7 @@ public class BodyPrep : MonoBehaviour
         Mesh bakedMesh = new Mesh();
         meshGen.skinnedMeshRenderer.BakeMesh(bakedMesh);
 
-        meshCollider = dinosaurModel.AddComponent<MeshCollider>();
+        MeshCollider meshCollider = dinosaurModel.AddComponent<MeshCollider>();
         meshCollider.sharedMesh = bakedMesh;
     }
 
@@ -193,18 +186,6 @@ public class BodyPrep : MonoBehaviour
         neckIK.data.target = apple;
 
         rigBuilder.Build();
-    }
-
-    void RemoveTempCollider()
-    {
-        Destroy(meshCollider);
-    }
-
-    void InitializeDinosaurController()
-    {
-        DinosaurController dinosaurController = root.parent.GetComponent<DinosaurController>();
-        dinosaurController.InitController();
-        dinosaurController.enabled = true;
     }
 
     void AdjustRotation()
