@@ -65,7 +65,7 @@ public class BodyPrep : MonoBehaviour
         AddNeckIK();
         RemoveTempCollider();
 
-        InitializeDinosaurController();
+        //InitializeDinosaurController();
 
         //AdjustRotation();
     }
@@ -197,7 +197,7 @@ public class BodyPrep : MonoBehaviour
 
     void RemoveTempCollider()
     {
-        Destroy(meshCollider);
+        DestroyImmediate(meshCollider);
     }
 
     void InitializeDinosaurController()

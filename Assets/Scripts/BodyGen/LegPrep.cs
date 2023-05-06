@@ -1,3 +1,4 @@
+using DitzelGames.FastIK;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,13 +15,13 @@ public class LegPrep : MonoBehaviour
     MeshGen meshGen;
     int boneCount;
     GameObject tipBone;
-    RigBuilder rigBuilder;
     Transform legRoot;
 
     private void Awake()
     {
         meshGen = GetComponent<MeshGen>();
         rigBuilder = bodyRoot.GetComponent<RigBuilder>();
+
         boneCount = dinosaur.legWidths.Length;
         legRoot = transform.Find("Root");
     }
@@ -67,21 +68,15 @@ public class LegPrep : MonoBehaviour
         GameObject hint = new GameObject("Hint");
         hint.transform.SetParent(legIKGO.transform);
 
-        AssignLegIKConstraint(legIKGO, target, hint);
+        AssignLegIKConstraint(target, hint);
         AssignIKLegSolver(target);
-
-        rigBuilder.Build();
     }
 
-    void AssignLegIKConstraint(GameObject legIKGO, GameObject target, GameObject hint)
+    void AssignLegIKConstraint(GameObject target, GameObject hint)
     {
-        TwoBoneIKConstraint legIK = legIKGO.AddComponent<TwoBoneIKConstraint>();
-        legIK.Reset();
-        legIK.data.root = meshGen.boneTransforms[0];
-        legIK.data.mid = meshGen.boneTransforms[1];
-        legIK.data.tip = tipBone.transform;
-        legIK.data.target = target.transform;
-        legIK.data.hint = hint.transform;
+        FastIKFabric legIK = tipBone.AddComponent<FastIKFabric>();
+        legIK.Target = target.transform;
+        legIK.Pole = hint.transform;
     }
 
     void AssignIKLegSolver(GameObject target)

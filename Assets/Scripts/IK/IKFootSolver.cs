@@ -59,12 +59,9 @@ public class IKFootSolver : MonoBehaviour
 
     void SetHintPosition()
     {
-        TwoBoneIKConstraint legIKConstraint = transform.parent.GetComponent<TwoBoneIKConstraint>();
-        Transform hint = legIKConstraint.data.hint;
+        Transform hint = transform.parent.Find("Hint");
         hint.position = legRoot.position + new Vector3(0, 0, 1000f);
     }
-
-    // Update is called once per frame
 
     void Update()
     {
