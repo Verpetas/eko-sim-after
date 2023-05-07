@@ -8,6 +8,7 @@ public class BodyPrep : MonoBehaviour
 {
     [SerializeField] Dinosaur dinosaur;
     [SerializeField] Transform rig;
+    [SerializeField] Transform wrapper;
     [SerializeField] float tailStiffness = 75f;
     [SerializeField] float tailBounciness = 75f;
     [SerializeField] float tailDampness = 0.2f;
@@ -23,6 +24,7 @@ public class BodyPrep : MonoBehaviour
     GameObject dinosaurModel;
     RigBuilder rigBuilder;
     MeshCollider meshCollider;
+    DinosaurController dinosaurController;
 
     private void Awake()
     {
@@ -31,6 +33,8 @@ public class BodyPrep : MonoBehaviour
 
         root = transform.parent;
         rigBuilder = root.GetComponent<RigBuilder>();
+
+        dinosaurController = wrapper.parent.GetComponent<DinosaurController>();
 
         spineBendsGlobal = new float[boneCount];
         CalculateGlobalSpineBends();
@@ -57,17 +61,19 @@ public class BodyPrep : MonoBehaviour
         }
 
         RestructureBones();
-        FindLegBones();
-        CenterBody();
-        CreateTempCollider();
-        AttachLegs();
+
         AddTailPhysics();
         AddNeckIK();
-        RemoveTempCollider();
 
-        //InitializeDinosaurController();
+        FindLegBones();
+        CenterBody();
 
-        //AdjustRotation();
+        CreateTempCollider();
+
+        AttachLegs();
+        SwapColliders();
+
+        InitializeDinosaurController();
     }
 
     void AssignLayer()
@@ -130,7 +136,7 @@ public class BodyPrep : MonoBehaviour
             legBoneRelativePos = (legBoneRelativePos + secondRelPos) / 2f;
         }
 
-        root.position -= legBoneRelativePos;
+        wrapper.localPosition = -legBoneRelativePos;
     }
 
     void CreateTempCollider()
@@ -158,6 +164,7 @@ public class BodyPrep : MonoBehaviour
                 Transform legL = legPair.Find("Leg_L");
                 Transform legR = legPair.Find("Leg_R");
                 legL.position = info.point;
+                legL.localPosition *= 1.2f;
                 legR.localPosition = new Vector3(-legL.localPosition.x, 0, 0);
             }
         }
@@ -186,23 +193,24 @@ public class BodyPrep : MonoBehaviour
         ChainIKConstraint neckIK = neckIKGO.AddComponent<ChainIKConstraint>();
         neckIK.Reset();
 
+        neckIK.weight = 0;
         neckIK.data.tip = meshGen.boneTransforms[boneCount - 1];
         neckIK.data.root = meshGen.boneTransforms[boneCount - dinosaur.neckLength - 1];
-        neckIK.data.chainRotationWeight = 0;
+        neckIK.data.chainRotationWeight = 1;
         neckIK.data.tipRotationWeight = 0;
         neckIK.data.target = apple;
 
         rigBuilder.Build();
     }
 
-    void RemoveTempCollider()
+    void SwapColliders()
     {
         DestroyImmediate(meshCollider);
+        dinosaurController.AddCollider(20f, 110f);
     }
 
     void InitializeDinosaurController()
     {
-        DinosaurController dinosaurController = root.parent.GetComponent<DinosaurController>();
         dinosaurController.InitController();
         dinosaurController.enabled = true;
     }

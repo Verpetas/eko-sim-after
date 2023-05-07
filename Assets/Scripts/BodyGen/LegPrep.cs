@@ -20,14 +20,13 @@ public class LegPrep : MonoBehaviour
     private void Awake()
     {
         meshGen = GetComponent<MeshGen>();
-        rigBuilder = bodyRoot.GetComponent<RigBuilder>();
-
         boneCount = dinosaur.legWidths.Length;
-        legRoot = transform.Find("Root");
     }
 
     public void PrepareLeg()
     {
+        legRoot = transform.Find("Root");
+
         AdjustLegPairSize();
 
         for (int i = 0; i < boneCount; i++)

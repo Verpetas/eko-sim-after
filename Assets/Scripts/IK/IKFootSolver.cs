@@ -23,8 +23,6 @@ public class IKFootSolver : MonoBehaviour
     public Transform bodyRoot;
     public Transform legRoot;
 
-    Transform hint;
-
     private void Awake()
     {
         int groundLayer = LayerMask.NameToLayer("Ground");

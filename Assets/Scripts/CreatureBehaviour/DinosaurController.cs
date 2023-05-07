@@ -13,7 +13,6 @@ public class DinosaurController : MonoBehaviour
 
     public void InitController()
     {
-        AddCollider();
         AddRB();
     }
 
@@ -54,11 +53,11 @@ public class DinosaurController : MonoBehaviour
         rb.AddForce(transform.up * gravity);
     }
 
-    void AddCollider()
+    public void AddCollider(float radius, float height)
     {
         CapsuleCollider collider = gameObject.AddComponent<CapsuleCollider>();
-        collider.radius = 20f;
-        collider.height = 80f;
+        collider.radius = radius;
+        collider.height = height;
     }
 
     void AddRB()

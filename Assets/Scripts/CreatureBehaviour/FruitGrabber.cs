@@ -5,7 +5,6 @@ using UnityEngine.Animations.Rigging;
 
 public class FruitGrabber : MonoBehaviour
 {
-    public GameObject fruit;
     public ChainIKConstraint neckIK;
     public float neckSpeed = 0.05f;
 
