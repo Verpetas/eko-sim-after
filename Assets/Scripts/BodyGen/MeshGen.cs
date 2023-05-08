@@ -269,7 +269,7 @@ public class MeshGen : MonoBehaviour
             if (legGen && boneIndex == 1)
             {
                 float lengthAlongSpine = radius + length * (0.75f + boneIndex);
-                CreateBlendshapesAtLength(boneIndex + 0.5f, lengthAlongSpine);
+                CreateBlendshapesAtLength(boneIndex + 1f, lengthAlongSpine);
             }
         }
 

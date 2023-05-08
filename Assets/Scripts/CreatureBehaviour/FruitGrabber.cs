@@ -5,8 +5,12 @@ using UnityEngine.Animations.Rigging;
 
 public class FruitGrabber : MonoBehaviour
 {
-    public ChainIKConstraint neckIK;
-    public float neckSpeed = 0.05f;
+    [SerializeField] ChainIKConstraint neckIK;
+    [SerializeField] Transform apple;
+    [SerializeField] Transform apple2;
+    [SerializeField] float neckSpeed = 0.05f;
+
+    RigBuilder rigBuilder;
 
     private void Update()
     {
@@ -23,6 +27,26 @@ public class FruitGrabber : MonoBehaviour
         if (Input.GetKey("[2]"))
         {
             neckIK.weight -= neckSpeed;
+        }
+
+        if (Input.GetKey("[4]"))
+        {
+            Debug.Log("Adding");
+
+            rigBuilder = transform.Find("Wrapper").Find("Root").GetComponent<RigBuilder>();
+
+            neckIK.data.target = apple;
+            rigBuilder.Build();
+        }
+
+        if (Input.GetKey("[5]"))
+        {
+            Debug.Log("Adding");
+
+            rigBuilder = transform.Find("Wrapper").Find("Root").GetComponent<RigBuilder>();
+
+            neckIK.data.target = apple2;
+            rigBuilder.Build();
         }
     }
 

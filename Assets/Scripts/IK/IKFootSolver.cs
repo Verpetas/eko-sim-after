@@ -23,6 +23,9 @@ public class IKFootSolver : MonoBehaviour
     public Transform bodyRoot;
     public Transform legRoot;
 
+    string legIKName;
+    bool backLeg;
+
     private void Awake()
     {
         int groundLayer = LayerMask.NameToLayer("Ground");
@@ -31,6 +34,8 @@ public class IKFootSolver : MonoBehaviour
 
     private void Start()
     {
+        legIKName = transform.parent.name;
+        backLeg = legIKName[legIKName.Length - 1] == '0';
         otherFoot = FindOtherFoot();
         SetHintPosition();
 
@@ -51,14 +56,20 @@ public class IKFootSolver : MonoBehaviour
 
     IKFootSolver FindOtherFoot()
     {
-        string otherFootName = "2BoneIK_Leg_" + (transform.parent.name.EndsWith("L") ? "R" : "L");
-        return transform.parent.parent.Find(otherFootName).Find("Target").GetComponent<IKFootSolver>();
+        char legPairNo = legIKName[legIKName.Length - 1];
+        char otherLegSide = legIKName[legIKName.Length - 3] == 'L' ? 'R' : 'L';
+        string otherLegName = "2BoneIK_Leg_" + otherLegSide + "_" + legPairNo;
+
+        return transform.parent.parent.Find(otherLegName).Find("Target").GetComponent<IKFootSolver>();
     }
 
     void SetHintPosition()
     {
         Transform hint = transform.parent.Find("Hint");
         hint.position = legRoot.position + new Vector3(0, 0, 1000f);
+
+        if (legIKName[legIKName.Length - 1] == '1') // if leg belongs to front leg pair
+            hint.position *= -1f;
     }
 
     void Update()
@@ -99,15 +110,19 @@ public class IKFootSolver : MonoBehaviour
             currentNormal = Vector3.Lerp(oldNormal, newNormal, lerp);
             lerp += Time.deltaTime * speed;
 
-            // put into separate script
-            float currBobHeight = Mathf.Sin(lerp * Mathf.PI) * -bodyBobAmount;
-            bodyRoot.localPosition = new Vector3(bodyRoot.localPosition.x, currBobHeight, bodyRoot.localPosition.z);
+            if (backLeg) PerformBodyBob(lerp);
         }
         else
         {
             oldPosition = newPosition;
             oldNormal = newNormal;
         }
+    }
+
+    void PerformBodyBob(float bobStage)
+    {
+        float currBobHeight = Mathf.Sin(bobStage * Mathf.PI) * -bodyBobAmount;
+        bodyRoot.localPosition = new Vector3(bodyRoot.localPosition.x, currBobHeight, bodyRoot.localPosition.z);
     }
 
     private void OnDrawGizmos()

@@ -1,8 +1,10 @@
 using DitzelGames.FastIK;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using UnityEngine.UIElements;
 using static UnityEngine.GraphicsBuffer;
 
 public class LegPrep : MonoBehaviour
@@ -40,7 +42,10 @@ public class LegPrep : MonoBehaviour
 
     void AdjustLegPairSize()
     {
-        transform.parent.localScale = Vector3.one * 0.2f;
+        string legPairName = transform.parent.name;
+        int legPairIndex = legPairName[legPairName.Length - 1] - '0';
+
+        transform.parent.localScale = Vector3.one * dinosaur.legPairSizes[legPairIndex];
     }
 
     void StretchLeg(int boneIndex)
@@ -58,7 +63,10 @@ public class LegPrep : MonoBehaviour
 
     void SetUpIK()
     {
-        GameObject legIKGO = new GameObject("2BoneIK_" + gameObject.name);
+        string legPairGOName = transform.parent.gameObject.name;
+        char legPairNo = legPairGOName[legPairGOName.Length - 1];
+
+        GameObject legIKGO = new GameObject("2BoneIK_" + gameObject.name + "_" + legPairNo);
         legIKGO.transform.SetParent(rig);
 
         GameObject target = new GameObject("Target");
@@ -74,6 +82,7 @@ public class LegPrep : MonoBehaviour
     void AssignLegIKConstraint(GameObject target, GameObject hint)
     {
         FastIKFabric legIK = tipBone.AddComponent<FastIKFabric>();
+        Destroy(legIK.Target.gameObject); // removes redundant target
         legIK.Target = target.transform;
         legIK.Pole = hint.transform;
     }

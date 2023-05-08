@@ -22,9 +22,9 @@ public class BodyPrep : MonoBehaviour
     List<Transform> legBones = new List<Transform>();
     LayerMask dinosaurLayerMask;
     GameObject dinosaurModel;
-    RigBuilder rigBuilder;
     MeshCollider meshCollider;
     DinosaurController dinosaurController;
+    RigBuilder rigBuilder;
 
     private void Awake()
     {
@@ -32,7 +32,7 @@ public class BodyPrep : MonoBehaviour
         boneCount = dinosaur.spineBends.Length;
 
         root = transform.parent;
-        rigBuilder = root.GetComponent<RigBuilder>();
+        //rigBuilder = root.GetComponent<RigBuilder>();
 
         dinosaurController = wrapper.parent.GetComponent<DinosaurController>();
 
@@ -61,6 +61,8 @@ public class BodyPrep : MonoBehaviour
         }
 
         RestructureBones();
+
+        SetUpRig();
 
         AddTailPhysics();
         AddNeckIK();
@@ -116,6 +118,17 @@ public class BodyPrep : MonoBehaviour
         }
     }
 
+    void SetUpRig()
+    {
+        Rig rigComp = rig.AddComponent<Rig>();
+        RigLayer rigLayer = new RigLayer(rigComp, true);
+
+        root.AddComponent<Animator>();
+        rigBuilder = root.AddComponent<RigBuilder>();
+
+        rigBuilder.layers.Add(rigLayer);
+    }
+
     void FindLegBones()
     {
         foreach (int index in dinosaur.legBoneIndices)
@@ -164,7 +177,7 @@ public class BodyPrep : MonoBehaviour
                 Transform legL = legPair.Find("Leg_L");
                 Transform legR = legPair.Find("Leg_R");
                 legL.position = info.point;
-                legL.localPosition *= 1.2f;
+                //legL.localPosition *= 1.2f;
                 legR.localPosition = new Vector3(-legL.localPosition.x, 0, 0);
             }
         }
