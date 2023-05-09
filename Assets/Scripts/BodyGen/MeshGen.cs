@@ -22,6 +22,7 @@ public class MeshGen : MonoBehaviour
 
     List<Vector3> vertices = new List<Vector3>();
     List<int> triangles = new List<int>();
+    List<Vector2> uv = new List<Vector2>();
     List<BoneWeight> boneWeights = new List<BoneWeight>();
 
     [NonSerialized] public Transform[] boneTransforms;
@@ -81,10 +82,18 @@ public class MeshGen : MonoBehaviour
     {
         CalculateVertices();
         CalculateTriangles();
+        CalculateUVs();
 
         mesh.Clear();
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
+        mesh.uv8 = uv.ToArray();
+
+        if (!legGen)
+        {
+            Debug.Log(vertices.Count);
+            Debug.Log(uv.Count);
+        }
 
         CalculateBones();
 
@@ -240,6 +249,23 @@ public class MeshGen : MonoBehaviour
             triangles.Add(topIndex - i - 2 + seamOffset);
             triangles.Add(topIndex - i - 1);
         }
+    }
+
+    void CalculateUVs()
+    {
+        int ringCount = (rings * boneCount) + (2 * (segments / 2 - 1));
+
+        uv.Add(Vector2.zero);
+        for (int ringIndex = 0; ringIndex < ringCount + 1; ringIndex++)
+        {
+            float v = ringIndex / (float)rings;
+            for (int i = 0; i < segments; i++)
+            {
+                float u = i / (float)(segments - 1);
+                uv.Add(new Vector2(u, v * (boneCount + 1)));
+            }
+        }
+        uv.Add(Vector2.one);
     }
 
     void CalculateBones()
