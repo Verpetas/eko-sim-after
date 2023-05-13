@@ -6,7 +6,7 @@ using UnityEngine.Animations.Rigging;
 
 public class BodyPrep : MonoBehaviour
 {
-    [SerializeField] Dinosaur dinosaur;
+
     [SerializeField] Transform rig;
     [SerializeField] Transform wrapper;
     [SerializeField] float tailStiffness = 75f;
@@ -15,6 +15,7 @@ public class BodyPrep : MonoBehaviour
 
     [SerializeField] Transform apple;
 
+    Dinosaur dinosaur;
     MeshGen meshGen;
     int boneCount;
     float[] spineBendsGlobal;
@@ -28,13 +29,13 @@ public class BodyPrep : MonoBehaviour
 
     private void Awake()
     {
+        dinosaur = wrapper.parent.GetComponent<DinosaurSetup>().GetDinosaur();
+        dinosaurController = wrapper.parent.GetComponent<DinosaurController>();
+
         meshGen = GetComponent<MeshGen>();
         boneCount = dinosaur.spineBends.Length;
 
         root = transform.parent;
-        //rigBuilder = root.GetComponent<RigBuilder>();
-
-        dinosaurController = wrapper.parent.GetComponent<DinosaurController>();
 
         spineBendsGlobal = new float[boneCount];
         CalculateGlobalSpineBends();

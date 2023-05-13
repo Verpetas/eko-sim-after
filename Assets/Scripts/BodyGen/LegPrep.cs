@@ -3,17 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Animations.Rigging;
-using UnityEngine.UIElements;
-using static UnityEngine.GraphicsBuffer;
 
 public class LegPrep : MonoBehaviour
 {
 
-    public Dinosaur dinosaur;
-    public Transform rig;
-    public Transform bodyRoot;
+    [SerializeField] Transform rig;
+    [SerializeField] Transform bodyRoot;
 
+    Dinosaur dinosaur;
     MeshGen meshGen;
     int boneCount;
     GameObject tipBone;
@@ -21,6 +18,8 @@ public class LegPrep : MonoBehaviour
 
     private void Awake()
     {
+        dinosaur = bodyRoot.parent.parent.GetComponent<DinosaurSetup>().GetDinosaur();
+
         meshGen = GetComponent<MeshGen>();
         boneCount = dinosaur.legWidths.Length;
     }
@@ -106,4 +105,5 @@ public class LegPrep : MonoBehaviour
             dinosaur.walkingProperties.bodyBobAmount
             );
     }
+
 }

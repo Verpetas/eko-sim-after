@@ -65,13 +65,6 @@ public class MeshGen : MonoBehaviour
         skinnedMeshRenderer.updateWhenOffscreen = true;
         skinnedMeshRenderer.sharedMaterial = bodyMaterial;
 
-        // to move to different script
-        //if (!legGen)
-        //{
-        //    meshCollider = gameObject.AddComponent<MeshCollider>();
-        //    meshCollider.convex = true;
-        //}
-
         if (legGen)
         { mesh.name = "Leg"; gameObject.tag = "Dinosaur_Leg"; }
         else
@@ -87,13 +80,8 @@ public class MeshGen : MonoBehaviour
         mesh.Clear();
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
-        mesh.uv8 = uv.ToArray();
-
-        if (!legGen)
-        {
-            Debug.Log(vertices.Count);
-            Debug.Log(uv.Count);
-        }
+        mesh.uv = uv.ToArray();
+        //mesh.uv8 = uv.ToArray();
 
         CalculateBones();
 
