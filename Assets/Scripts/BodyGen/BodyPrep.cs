@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using UnityEngine.TextCore.LowLevel;
 
 public class BodyPrep : MonoBehaviour
 {
@@ -53,6 +54,8 @@ public class BodyPrep : MonoBehaviour
 
     public void PrepareBody()
     {
+        AdjustBodySize();
+
         AssignLayer();
 
         for (int i = 0; i < boneCount; i++)
@@ -77,6 +80,11 @@ public class BodyPrep : MonoBehaviour
         SwapColliders();
 
         InitializeDinosaurController();
+    }
+
+    void AdjustBodySize()
+    {
+        transform.localScale = Vector3.one * dinosaur.bodySize;
     }
 
     void AssignLayer()
@@ -227,13 +235,6 @@ public class BodyPrep : MonoBehaviour
     {
         dinosaurController.InitController();
         dinosaurController.enabled = true;
-    }
-
-    void AdjustRotation()
-    {
-        Quaternion rotStart = Quaternion.Euler(0, 0, 0);
-        Quaternion rotEnd = meshGen.boneTransforms[boneCount - 1].rotation;
-        meshGen.boneTransforms[0].rotation = Quaternion.Inverse(Quaternion.Slerp(rotStart, rotEnd, 0.5f));
     }
 
 }

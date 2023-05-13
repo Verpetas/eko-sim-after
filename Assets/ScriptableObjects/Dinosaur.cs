@@ -9,6 +9,7 @@ public class Dinosaur : ScriptableObject
     public bool bipedal;
     public List<int> legBoneIndices;
     public List<float> legPairSizes;
+    public float bodySize;
 
     public int tailLength;
     public int neckLength;

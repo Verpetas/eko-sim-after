@@ -8,7 +8,7 @@ public class SpringBone : MonoBehaviour {
 
     private float springLength {
         get {
-            return springEnd.magnitude;
+            return springEnd.magnitude * bodySize;
         }
     }
         
@@ -23,8 +23,12 @@ public class SpringBone : MonoBehaviour {
     [Range(0.0f,0.9f)]
     public float dampness = 0.1f;
 
+    float bodySize;
+
     // Use this for initialization
     void Start () {
+        bodySize = transform.lossyScale.x;
+
         currentTipPos = transform.TransformPoint(springEnd);
         if (transform.parent != null) {
             parBone = transform.parent.GetComponentInParent<SpringBone>();
@@ -67,7 +71,7 @@ public class SpringBone : MonoBehaviour {
 
         var force = bounciness * (currentTipPos - lastFrameTip);  //spring force.
 
-        force += stiffness * (currentTipPos - transform.position).normalized;  //stiffness
+        force += stiffness * (currentTipPos - transform.position).normalized * bodySize;  //stiffness
 
         force -= dampness * velocity;               //damp force. 
 
