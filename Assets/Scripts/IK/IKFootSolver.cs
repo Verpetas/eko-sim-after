@@ -127,12 +127,11 @@ public class IKFootSolver : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-
         Gizmos.color = Color.red;
-        Gizmos.DrawSphere(newPosition, 5f);
+        Gizmos.DrawSphere(newPosition, 0.25f);
 
         Gizmos.color = Color.blue;
-        Gizmos.DrawSphere(gizmoPoint, 5f);
+        Gizmos.DrawSphere(gizmoPoint, 0.25f);
     }
 
 

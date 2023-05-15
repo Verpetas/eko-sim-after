@@ -23,10 +23,10 @@ public class BodyPrep : MonoBehaviour
     Transform root;
     List<Transform> legBones = new List<Transform>();
     LayerMask dinosaurLayerMask;
-    GameObject dinosaurModel;
-    MeshCollider meshCollider;
     DinosaurController dinosaurController;
     RigBuilder rigBuilder;
+    int dinosaurLayer;
+    GameObject colliderGO;
 
     private void Awake()
     {
@@ -40,6 +40,9 @@ public class BodyPrep : MonoBehaviour
 
         spineBendsGlobal = new float[boneCount];
         CalculateGlobalSpineBends();
+
+        dinosaurLayer = LayerMask.NameToLayer("Dinosaur");
+        dinosaurLayerMask |= (1 << dinosaurLayer);
     }
 
     void CalculateGlobalSpineBends()
@@ -55,8 +58,6 @@ public class BodyPrep : MonoBehaviour
     public void PrepareBody()
     {
         AdjustBodySize();
-
-        AssignLayer();
 
         for (int i = 0; i < boneCount; i++)
         {
@@ -85,14 +86,6 @@ public class BodyPrep : MonoBehaviour
     void AdjustBodySize()
     {
         transform.localScale = Vector3.one * dinosaur.bodySize;
-    }
-
-    void AssignLayer()
-    {
-        int dinosaurLayer = LayerMask.NameToLayer("Dinosaur");
-        dinosaurModel = transform.Find("Model").gameObject;
-        dinosaurModel.layer = dinosaurLayer;
-        dinosaurLayerMask |= (1 << dinosaurLayer);
     }
 
     void BendBody(int boneIndex)
@@ -166,7 +159,15 @@ public class BodyPrep : MonoBehaviour
         Mesh bakedMesh = new Mesh();
         meshGen.skinnedMeshRenderer.BakeMesh(bakedMesh);
 
-        meshCollider = dinosaurModel.AddComponent<MeshCollider>();
+        Transform dinosaurModel = transform.Find("Model");
+
+        colliderGO = new GameObject("Collider");
+        colliderGO.transform.parent = dinosaurModel;
+        colliderGO.transform.localPosition = Vector3.zero;
+
+        colliderGO.layer = dinosaurLayer;
+
+        MeshCollider meshCollider = colliderGO.AddComponent<MeshCollider>();
         meshCollider.sharedMesh = bakedMesh;
     }
 
@@ -175,7 +176,8 @@ public class BodyPrep : MonoBehaviour
         for (int i = 0; i < legBones.Count; i++)
         {
             Transform legPair = root.Find("LegPair_" + i);
-            legPair.position = legBones[i].position + Vector3.up * 10f;
+            Vector3 legPairPosOffset = Vector3.up * 10f * dinosaur.bodySize;
+            legPair.position = legBones[i].position + legPairPosOffset;
 
             Vector3 rayStart = legPair.TransformPoint(Vector3.left * 300f);
             Vector3 rayDir = legPair.TransformPoint(Vector3.zero) - rayStart;
@@ -227,8 +229,8 @@ public class BodyPrep : MonoBehaviour
 
     void SwapColliders()
     {
-        DestroyImmediate(meshCollider);
-        dinosaurController.AddCollider(20f, 110f);
+        DestroyImmediate(colliderGO);
+        dinosaurController.AddCollider(20f * dinosaur.bodySize, 110f * dinosaur.bodySize);
     }
 
     void InitializeDinosaurController()

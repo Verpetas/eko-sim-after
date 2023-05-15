@@ -98,11 +98,11 @@ public class LegPrep : MonoBehaviour
     {
         legIKSolver.AssignWalkProperties(
             dinosaur.walkingProperties.stepSpeed,
-            dinosaur.walkingProperties.stepDistance,
-            dinosaur.walkingProperties.stepLength,
-            dinosaur.walkingProperties.stepHeight,
+            dinosaur.walkingProperties.stepDistance * dinosaur.bodySize,
+            dinosaur.walkingProperties.stepLength * dinosaur.bodySize,
+            dinosaur.walkingProperties.stepHeight * dinosaur.bodySize,
             dinosaur.walkingProperties.footOffset,
-            dinosaur.walkingProperties.bodyBobAmount
+            dinosaur.walkingProperties.bodyBobAmount * dinosaur.bodySize
             );
     }
 
