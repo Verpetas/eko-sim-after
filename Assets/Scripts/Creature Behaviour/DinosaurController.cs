@@ -13,6 +13,7 @@ public class DinosaurController : MonoBehaviour
 
     public void InitController()
     {
+        //AssignSpawnPosition();
         AddRB();
     }
 
@@ -21,6 +22,13 @@ public class DinosaurController : MonoBehaviour
         UpdateDinosaurPos();
         UpdateDinosaurRot();
         ApplyGravity();
+    }
+
+    void AssignSpawnPosition()
+    {
+        DinosaurSetup dinosaurSetup = transform.GetComponent<DinosaurSetup>();
+        transform.position = dinosaurSetup.SpawnPos;
+        transform.rotation = dinosaurSetup.SpawnRot;
     }
 
     void UpdateDinosaurPos()

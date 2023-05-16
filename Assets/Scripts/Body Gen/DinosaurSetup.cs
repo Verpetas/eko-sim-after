@@ -10,6 +10,9 @@ public class DinosaurSetup : MonoBehaviour
 
     Transform root;
 
+    Vector3 spawnPos;
+    Quaternion spawnRot;
+
     private void Awake()
     {
         root = transform.Find("Wrapper").Find("Root");
@@ -37,6 +40,18 @@ public class DinosaurSetup : MonoBehaviour
     public Dinosaur GetDinosaur()
     {
         return dinosaur;
+    }
+
+    public Vector3 SpawnPos
+    {
+        get { return spawnPos; }
+        set { spawnPos = value; }
+    }
+
+    public Quaternion SpawnRot
+    {
+        get { return spawnRot; }
+        set { spawnRot = value; }
     }
 
 }

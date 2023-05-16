@@ -15,6 +15,8 @@ public class LegPrep : MonoBehaviour
     int boneCount;
     GameObject tipBone;
     Transform legRoot;
+    float legPairSize;
+    float legPairSizeRelative;
 
     private void Awake()
     {
@@ -28,7 +30,9 @@ public class LegPrep : MonoBehaviour
     {
         legRoot = transform.Find("Root");
 
-        AdjustLegPairSize();
+        legPairSize = GetLegPairSize();
+        legPairSizeRelative = GetLegPairSizeRelative(legPairSize);
+        transform.parent.localScale = Vector3.one * legPairSize;
 
         for (int i = 0; i < boneCount; i++)
         {
@@ -39,12 +43,25 @@ public class LegPrep : MonoBehaviour
         SetUpIK();
     }
 
-    void AdjustLegPairSize()
+    float GetLegPairSize()
     {
         string legPairName = transform.parent.name;
         int legPairIndex = legPairName[legPairName.Length - 1] - '0';
 
-        transform.parent.localScale = Vector3.one * dinosaur.legPairSizes[legPairIndex];
+        return dinosaur.legPairSizes[legPairIndex];
+    }
+
+    float GetLegPairSizeRelative(float currentPairSize)
+    {
+        float legPairSizeRelative = 1f;
+
+        for (int i = 0; i < dinosaur.legPairSizes.Count; i++)
+        {
+            if (dinosaur.legPairSizes[i] > currentPairSize)
+                legPairSizeRelative = currentPairSize / dinosaur.legPairSizes[i];
+        }
+
+        return legPairSizeRelative;
     }
 
     void StretchLeg(int boneIndex)
@@ -98,9 +115,9 @@ public class LegPrep : MonoBehaviour
     {
         legIKSolver.AssignWalkProperties(
             dinosaur.walkingProperties.stepSpeed,
-            dinosaur.walkingProperties.stepDistance * dinosaur.bodySize,
-            dinosaur.walkingProperties.stepLength * dinosaur.bodySize,
-            dinosaur.walkingProperties.stepHeight * dinosaur.bodySize,
+            dinosaur.walkingProperties.stepDistance * dinosaur.bodySize * legPairSizeRelative,
+            dinosaur.walkingProperties.stepLength * dinosaur.bodySize * legPairSizeRelative,
+            dinosaur.walkingProperties.stepHeight * dinosaur.bodySize * legPairSizeRelative,
             dinosaur.walkingProperties.footOffset,
             dinosaur.walkingProperties.bodyBobAmount * dinosaur.bodySize
             );
