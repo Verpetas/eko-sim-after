@@ -6,26 +6,24 @@ public class Unit : MonoBehaviour {
     const float minPathUpdateTime = 0.2f;
     const float pathUpdateMoveThreshold = 0.5f;
 
-	public float waypointDistanceThreshold = 1.5f; 
+    const float moveForce = 10000f;
 
+	public float waypointDistanceThreshold = 1.5f; 
 	public Transform target;
-	public float moveForce = 1750f;
+	public float speed = 20f;
 	public float turnSpeed = 0.5f;
 	public LayerMask groundMask;
-    public bool touchingGround = false;
-    public float groundedDrag = 1;
 
     Vector3[] path;
 	int targetIndex;
 	Rigidbody seekerRB;
-
-    private void Awake()
-    {
-        seekerRB = GetComponent<Rigidbody>();
-    }
+    DinosaurManager dinosaurManager;
 
     void Start()
     {
+        seekerRB = transform.GetComponent<Rigidbody>();
+        dinosaurManager = transform.GetComponent<DinosaurManager>();
+
         StartCoroutine(UpdatePath());
     }
 
@@ -82,11 +80,12 @@ public class Unit : MonoBehaviour {
 				currentWaypoint = path[targetIndex];
 			}
 
-            //transform.position = Vector3.MoveTowards(transform.position,currentWaypoint,speed * Time.deltaTime);
-            if (touchingGround)
+            if (dinosaurManager.touchingGround)
             {
                 TurnTowardsWaypoint(currentWaypoint);
-                seekerRB.AddForce(DirectForce(transform.forward) * moveForce * Time.deltaTime);
+
+                if (seekerRB.velocity.sqrMagnitude < speed)
+                    seekerRB.AddForce(DirectForce(transform.forward) * moveForce * Time.deltaTime);
             }
 
             yield return null;
@@ -122,23 +121,23 @@ public class Unit : MonoBehaviour {
         return forceDirection;
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
-		{
-			touchingGround = true;
-            seekerRB.drag = groundedDrag;
-		}
-    }
+  //  private void OnCollisionStay(Collision collision)
+  //  {
+  //      if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
+		//{
+		//	touchingGround = true;
+  //          seekerRB.drag = groundedDrag;
+		//}
+  //  }
 
-    private void OnCollisionExit(Collision collision)
-    {
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
-        {
-            touchingGround = false;
-            seekerRB.drag = 0;
-        }
-    }
+  //  private void OnCollisionExit(Collision collision)
+  //  {
+  //      if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
+  //      {
+  //          touchingGround = false;
+  //          seekerRB.drag = 0;
+  //      }
+  //  }
 
     public void OnDrawGizmos() {
 		if (path != null) {

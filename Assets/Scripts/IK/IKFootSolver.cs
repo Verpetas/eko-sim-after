@@ -29,7 +29,7 @@ public class IKFootSolver : MonoBehaviour
     private void Awake()
     {
         int groundLayer = LayerMask.NameToLayer("Ground");
-        terrainLayer |= (1 << groundLayer);
+        terrainLayer |= 1 << groundLayer;
     }
 
     private void Start()
@@ -37,6 +37,7 @@ public class IKFootSolver : MonoBehaviour
         legIKName = transform.parent.name;
         backLeg = legIKName[legIKName.Length - 1] == '0';
         otherFoot = FindOtherFoot();
+
         SetHintPosition();
 
         currentPosition = newPosition = oldPosition = transform.position;
@@ -66,10 +67,11 @@ public class IKFootSolver : MonoBehaviour
     void SetHintPosition()
     {
         Transform hint = transform.parent.Find("Hint");
-        hint.position = legRoot.position + new Vector3(0, 0, 1000f);
+        hint.position = legRoot.position;
+        hint.localPosition += new Vector3(0, 0, 1000f);
 
         if (legIKName[legIKName.Length - 1] == '1') // if leg belongs to front leg pair
-            hint.position *= -1f;
+            hint.localPosition *= -1f;
     }
 
     void Update()

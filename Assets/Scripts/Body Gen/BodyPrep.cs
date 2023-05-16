@@ -23,7 +23,7 @@ public class BodyPrep : MonoBehaviour
     Transform root;
     List<Transform> legBones = new List<Transform>();
     LayerMask dinosaurLayerMask;
-    DinosaurController dinosaurController;
+    DinosaurManager dinosaurManager;
     RigBuilder rigBuilder;
     int dinosaurLayer;
     GameObject colliderGO;
@@ -31,7 +31,7 @@ public class BodyPrep : MonoBehaviour
     private void Awake()
     {
         dinosaur = wrapper.parent.GetComponent<DinosaurSetup>().GetDinosaur();
-        dinosaurController = wrapper.parent.GetComponent<DinosaurController>();
+        dinosaurManager = wrapper.parent.GetComponent<DinosaurManager>();
 
         meshGen = GetComponent<MeshGen>();
         boneCount = dinosaur.spineBends.Length;
@@ -111,7 +111,6 @@ public class BodyPrep : MonoBehaviour
         {
             meshGen.boneTransforms[i].parent = meshGen.boneTransforms[i + 1];
         }
-
 
         // structure bones for the rest of the body
         for (int i = tailLength + 1; i < boneCount; i++)
@@ -230,13 +229,15 @@ public class BodyPrep : MonoBehaviour
     void SwapColliders()
     {
         DestroyImmediate(colliderGO);
-        dinosaurController.AddCollider(20f * dinosaur.bodySize, 110f * dinosaur.bodySize);
+        dinosaurManager.AddCollider(
+            dinosaur.colliderSize.x * dinosaur.bodySize,
+            dinosaur.colliderSize.y * dinosaur.bodySize);
     }
 
     void InitializeDinosaurController()
     {
-        dinosaurController.InitController();
-        dinosaurController.enabled = true;
+        dinosaurManager.PrepareDinosaur();
+        dinosaurManager.enabled = true;
     }
 
 }
