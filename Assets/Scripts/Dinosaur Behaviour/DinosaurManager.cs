@@ -31,41 +31,6 @@ public class DinosaurManager : MonoBehaviour
         ApplyGravity();
     }
 
-    //IEnumerator TryFindAnotherDinosaur()
-    //{
-    //    while (true)
-    //    {
-    //        if (!unitInstance.seekingTarget && dinosaurSpawner.spawnedDinosaurs.Count > 1)
-    //        {
-    //            Transform newTarget = FindClosestDinosaur();
-    //            unitInstance.target = newTarget;
-    //        }
-
-    //        yield return new WaitForSeconds(0.5f);
-    //    }
-    //}
-
-    //Transform FindClosestDinosaur()
-    //{
-    //    float minSqrDst = Mathf.Infinity;
-    //    int minDstIndex = 0;
-    //    int dinosaurCount = dinosaurSpawner.spawnedDinosaurs.Count;
-
-    //    for (int i = 0; i < dinosaurCount; i++)
-    //    {
-    //        Transform dinosaurInstance = dinosaurSpawner.spawnedDinosaurs[i].transform;
-    //        float srqDstToDinosaur = (transform.position - dinosaurInstance.position).sqrMagnitude;
-
-    //        if (srqDstToDinosaur < minSqrDst && transform != dinosaurInstance)
-    //        {
-    //            minSqrDst = srqDstToDinosaur;
-    //            minDstIndex = i;
-    //        }
-    //    }
-
-    //    return dinosaurSpawner.spawnedDinosaurs[minDstIndex].transform;
-    //}
-
     public void AddCollider(float radius, float height)
     {
         CapsuleCollider collider = gameObject.AddComponent<CapsuleCollider>();

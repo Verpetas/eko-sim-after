@@ -134,7 +134,7 @@ public class Unit : MonoBehaviour {
     void DropTarget()
     {
         target = null;
-        populationManager.AddToIdle(gameObject);
+        populationManager.AddToIdle(transform);
     }
 
     public void OnDrawGizmos() {

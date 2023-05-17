@@ -4,8 +4,17 @@ using UnityEngine;
 
 public class PopulationManager : MonoBehaviour
 {
-    List<GameObject> spawnedDinosaurs = new List<GameObject>();
-    public List<GameObject> idleDinosaurs = new List<GameObject>();
+    [SerializeField] float minMatchDstThreshold = 50f;
+
+    List<Transform> spawnedDinosaurs = new List<Transform>();
+    public List<Transform> idleDinosaurs = new List<Transform>(); // to remove public later
+
+    float matchDstThresholdSqr; 
+
+    private void Awake()
+    {
+        matchDstThresholdSqr = minMatchDstThreshold * minMatchDstThreshold;
+    }
 
     private void Start()
     {
@@ -30,14 +39,18 @@ public class PopulationManager : MonoBehaviour
                     secondDinosaurIndex = Random.Range(0, idleDinosaurCount);
                 }
 
-                CreateMatch(idleDinosaurs[firstDinosaurIndex], idleDinosaurs[secondDinosaurIndex]);
+                Transform dinosaurFirst = idleDinosaurs[firstDinosaurIndex].transform;
+                Transform dinosaurSecond = idleDinosaurs[secondDinosaurIndex].transform;
+
+                if ((dinosaurFirst.position - dinosaurSecond.position).sqrMagnitude > matchDstThresholdSqr)
+                    CreateMatch(dinosaurFirst, dinosaurSecond);
             }
 
             yield return new WaitForSeconds(0.5f);
         }
     }
 
-    void CreateMatch(GameObject dinosaurFirst, GameObject dinosaurSecond)
+    void CreateMatch(Transform dinosaurFirst, Transform dinosaurSecond)
     {
         Unit unitInstanceFist = dinosaurFirst.GetComponent<Unit>();
         Unit unitInstanceSecond = dinosaurSecond.GetComponent<Unit>();
@@ -49,13 +62,13 @@ public class PopulationManager : MonoBehaviour
         idleDinosaurs.Remove(dinosaurSecond);
     }
 
-    public void AddDinosaur(GameObject dinosaur)
+    public void AddDinosaur(Transform dinosaur)
     {
         spawnedDinosaurs.Add(dinosaur);
         idleDinosaurs.Add(dinosaur);
     }
 
-    public void AddToIdle(GameObject dinosaur)
+    public void AddToIdle(Transform dinosaur)
     {
         idleDinosaurs.Add(dinosaur);
     }

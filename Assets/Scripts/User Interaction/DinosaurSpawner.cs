@@ -40,7 +40,7 @@ public class DinosaurSpawner : MonoBehaviour
                 dinosaurSetup.SpawnRot = Quaternion.Euler(0, Random.Range(0, 360), 0);
                 dinosaurSetup.enabled = true;
 
-                populationManager.AddDinosaur(dinosaurInstance);
+                populationManager.AddDinosaur(dinosaurInstance.transform);
             }
         }
     }
