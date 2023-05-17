@@ -37,9 +37,10 @@ public class DinosaurSetup : MonoBehaviour
         bodyPart.gameObject.SetActive(true);
     }
 
-    public Dinosaur GetDinosaur()
+    public Dinosaur Dinosaur
     {
-        return dinosaur;
+        get { return dinosaur; }
+        set { dinosaur = value; }
     }
 
     public Vector3 SpawnPos

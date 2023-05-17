@@ -20,7 +20,7 @@ public class LegPrep : MonoBehaviour
 
     private void Awake()
     {
-        dinosaur = bodyRoot.parent.parent.GetComponent<DinosaurSetup>().GetDinosaur();
+        dinosaur = bodyRoot.parent.parent.GetComponent<DinosaurSetup>().Dinosaur;
 
         meshGen = GetComponent<MeshGen>();
         boneCount = dinosaur.legWidths.Length;

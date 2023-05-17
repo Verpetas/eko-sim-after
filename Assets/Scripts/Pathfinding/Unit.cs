@@ -13,48 +13,57 @@ public class Unit : MonoBehaviour {
 	public float speed = 20f;
 	public float turnSpeed = 0.5f;
 	public LayerMask groundMask;
+    public bool seekingTarget = false;
 
     Vector3[] path;
 	int targetIndex;
 	Rigidbody seekerRB;
     DinosaurManager dinosaurManager;
+    PopulationManager populationManager;
 
     void Start()
     {
         seekerRB = transform.GetComponent<Rigidbody>();
         dinosaurManager = transform.GetComponent<DinosaurManager>();
+        populationManager = GameObject.FindWithTag("PopulationManager").GetComponent<PopulationManager>();
 
         StartCoroutine(UpdatePath());
     }
 
-    public void OnPathFound(Vector3[] newPath, bool pathSuccessful) {
-		if (pathSuccessful) {
+    public void OnPathFound(Vector3[] newPath, bool pathSuccessful)
+    {
+		if (pathSuccessful)
+        {
 			path = newPath;
 			targetIndex = 0;
+            seekingTarget = true;
 			StopCoroutine("FollowPath");
 			StartCoroutine("FollowPath");
 		}
+        else
+        {
+            Debug.Log("Path failed");
+            StopCoroutine("FollowPath");
+            DropTarget();
+        }
 	}
 
 	IEnumerator UpdatePath()
 	{
-		if(Time.timeSinceLevelLoad < 0.3f)
-		{
-			yield return new WaitForSeconds(0.3f);
-		}
-        PathRequestManager.RequestPath(new PathRequest(transform.position, target.position, OnPathFound));
-
         float sqrMoveThreshold = pathUpdateMoveThreshold * pathUpdateMoveThreshold;
-		Vector3 targetPosOld = target.position;
+        Vector3 targetPosOld = Vector3.zero;
 
 		while (true)
 		{
             yield return new WaitForSeconds(minPathUpdateTime);
-            //yield return null;
-			if ((target.position - targetPosOld).sqrMagnitude > sqrMoveThreshold)
-			{
-                PathRequestManager.RequestPath(new PathRequest(transform.position, target.position, OnPathFound));
-				targetPosOld = target.position;
+
+            if (target != null)
+            {
+                if ((target.position - targetPosOld).sqrMagnitude > sqrMoveThreshold)
+                {
+                    PathRequestManager.RequestPath(new PathRequest(transform.position, target.position, OnPathFound));
+                    targetPosOld = target.position;
+                }
             }
         }
 	}
@@ -75,6 +84,7 @@ public class Unit : MonoBehaviour {
                 targetIndex ++;
 				if (targetIndex >= path.Length)
 				{
+                    DropTarget();
 					yield break;
 				}
 				currentWaypoint = path[targetIndex];
@@ -121,23 +131,11 @@ public class Unit : MonoBehaviour {
         return forceDirection;
     }
 
-  //  private void OnCollisionStay(Collision collision)
-  //  {
-  //      if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
-		//{
-		//	touchingGround = true;
-  //          seekerRB.drag = groundedDrag;
-		//}
-  //  }
-
-  //  private void OnCollisionExit(Collision collision)
-  //  {
-  //      if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
-  //      {
-  //          touchingGround = false;
-  //          seekerRB.drag = 0;
-  //      }
-  //  }
+    void DropTarget()
+    {
+        target = null;
+        populationManager.AddToIdle(gameObject);
+    }
 
     public void OnDrawGizmos() {
 		if (path != null) {

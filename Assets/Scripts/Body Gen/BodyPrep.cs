@@ -30,7 +30,7 @@ public class BodyPrep : MonoBehaviour
 
     private void Awake()
     {
-        dinosaur = wrapper.parent.GetComponent<DinosaurSetup>().GetDinosaur();
+        dinosaur = wrapper.parent.GetComponent<DinosaurSetup>().Dinosaur;
         dinosaurManager = wrapper.parent.GetComponent<DinosaurManager>();
 
         meshGen = GetComponent<MeshGen>();
