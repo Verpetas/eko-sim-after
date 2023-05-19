@@ -1,6 +1,7 @@
 using Dreamteck.Splines;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
@@ -12,12 +13,15 @@ public class PalmManager : MonoBehaviour
 
     [SerializeField] int segmentCount = 14;
     [SerializeField] float maxSegmentAngle = 12.5f;
-    [SerializeField] float subsequentSegmentScaleRatio = 0.994f;
+    [SerializeField] float subsequentSegmentScaleRatio = 0.95f;
     [SerializeField] float upwardLeanRatio = 0.925f;
     [SerializeField] float trunkCurviness = 175f;
 
     [SerializeField] float leafDensity = 12;
     [SerializeField] float leafRandomness = 0.3f;
+
+    [SerializeField] AnimationCurve segmentPopCurve;
+    [SerializeField] float segmentPopDuration = 0.4f;
 
     Transform[] trunkSegments;
     List<Transform> leafInstances;
@@ -25,6 +29,7 @@ public class PalmManager : MonoBehaviour
     Transform trunk;
     Transform leaves;
     float maxLeafAngleOffset = 10f;
+    int visibleSegmentCount = 1;
 
     private void Awake()
     {
@@ -39,23 +44,75 @@ public class PalmManager : MonoBehaviour
     {
         GenerateTrunk();
         GenerateLeaves();
+
+        StartCoroutine(DisplayGrowth());
+    }
+
+    IEnumerator DisplayGrowth()
+    {
+        int segmentIndex = 0;
+
+        while (true)
+        {
+            if (visibleSegmentCount == segmentCount) yield break;
+
+            if (Input.GetKey(KeyCode.Space))
+            {
+                StartCoroutine(PopSegment(trunkSegments[segmentIndex]));
+
+                if (segmentIndex >= visibleSegmentCount)
+                {
+                    trunkSegments[visibleSegmentCount].gameObject.SetActive(true);
+                    visibleSegmentCount++;
+                    segmentIndex = 0;
+
+                    leaves.position = trunkSegments[segmentIndex].position;
+
+                    SplineComputer leafSC = leafInstances[0].GetComponent<SplineComputer>();
+                    leafSC.Rebuild();
+                }
+                else segmentIndex++;
+            }
+
+            yield return new WaitForSeconds(0.2f);
+        }
+    }
+
+    IEnumerator PopSegment(Transform segment)
+    {
+        float startTime = Time.time;
+        Vector3 startScale = segment.localScale;
+        Vector3 peakScale = startScale * 1.5f;
+
+        while (true)
+        {
+            float popStage = (Time.time - startTime) / segmentPopDuration;
+            segment.localScale = Vector3.Lerp(startScale, peakScale, segmentPopCurve.Evaluate(popStage));
+
+            if (popStage > 1)
+            {
+                segment.localScale = startScale;
+                yield break;
+            }
+            else yield return null;
+        }
     }
 
     void GenerateTrunk()
     {
-        Transform parent = trunk;
-        Vector3 segmentPos = Vector3.up * 0.014f;
+        Vector3 segmentPosRelative = Vector3.up * 0.014f;
         Vector3 segmentScale = Vector3.one;
 
         for (int i = 0; i < segmentCount; i++)
         {
-            trunkSegments[i] = Instantiate(trunkSegment, parent).transform;
-            trunkSegments[i].localPosition = segmentPos;
+            trunkSegments[i] = Instantiate(trunkSegment, trunk).transform;
+            trunkSegments[i].position = i == 0 ? Vector3.zero : trunkSegments[i - 1].TransformPoint(segmentPosRelative);
             trunkSegments[i].localScale = segmentScale;
             trunkSegments[i].rotation = CalculateSegmentRotation(i);
 
             segmentScale *= subsequentSegmentScaleRatio;
-            parent = trunkSegments[i];
+
+            if (i > 0) trunkSegments[i].gameObject.SetActive(false);
         }
     }
 
@@ -76,7 +133,7 @@ public class PalmManager : MonoBehaviour
             angleOffset = Random.Range(-maxLeafAngleOffset, maxLeafAngleOffset);
         }
 
-        leaves.parent = trunkTop;
+        //Invoke("DestroyAllNodes", 1f);
     }
 
     Quaternion CalculateSegmentRotation(int segmentIndex)
@@ -102,6 +159,17 @@ public class PalmManager : MonoBehaviour
         }
 
         return leafInstance;
+    }
+
+    void DestroyAllNodes()
+    {
+        foreach (Transform leaf in leafInstances)
+        {
+            foreach (Transform node in leaf)
+            {
+                Destroy(node.gameObject);
+            }
+        }
     }
 
     static Vector3 RandomVector(float offset)
