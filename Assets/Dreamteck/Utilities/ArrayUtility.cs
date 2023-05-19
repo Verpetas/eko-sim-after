@@ -1,7 +1,5 @@
 namespace Dreamteck
 {
-    using System;
-
     public static class ArrayUtility
     {
         public static void Add<T>(ref T[] array, T item)
@@ -50,24 +48,6 @@ namespace Dreamteck
                 else if (i > index) newArray[i-1] = array[i];
             }
             array = newArray;
-        }
-
-        public static void ForEach<T>(this T[] source, Action<T> onLoop)
-        {
-            foreach (var item in source)
-            {
-                onLoop(item);
-            }
-        }
-
-        public static void SetLength<T>(ref T[] source, int newCount)
-        {
-            T[] newArray = new T[newCount];
-            for (int i = 0; i < UnityEngine.Mathf.Min(newCount, source.Length); i++)
-            {
-                newArray[i] = source[i];
-            }
-            source = newArray;
         }
     }
 }

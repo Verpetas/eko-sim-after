@@ -35,24 +35,6 @@ namespace Dreamteck
             }
         }
 
-        public static void MergeBoundsRecursively(this Transform rootParent, Transform tr, ref Bounds bounds)
-        {
-            foreach (Transform child in tr)
-            {
-                MergeBoundsRecursively(rootParent, child, ref bounds);
-
-                var meshFilter = child.GetComponent<MeshFilter>();
-
-                if (meshFilter == null) continue;
-
-                var min = child.TransformPoint(meshFilter.sharedMesh.bounds.min);
-                var max = child.TransformPoint(meshFilter.sharedMesh.bounds.max);
-
-                bounds.Encapsulate(rootParent.InverseTransformPoint(min));
-                bounds.Encapsulate(rootParent.InverseTransformPoint(max));
-            }
-        }
-
         public static bool IsParent(Transform child, Transform parent)
         {
             Transform current = child;

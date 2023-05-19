@@ -31,20 +31,16 @@
         {
             EditorGUI.BeginChangeCheck();
             OnGUI();
-            if (EditorGUI.EndChangeCheck())
-            {
-                Update();
-            }
+            if (EditorGUI.EndChangeCheck()) Update();
         }
 
         public void Update()
         {
             primitive.is2D = editor.is2D;
             primitive.Calculate();
-            editor.SetPointsArray(primitive.GetPoints());
-            editor.SetSplineType(primitive.GetSplineType());
-            editor.SetSplineClosed(primitive.GetIsClosed());
-            editor.ApplyModifiedProperties(true);
+            editor.points = primitive.GetPoints();
+            editor.splineType = primitive.GetSplineType();
+            editor.isClosed = primitive.GetIsClosed();
         }
 
         protected virtual void OnGUI()

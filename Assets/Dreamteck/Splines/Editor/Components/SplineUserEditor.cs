@@ -347,8 +347,6 @@ namespace Dreamteck.Splines.Editor
 #if UNITY_2019_1_OR_NEWER
             SceneView.duringSceneGui += DuringSceneGUI;
 #endif
-            SplineUser user = (SplineUser)target;
-            user.EditorAwake();
         }
 
 #if !UNITY_2019_1_OR_NEWER
@@ -364,10 +362,10 @@ namespace Dreamteck.Splines.Editor
             SplineUser user = (SplineUser)target;
             
             settingsFoldout = EditorPrefs.GetBool("Dreamteck.Splines.Editor.SplineUserEditor.settingsFoldout", false);
-            rotationModifierEditor = new RotationModifierEditor(user, this);
-            offsetModifierEditor = new OffsetModifierEditor(user, this);
-            colorModifierEditor = new ColorModifierEditor(user, this);
-            sizeModifierEditor = new SizeModifierEditor(user, this);
+            rotationModifierEditor = new RotationModifierEditor(user, this, user.rotationModifier);
+            offsetModifierEditor = new OffsetModifierEditor(user, this, user.offsetModifier);
+            colorModifierEditor = new ColorModifierEditor(user, this, user.colorModifier);
+            sizeModifierEditor = new SizeModifierEditor(user, this, user.sizeModifier);
 
             updateMethodProperty = serializedObject.FindProperty("updateMethod");
             buildOnAwakeProperty = serializedObject.FindProperty("buildOnAwake");
@@ -383,6 +381,10 @@ namespace Dreamteck.Splines.Editor
             for (int i = 0; i < users.Length; i++)
             {
                 users[i] = (SplineUser)targets[i];
+                if (users[i].isActiveAndEnabled)
+                {
+                    user.EditorAwake();
+                }
             }
             Undo.undoRedoPerformed += OnUndoRedo;
         }

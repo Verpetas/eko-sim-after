@@ -89,7 +89,7 @@ namespace Dreamteck.Splines.Editor
             }
         }
 
-        public SplinePreset(SerializedSplinePoint[] p, bool closed, Spline.Type t)
+        public SplinePreset(SplinePoint[] p, bool closed, Spline.Type t)
         {
             points_position = new S_Vector3[p.Length];
             points_tanget = new S_Vector3[p.Length];

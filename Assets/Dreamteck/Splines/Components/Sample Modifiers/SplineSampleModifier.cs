@@ -8,9 +8,7 @@
     [System.Serializable]
     public class SplineSampleModifier
     {
-        [Range(0f, 1f)]
         public float blend = 1f;
-        public bool useClippedPercent = false;
 
         public virtual List<Key> GetKeys()
         {
@@ -19,17 +17,18 @@
 
         public virtual void SetKeys(List<Key> input)
         {
+            for (int i = 0; i < input.Count; i++) input[i].modifier = this;
         }
 
-        public virtual void Apply(ref SplineSample result)
+        public virtual void Apply(SplineSample result)
         {
 
         }
 
-        public virtual void Apply(ref SplineSample source, ref SplineSample destination)
+        public virtual void Apply(SplineSample source, SplineSample destination)
         {
-            destination = source;
-            Apply(ref destination);
+            destination.CopyFrom(source);
+            Apply(destination);
         }
 
         [System.Serializable]
@@ -131,18 +130,22 @@
                 }
             }
 
-            [SerializeField] private double _featherStart = 0.0, _featherEnd = 0.0, _centerStart = 0.25, _centerEnd = 0.75;
+            [SerializeField]
+            private double _featherStart = 0.0, _featherEnd = 0.0, _centerStart = 0.25, _centerEnd = 0.75;
+            [SerializeField]
+            internal SplineSampleModifier modifier = null;
             public AnimationCurve interpolation;
             public float blend = 1f;
 
-            internal Key(double f, double t)
+            internal Key(double f, double t, SplineSampleModifier modifier)
             {
+                this.modifier = modifier;
                 start = f;
                 end = t;
                 interpolation = AnimationCurve.Linear(0f, 0f, 1f, 1f);
             }
 
-            private double GlobalToLocalPercent(double t)
+            double GlobalToLocalPercent(double t)
             {
                 if (_featherStart > _featherEnd)
                 {
@@ -153,7 +156,7 @@
                 return DMath.InverseLerp(_featherStart, _featherEnd, t);
             }
 
-            private double LocalToGlobalPercent(double t)
+            double LocalToGlobalPercent(double t)
             {
                 if (_featherStart > _featherEnd)
                 {
@@ -181,7 +184,7 @@
 
             public virtual Key Duplicate()
             {
-                Key newKey = new Key(start, end);
+                Key newKey = new Key(start, end, modifier);
                 newKey._centerStart = _centerStart;
                 newKey._centerEnd = _centerEnd;
                 newKey.blend = blend;

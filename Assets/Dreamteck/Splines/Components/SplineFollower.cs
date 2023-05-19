@@ -22,11 +22,6 @@ namespace Dreamteck.Splines
         [UnityEngine.Serialization.FormerlySerializedAs("follow")]
         private bool _follow = true;
 
-        [SerializeField]
-        [HideInInspector]
-        [Range(0f, 1f)]
-        private double _startPosition;
-
         /// <summary>
         /// If the follow mode is set to Uniform and there is an added offset in the motion panel, this will presserve the uniformity of the follow speed
         /// </summary>
@@ -43,37 +38,24 @@ namespace Dreamteck.Splines
             {
                 if (_followSpeed != value)
                 {
+                    if (value < 0f) value = 0f;
                     _followSpeed = value;
-                    Spline.Direction lastDirection = _direction;
-                    if (_followSpeed < 0f)
-                    {
-                        direction = Spline.Direction.Backward;
-                    }
-                    if(_followSpeed > 0f)
-                    {
-                        direction = Spline.Direction.Forward;
-                    }
                 }
             }
         }
 
-        public override Spline.Direction direction {
-            get { 
-                return base.direction; 
-            }
-            set { 
-                base.direction = value; 
-                if(_direction == Spline.Direction.Forward)
+        [System.Obsolete("startPosition is obsolete. use SetPercent and GetPercent instead")]
+        public double startPosition
+        {
+            get { return _startPosition; }
+            set
+            {
+                if (value != _startPosition)
                 {
-                    if(_followSpeed < 0f)
+                    _startPosition = DMath.Clamp01(value);
+                    if (!Application.isPlaying && !autoStartPosition)
                     {
-                        _followSpeed = -_followSpeed;
-                    }
-                } else
-                {
-                    if (_followSpeed > 0f)
-                    {
-                        _followSpeed = -_followSpeed;
+                        SetPercent(_startPosition);
                     }
                 }
             }
@@ -104,7 +86,7 @@ namespace Dreamteck.Splines
                 {
                     if (autoStartPosition)
                     {
-                        Project(GetTransform().position, ref evalResult);
+                        Project(GetTransform().position, evalResult);
                         SetPercent(evalResult.percent);
                     }
                     _follow = value;
@@ -129,6 +111,10 @@ namespace Dreamteck.Splines
         [SerializeField]
         [HideInInspector]
         private float _followDuration = 1f;
+        [SerializeField]
+        [HideInInspector]
+        [Range(0f, 1f)]
+        private double _startPosition = 0.0;
 
         [SerializeField]
         [HideInInspector]
@@ -158,33 +144,25 @@ namespace Dreamteck.Splines
 #if UNITY_EDITOR
             if (!Application.isPlaying) return;
 #endif
-            if (_follow)
-            {
-                Follow();
-            }
+            if (_follow) Follow();
         }
 
         protected override void PostBuild()
         {
             base.PostBuild();
-            Evaluate(_result.percent, ref _result);
+            Evaluate(_result.percent, _result);
             if (sampleCount > 0)
             {
                 if (_follow && !autoStartPosition) ApplyMotion();
             }
         }
 
-        private void Follow()
+        void Follow()
         {
             switch (followMode)
             {
                 case FollowMode.Uniform:
-                    double percent = result.percent;
-                    if (!_speedModifier.useClippedPercent)
-                    {
-                        UnclipPercent(ref percent);
-                    }
-                    float speed = _speedModifier.GetSpeed(Mathf.Abs(_followSpeed), percent);
+                    float speed = _followSpeed + _speedModifier.GetSpeed(result);
                     Move(Time.deltaTime * speed); break;
                 case FollowMode.Time:
                     if (_followDuration == 0.0) Move(0.0);
@@ -218,12 +196,12 @@ namespace Dreamteck.Splines
             {
                 if (sampleCount == 1)
                 {
-                    GetSampleRaw(0, ref _result);
+                    _result.CopyFrom(GetSampleRaw(0));
                     ApplyMotion();
                 }
                 return;
             }
-            Evaluate(_result.percent, ref _result);
+            Evaluate(_result.percent, _result);
             double startPercent = _result.percent;
             if (wrapMode == Wrap.Default && lastClippedPercent >= 1.0 && startPercent == 0.0) startPercent = 1.0;
             double p = startPercent + (_direction == Spline.Direction.Forward ? percent : -percent);
@@ -279,7 +257,7 @@ namespace Dreamteck.Splines
             }
             CheckTriggers(startPercent, p);
             CheckNodes(startPercent, p);
-            Evaluate(p, ref _result);
+            Evaluate(p, _result);
             ApplyMotion();
             if (callOnEndReached)
             {
@@ -312,17 +290,16 @@ namespace Dreamteck.Splines
             bool endReached = false, beginningReached = false;
             float moved = 0f;
             double startPercent = _result.percent;
-
-            double travelPercent = DoTravel(_result.percent, distance, out moved);
-            if (startPercent != travelPercent)
+            _result.percent = DoTravel(_result.percent, distance, out moved);
+            if (startPercent != _result.percent)
             {
-                CheckTriggers(startPercent, travelPercent);
-                CheckNodes(startPercent, travelPercent);
+                CheckTriggers(startPercent, _result.percent);
+                CheckNodes(startPercent, _result.percent);
             }
 
             if (direction == Spline.Direction.Forward)
             {
-                if (travelPercent >= 1.0)
+                if (_result.percent >= 1.0)
                 {
                     if (startPercent < 1.0)
                     {
@@ -331,21 +308,21 @@ namespace Dreamteck.Splines
                     switch (wrapMode)
                     {
                         case Wrap.Loop:
-                            travelPercent = DoTravel(0.0, distance - moved, out moved);
-                            CheckTriggers(0.0, travelPercent);
-                            CheckNodes(0.0, travelPercent);
+                            _result.percent = DoTravel(0.0, distance - moved, out moved);
+                            CheckTriggers(0.0, _result.percent);
+                            CheckNodes(0.0, _result.percent);
                             break;
                         case Wrap.PingPong:
                             _direction = Spline.Direction.Backward;
-                            travelPercent = DoTravel(1.0, distance - moved, out moved);
-                            CheckTriggers(1.0, travelPercent);
-                            CheckNodes(1.0, travelPercent);
+                            _result.percent = DoTravel(1.0, distance - moved, out moved);
+                            CheckTriggers(1.0, _result.percent);
+                            CheckNodes(1.0, _result.percent);
                             break;
                     }
                 }
             } else
             {
-                if (travelPercent <= 0.0)
+                if (_result.percent <= 0.0)
                 {
                     if (startPercent > 0.0)
                     {
@@ -354,21 +331,21 @@ namespace Dreamteck.Splines
                     switch (wrapMode)
                     {
                         case Wrap.Loop:
-                            travelPercent = DoTravel(1.0, distance - moved, out moved);
-                            CheckTriggers(1.0, travelPercent);
-                            CheckNodes(1.0, travelPercent);
+                            _result.percent = DoTravel(1.0, distance - moved, out moved);
+                            CheckTriggers(1.0, _result.percent);
+                            CheckNodes(1.0, _result.percent);
                             break;
                         case Wrap.PingPong:
                             _direction = Spline.Direction.Forward;
-                            travelPercent = DoTravel(0.0, distance - moved, out moved);
-                            CheckTriggers(0.0, travelPercent);
-                            CheckNodes(0.0, travelPercent);
+                            _result.percent = DoTravel(0.0, distance - moved, out moved);
+                            CheckTriggers(0.0, _result.percent);
+                            CheckNodes(0.0, _result.percent);
                             break;
                     }
                 }
             }
 
-            Evaluate(travelPercent, ref _result);
+            Evaluate(_result.percent, _result);
             ApplyMotion();
             if (endReached)
             {

@@ -54,7 +54,7 @@ namespace Dreamteck.Splines.Editor
             if (Event.current.type == EventType.MouseUp) GetRotation();
         }
 
-        protected override void OnDrawInspector()
+        public override void DrawInspector()
         {
             editSpace = (EditSpace)EditorGUILayout.EnumPopup("Edit Space", editSpace);
             surfaceMode = EditorGUILayout.Toggle("Move On Surface", surfaceMode);
@@ -74,7 +74,9 @@ namespace Dreamteck.Splines.Editor
         private Vector3 SurfaceMoveHandle(Vector3 inputPosition, float size = 0.2f)
         {
             Vector3 lastPosition = inputPosition;
-            inputPosition = SplineEditorHandles.FreeMoveHandle(inputPosition, HandleUtility.GetHandleSize(inputPosition) * size, Vector3.zero, Handles.CircleHandleCap);
+            inputPosition = Handles.FreeMoveHandle(inputPosition, 
+                Quaternion.LookRotation(SceneView.currentDrawingSceneView.camera.transform.position - inputPosition), 
+                HandleUtility.GetHandleSize(inputPosition) * size, Vector3.zero, Handles.CircleHandleCap);
             if (lastPosition != inputPosition)
             {
                 Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
@@ -88,7 +90,7 @@ namespace Dreamteck.Splines.Editor
             return inputPosition;
         }
 
-        protected override void OnDrawScene()
+        public override void DrawScene()
         {
             if (selectedPoints.Count == 0) return;
             Vector3 c = selectionCenter;
@@ -103,9 +105,10 @@ namespace Dreamteck.Splines.Editor
             }
             if (lastPos != c)
             {
-                RegisterChange();
+                RecordUndo("Move Points");
                 for (int i = 0; i < selectedPoints.Count; i++)
                 {
+                    if (isClosed && selectedPoints[i] == points.Length - 1) continue;
                     points[selectedPoints[i]].SetPosition(points[selectedPoints[i]].position + (c - lastPos));
                     if (snap) points[selectedPoints[i]].SetPosition(SnapPoint(points[selectedPoints[i]].position));
                 }
@@ -125,10 +128,7 @@ namespace Dreamteck.Splines.Editor
                 }
 
                 if (snap) newPos = SnapPoint(newPos);
-                if (newPos != lastPos)
-                {
-                    RegisterChange();
-                }
+                if (newPos != lastPos) RecordUndo("Move Tangents");
                 points[index].SetTangentPosition(newPos);
 
                 lastPos = points[index].tangent2;
@@ -141,10 +141,7 @@ namespace Dreamteck.Splines.Editor
                 }
                     
                 if (snap) newPos = SnapPoint(newPos);
-                if (newPos != lastPos)
-                {
-                    RegisterChange();
-                }
+                if (newPos != lastPos) RecordUndo("Move Tangents");
                 points[index].SetTangent2Position(newPos);
             }
         }

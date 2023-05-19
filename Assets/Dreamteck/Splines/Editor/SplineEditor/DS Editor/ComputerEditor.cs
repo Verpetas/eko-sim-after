@@ -7,66 +7,67 @@ namespace Dreamteck.Splines.Editor
 
     public class ComputerEditor : SplineEditorBase
     {
+        private SplineComputer spline = null;
+        private SplineComputer[] splines = new SplineComputer[0];
+        private SerializedObject serializedObject;
+        private bool pathToolsFoldout = false, interpolationFoldout = false;
         public bool drawComputer = true;
-        public bool drawPivot = true;
         public bool drawConnectedComputers = true;
-        private DreamteckSplinesEditor _pathEditor;
-        private int _operation = -1, _module = -1, _transformTool = 1;
-        private ComputerEditorModule[] _modules = new ComputerEditorModule[0];
-        private Dreamteck.Editor.Toolbar _utilityToolbar;
-        private Dreamteck.Editor.Toolbar _operationsToolbar;
-        private Dreamteck.Editor.Toolbar _transformToolbar;
-        private SplineComputer _spline = null;
-        private SplineComputer[] _splines = new SplineComputer[0];
-        private bool _pathToolsFoldout = false, _interpolationFoldout = false;
+        private DreamteckSplinesEditor pathEditor;
+        private int operation = -1, module = -1, transformTool = 1;
+        private ComputerEditorModule[] modules = new ComputerEditorModule[0];
+        private Dreamteck.Editor.Toolbar utilityToolbar;
+        private Dreamteck.Editor.Toolbar operationsToolbar;
+        private Dreamteck.Editor.Toolbar transformToolbar;
 
-        private SerializedProperty _splineProperty;
-        private SerializedProperty _sampleRate;
-        private SerializedProperty _type;
-        private SerializedProperty _knotParametrization;
-        private SerializedProperty _linearAverageDirection;
-        private SerializedProperty _space;
-        private SerializedProperty _sampleMode;
-        private SerializedProperty _optimizeAngleThreshold;
-        private SerializedProperty _updateMode;
-        private SerializedProperty _multithreaded;
-        private SerializedProperty _customNormalInterpolation;
-        private SerializedProperty _customValueInterpolation;
+        private SerializedProperty splineProperty;
+        private SerializedProperty sampleRate;
+        private SerializedProperty type;
+        private SerializedProperty linearAverageDirection;
+        private SerializedProperty space;
+        private SerializedProperty sampleMode;
+        private SerializedProperty optimizeAngleThreshold;
+        private SerializedProperty updateMode;
+        private SerializedProperty rebuildOnAwake;
+        private SerializedProperty multithreaded;
+        private SerializedProperty customNormalInterpolation;
+        private SerializedProperty customValueInterpolation;
 
 
-        public ComputerEditor(SplineComputer[] splines, SerializedObject serializedObject, DreamteckSplinesEditor pathEditor) : base(serializedObject)
+        public ComputerEditor(SplineComputer[] splines, SerializedObject serializedObject, DreamteckSplinesEditor pathEditor) : base()
         {
-            _spline = splines[0];
-            this._splines = splines;
-            this._pathEditor = pathEditor;
+            spline = splines[0];
+            this.splines = splines;
+            this.pathEditor = pathEditor;
+            this.serializedObject = serializedObject;
 
-            _splineProperty = serializedObject.FindProperty("_spline");
-            _sampleRate = serializedObject.FindProperty("_spline").FindPropertyRelative("sampleRate");
-            _type = serializedObject.FindProperty("_spline").FindPropertyRelative("type");
-            _linearAverageDirection = _splineProperty.FindPropertyRelative("linearAverageDirection");
-            _space = serializedObject.FindProperty("_space");
-            _sampleMode = serializedObject.FindProperty("_sampleMode");
-            _optimizeAngleThreshold = serializedObject.FindProperty("_optimizeAngleThreshold");
-            _updateMode = serializedObject.FindProperty("updateMode");
-            _multithreaded = serializedObject.FindProperty("multithreaded");
-            _customNormalInterpolation = _splineProperty.FindPropertyRelative("customNormalInterpolation");
-            _customValueInterpolation = _splineProperty.FindPropertyRelative("customValueInterpolation");
-            _knotParametrization = _splineProperty.FindPropertyRelative("_knotParametrization");
+            splineProperty = serializedObject.FindProperty("spline");
+            sampleRate = serializedObject.FindProperty("spline").FindPropertyRelative("sampleRate");
+            type = serializedObject.FindProperty("spline").FindPropertyRelative("type");
+            linearAverageDirection = splineProperty.FindPropertyRelative("linearAverageDirection");
+            space = serializedObject.FindProperty("_space");
+            sampleMode = serializedObject.FindProperty("_sampleMode");
+            optimizeAngleThreshold = serializedObject.FindProperty("_optimizeAngleThreshold");
+            updateMode = serializedObject.FindProperty("updateMode");
+            rebuildOnAwake = serializedObject.FindProperty("rebuildOnAwake");
+            multithreaded = serializedObject.FindProperty("multithreaded");
+            customNormalInterpolation = splineProperty.FindPropertyRelative("customNormalInterpolation");
+            customValueInterpolation = splineProperty.FindPropertyRelative("customValueInterpolation");
 
 
-            _modules = new ComputerEditorModule[2];
-            _modules[0] = new ComputerMergeModule(_spline);
-            _modules[1] = new ComputerSplitModule(_spline);
-            GUIContent[] utilityContents = new GUIContent[_modules.Length], utilityContentsSelected = new GUIContent[_modules.Length];
-            for (int i = 0; i < _modules.Length; i++)
+            modules = new ComputerEditorModule[2];
+            modules[0] = new ComputerMergeModule(spline);
+            modules[1] = new ComputerSplitModule(spline);
+            GUIContent[] utilityContents = new GUIContent[modules.Length], utilityContentsSelected = new GUIContent[modules.Length];
+            for (int i = 0; i < modules.Length; i++)
             {
-                utilityContents[i] = _modules[i].GetIconOff();
-                utilityContentsSelected[i] = _modules[i].GetIconOn();
-                _modules[i].undoHandler += OnRecordUndo;
-                _modules[i].repaintHandler += OnRepaint;
+                utilityContents[i] = modules[i].GetIconOff();
+                utilityContentsSelected[i] = modules[i].GetIconOn();
+                modules[i].undoHandler += OnRecordUndo;
+                modules[i].repaintHandler += OnRepaint;
             }
-            _utilityToolbar = new Dreamteck.Editor.Toolbar(utilityContents, utilityContentsSelected, 35f);
-            _utilityToolbar.newLine = false;
+            utilityToolbar = new Dreamteck.Editor.Toolbar(utilityContents, utilityContentsSelected, 35f);
+            utilityToolbar.newLine = false;
 
 
             int index = 0;
@@ -83,8 +84,8 @@ namespace Dreamteck.Splines.Editor
             transformContents[index] = EditorGUIUtility.IconContent("ScaleTool");
             transformContentsSelected[index] = EditorGUIUtility.IconContent("ScaleTool On");
 
-            _transformToolbar = new Dreamteck.Editor.Toolbar(transformContents, transformContentsSelected, 35f);
-            _transformToolbar.newLine = false;
+            transformToolbar = new Dreamteck.Editor.Toolbar(transformContents, transformContentsSelected, 35f);
+            transformToolbar.newLine = false;
 
             index = 0;
             GUIContent[] operationContents = new GUIContent[3], operationContentsSelected = new GUIContent[3];
@@ -93,8 +94,8 @@ namespace Dreamteck.Splines.Editor
                 operationContents[i] = new GUIContent("");
                 operationContentsSelected[i] = new GUIContent("");
             }
-            _operationsToolbar = new Dreamteck.Editor.Toolbar(operationContents, operationContentsSelected, 64f);
-            _operationsToolbar.newLine = false;
+            operationsToolbar = new Dreamteck.Editor.Toolbar(operationContents, operationContentsSelected, 64f);
+            operationsToolbar.newLine = false;
         }
 
         void OnRecordUndo(string title)
@@ -110,177 +111,138 @@ namespace Dreamteck.Splines.Editor
         protected override void Load()
         {
             base.Load();
-            _pathToolsFoldout = LoadBool("DreamteckSplinesEditor.pathToolsFoldout", false);
-            _interpolationFoldout = LoadBool("DreamteckSplinesEditor.interpolationFoldout", false);
-            _transformTool = LoadInt("DreamteckSplinesEditor.transformTool", 0);
+            pathToolsFoldout = LoadBool("DreamteckSplinesEditor.pathToolsFoldout", false);
+            interpolationFoldout = LoadBool("DreamteckSplinesEditor.interpolationFoldout", false);
+            transformTool = LoadInt("DreamteckSplinesEditor.transformTool", 0);
         }
 
         protected override void Save()
         {
             base.Save();
-            SaveBool("DreamteckSplinesEditor.pathToolsFoldout", _pathToolsFoldout);
-            SaveBool("DreamteckSplinesEditor.interpolationFoldout", _interpolationFoldout);
-            SaveInt("DreamteckSplinesEditor.transformTool", _transformTool);
+            SaveBool("DreamteckSplinesEditor.pathToolsFoldout", pathToolsFoldout);
+            SaveBool("DreamteckSplinesEditor.interpolationFoldout", interpolationFoldout);
+            SaveInt("DreamteckSplinesEditor.transformTool", transformTool);
         }
 
         public override void Destroy()
         {
             base.Destroy();
-            for (int i = 0; i < _modules.Length; i++) _modules[i].Deselect();
+            for (int i = 0; i < modules.Length; i++) modules[i].Deselect();
         }
 
         public override void DrawInspector()
         {
             base.DrawInspector();
-            if (_spline == null) return;
+            if (spline == null) return;
             SplineEditorGUI.SetHighlightColors(SplinePrefs.highlightColor, SplinePrefs.highlightContentColor);
             EditorGUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             EditorGUI.BeginChangeCheck();
-            _operationsToolbar.SetContent(0, new GUIContent(_spline.isClosed ? "Break" : "Close"));
-            _operationsToolbar.SetContent(1, new GUIContent("Reverse"));
-            _operationsToolbar.SetContent(2, new GUIContent(_spline.is2D ? "3D Mode" : "2D Mode"));
-            _operationsToolbar.Draw(ref _operation);
-            if (EditorGUI.EndChangeCheck())
-            {
-                PerformOperation();
-            }
+            operationsToolbar.SetContent(0, new GUIContent(spline.isClosed ? "Break" : "Close"));
+            operationsToolbar.SetContent(1, new GUIContent("Reverse"));
+            operationsToolbar.SetContent(2, new GUIContent(spline.is2D ? "3D Mode" : "2D Mode"));
+            operationsToolbar.Draw(ref operation);
+            if (EditorGUI.EndChangeCheck()) PerformOperation();
             EditorGUI.BeginChangeCheck();
-            if (_splines.Length == 1)
+            if (splines.Length == 1)
             {
-                int mod = _module;
-                _utilityToolbar.Draw(ref mod);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    ToggleModule(mod);
-                }
+                int mod = module;
+                utilityToolbar.Draw(ref mod);
+                if (EditorGUI.EndChangeCheck()) ToggleModule(mod);
             }
             GUILayout.FlexibleSpace();
             EditorGUILayout.EndHorizontal();
-            if (_module >= 0 && _module < _modules.Length)
-            {
-                _modules[_module].DrawInspector();
-            }
+            if (module >= 0 && module < modules.Length) modules[module].DrawInspector();
             EditorGUILayout.Space();
             DreamteckEditorGUI.DrawSeparator();
 
             EditorGUILayout.Space();
             
+            serializedObject.Update();
+
+
+
             EditorGUI.BeginChangeCheck();
-            Spline.Type lastType = (Spline.Type)_type.intValue;
-            EditorGUILayout.PropertyField(_type);
-            if(lastType == Spline.Type.CatmullRom && _type.intValue == (int)Spline.Type.Bezier)
+            Spline.Type lastType = (Spline.Type)type.intValue;
+            EditorGUILayout.PropertyField(type);
+            if(lastType == Spline.Type.CatmullRom && type.intValue == (int)Spline.Type.Bezier)
             {
                 if(EditorUtility.DisplayDialog("Hermite to Bezier", "Would you like to retain the Catmull Rom shape in Bezier mode?", "Yes", "No"))
                 {
-                    for (int i = 0; i < _splines.Length; i++)
-                    {
-                        Undo.RecordObject(_splines[i], "CatToBezierTangents");
-                        _splines[i].CatToBezierTangents();
-                        EditorUtility.SetDirty(_splines[i]);
-                    }
-                    _pathEditor.SetPointsArray(_spline.GetPoints());
-                    _pathEditor.ApplyModifiedProperties();
+                    for (int i = 0; i < splines.Length; i++) splines[i].CatToBezierTangents();
+                    
+                    serializedObject.Update();
+                    pathEditor.Refresh();
                 }
             }
-
-            if(_spline.type == Spline.Type.CatmullRom)
-            {
-                int type = Mathf.RoundToInt(_knotParametrization.floatValue * 2);
-                string catmullTypeText = "Parametrization: ";
-                switch (type)
-                {
-                    case 0: catmullTypeText += "Uniform"; break;
-                    case 1: catmullTypeText += "Centripetal"; break;
-                    case 2: catmullTypeText += "Chordal"; break;
-                }
-                EditorGUILayout.PropertyField(_knotParametrization, new GUIContent(catmullTypeText));
-            }
-
-            if (_spline.type == Spline.Type.Linear)
-            {
-                EditorGUILayout.PropertyField(_linearAverageDirection);
-            }
-
-            int lastSpace = _space.intValue;
-            EditorGUILayout.Space();
-            EditorGUILayout.PropertyField(_space, new GUIContent("Space"));
-            if((SplineComputer.Space)_space.enumValueIndex == SplineComputer.Space.Local)
-            {
-                EditTransformToolbar();
-                if (_splines.Length == 1)
-                {
-                    EditorGUILayout.Space();
-                }
-            }
-            EditorGUILayout.PropertyField(_sampleMode, new GUIContent("Sample Mode"));
-            if (_sampleMode.intValue == (int)SplineComputer.SampleMode.Optimized) EditorGUILayout.PropertyField(_optimizeAngleThreshold);
-            EditorGUILayout.PropertyField(_updateMode);
-            if (_updateMode.intValue == (int)SplineComputer.UpdateMode.None && Application.isPlaying)
+            if(spline.type == Spline.Type.Linear) EditorGUILayout.PropertyField(linearAverageDirection);
+            int lastSpace = space.intValue;
+            EditorGUILayout.PropertyField(space, new GUIContent("Space"));
+            EditorGUILayout.PropertyField(sampleMode, new GUIContent("Sample Mode"));
+            if (sampleMode.intValue == (int)SplineComputer.SampleMode.Optimized) EditorGUILayout.PropertyField(optimizeAngleThreshold);
+            EditorGUILayout.PropertyField(updateMode);
+            if (updateMode.intValue == (int)SplineComputer.UpdateMode.None && Application.isPlaying)
             {
                 if (GUILayout.Button("Rebuild"))
                 {
-                    for (int i = 0; i < _splines.Length; i++) _splines[i].RebuildImmediate(true, true);
+                    for (int i = 0; i < splines.Length; i++) splines[i].RebuildImmediate(true, true);
                 }
             }
-            if (_spline.type != Spline.Type.Linear) EditorGUILayout.PropertyField(_sampleRate, new GUIContent("Sample Rate"));
-            EditorGUILayout.PropertyField(_multithreaded);
+            if (spline.type != Spline.Type.Linear) EditorGUILayout.PropertyField(sampleRate, new GUIContent("Sample Rate"));
+            EditorGUILayout.PropertyField(rebuildOnAwake);
+            EditorGUILayout.PropertyField(multithreaded);
 
             EditorGUI.indentLevel++;
             bool curveUpdate = false;
-            _interpolationFoldout = EditorGUILayout.Foldout(_interpolationFoldout, "Point Value Interpolation");
-            if (_interpolationFoldout)
+            interpolationFoldout = EditorGUILayout.Foldout(interpolationFoldout, "Point Value Interpolation");
+            if (interpolationFoldout)
             {
-                if (_customValueInterpolation.animationCurveValue == null || _customValueInterpolation.animationCurveValue.keys.Length == 0)
+                if (customValueInterpolation.animationCurveValue == null || customValueInterpolation.animationCurveValue.keys.Length == 0)
                 {
                     if (GUILayout.Button("Size & Color Interpolation"))
                     {
                         AnimationCurve curve = new AnimationCurve();
                         curve.AddKey(new Keyframe(0, 0, 0, 0));
                         curve.AddKey(new Keyframe(1, 1, 0, 0));
-                        for (int i = 0; i < _splines.Length; i++) _splines[i].customValueInterpolation = curve;
+                        for (int i = 0; i < splines.Length; i++) splines[i].customValueInterpolation = curve;
                         serializedObject.Update();
-                        _pathEditor.GetPointsFromSpline();
                         curveUpdate = true;
                     }
                 }
                 else
                 {
                     EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.PropertyField(_customValueInterpolation, new GUIContent("Size & Color Interpolation"));
+                    EditorGUILayout.PropertyField(customValueInterpolation, new GUIContent("Size & Color Interpolation"));
                     if (GUILayout.Button("x", GUILayout.MaxWidth(25)))
                     {
-                        _customValueInterpolation.animationCurveValue = null;
-                        for (int i = 0; i < _splines.Length; i++) _splines[i].customValueInterpolation = null;
+                        customValueInterpolation.animationCurveValue = null;
+                        for (int i = 0; i < splines.Length; i++) splines[i].customValueInterpolation = null;
                         serializedObject.Update();
-                        _pathEditor.GetPointsFromSpline();
                         curveUpdate = true;
                     }
                     EditorGUILayout.EndHorizontal();
                 }
-                if (_customNormalInterpolation.animationCurveValue == null || _customNormalInterpolation.animationCurveValue.keys.Length == 0)
+                if (customNormalInterpolation.animationCurveValue == null || customNormalInterpolation.animationCurveValue.keys.Length == 0)
                 {
                     if (GUILayout.Button("Normal Interpolation"))
                     {
                         AnimationCurve curve = new AnimationCurve();
                         curve.AddKey(new Keyframe(0, 0));
                         curve.AddKey(new Keyframe(1, 1));
-                        for (int i = 0; i < _splines.Length; i++) _splines[i].customNormalInterpolation = curve;
+                        for (int i = 0; i < splines.Length; i++) splines[i].customNormalInterpolation = curve;
                         serializedObject.Update();
-                        _pathEditor.GetPointsFromSpline();
                         curveUpdate = true;
                     }
                 }
                 else
                 {
                     EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.PropertyField(_customNormalInterpolation, new GUIContent("Normal Interpolation"));
+                    EditorGUILayout.PropertyField(customNormalInterpolation, new GUIContent("Normal Interpolation"));
                     if (GUILayout.Button("x", GUILayout.MaxWidth(25)))
                     {
-                        _customNormalInterpolation.animationCurveValue = null;
-                        for (int i = 0; i < _splines.Length; i++) _splines[i].customNormalInterpolation = null;
+                        customNormalInterpolation.animationCurveValue = null;
+                        for (int i = 0; i < splines.Length; i++) splines[i].customNormalInterpolation = null;
                         serializedObject.Update();
-                        _pathEditor.GetPointsFromSpline();
                         curveUpdate = true;
                     }
                     EditorGUILayout.EndHorizontal();
@@ -291,155 +253,96 @@ namespace Dreamteck.Splines.Editor
 
             if (EditorGUI.EndChangeCheck() || curveUpdate)
             {
-                if (_sampleRate.intValue < 2)
+                if (sampleRate.intValue < 2) sampleRate.intValue = 2;
+                if (lastSpace != space.intValue)
                 {
-                    _sampleRate.intValue = 2;
+                    for (int i = 0; i < splines.Length; i++) splines[i].space = (SplineComputer.Space)space.intValue;
+                    serializedObject.Update();
+                    if (splines.Length == 1) pathEditor.Refresh();
                 }
 
-                bool forceUpdateAll = false;
-                if (lastSpace != _space.intValue)
+                serializedObject.ApplyModifiedProperties();
+                for (int i = 0; i < splines.Length; i++)
                 {
-                    forceUpdateAll = true;
-                }
-
-                _pathEditor.ApplyModifiedProperties(true);
-
-                for (int i = 1; i < _splines.Length; i++)
-                {
-                    _splines[i].RebuildImmediate(true, forceUpdateAll);
+                    splines[i].Rebuild(true);
                 }
             }
 
-            if (_pathEditor.currentModule != null)
+
+            if (pathEditor.currentModule != null)
             {
-                _transformTool = 0;
+                transformTool = 0;
             }
-        }
-
-        private void EditTransformToolbar()
-        {
-            if(_splines.Length > 1)
+            if (splines.Length == 1)
+            {
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.Label("Edit Transform");
+                GUILayout.FlexibleSpace();
+                int lastTool = transformTool;
+                transformToolbar.Draw(ref transformTool);
+                if (lastTool != transformTool && transformTool > 0)
+                {
+                    pathEditor.UntoggleCurrentModule();
+                }
+                EditorGUILayout.EndHorizontal();
+            } else
             {
                 GUILayout.Label("Edit Transform unavailable with multiple splines");
-                return;
-            }
-            EditorGUILayout.BeginHorizontal();
-            GUILayout.Label("Edit Transform - Only");
-            GUILayout.FlexibleSpace();
-            int lastTool = _transformTool;
-            _transformToolbar.Draw(ref _transformTool);
-            if (lastTool != _transformTool && _transformTool > 0)
-            {
-                _pathEditor.UntoggleCurrentModule();
-                Tools.current = Tool.None;
-            }
-            EditorGUILayout.EndHorizontal();
-
-            switch (_transformTool)
-            {
-                case 1:
-                    Vector3 position = _spline.transform.position;
-
-                    position = EditorGUILayout.Vector3Field("Position", position);
-                    if (position != _spline.transform.position)
-                    {
-                        Undo.RecordObject(_spline.transform, "Move spline computer");
-                        _spline.transform.position = position;
-                        _pathEditor.ApplyModifiedProperties(true);
-                    }
-                    break;
-                case 2:
-                    Quaternion rotation = _spline.transform.rotation;
-                    rotation = Quaternion.Euler(EditorGUILayout.Vector3Field("Rotation", rotation.eulerAngles));
-                    if (rotation != _spline.transform.rotation)
-                    {
-                        Undo.RecordObject(_spline.transform, "Rotate spline computer");
-                        _spline.transform.rotation = rotation;
-                        _pathEditor.ApplyModifiedProperties(true);
-                    }
-                    break;
-                case 3:
-                    Vector3 scale = _spline.transform.localScale;
-                    scale = EditorGUILayout.Vector3Field("Scale", scale);
-                    if (scale != _spline.transform.localScale)
-                    {
-                        Undo.RecordObject(_spline.transform, "Scale spline computer");
-                        _spline.transform.localScale = scale;
-                        _pathEditor.ApplyModifiedProperties(true);
-                    }
-                    break;
             }
         }
 
         void PerformOperation()
         {
-            switch (_operation)
+            switch (operation)
             {
                 case 0:
-                    if (_spline.isClosed)
-                    {
-                        BreakSpline();
-                    }
-                    else
-                    {
-                        CloseSpline();
-                    }
-                    _operation = -1;
+                    if (spline.isClosed) BreakSpline();
+                    else CloseSpline();
+                    operation = -1;
                     break;
                 case 1:
                     ReversePointOrder();
-                    _operation = -1;
+                    operation = -1;
                     break;
                 case 2:
-                    _spline.is2D = !_spline.is2D;
-                    _operation = -1;
+                    spline.is2D = !spline.is2D;
+                    operation = -1;
                     break;
             }
         }
 
         void ToggleModule(int index)
         {
-            if (_module >= 0 && _module < _modules.Length) _modules[_module].Deselect();
-            if (_module == index) index = -1;
-            _module = index;
-            if (_module >= 0 && _module < _modules.Length) _modules[_module].Select();
+            if (module >= 0 && module < modules.Length) modules[module].Deselect();
+            if (module == index) index = -1;
+            module = index;
+            if (module >= 0 && module < modules.Length) modules[module].Select();
         }
 
         public void BreakSpline()
         {
             RecordUndo("Break path");
-            if (_splines.Length == 1 && _pathEditor.selectedPoints.Count == 1)
-            {
-                _spline.Break(_pathEditor.selectedPoints[0]);
-                EditorUtility.SetDirty(_spline);
-                _pathEditor.selectedPoints.Clear();
-                _pathEditor.selectedPoints.Add(0);
-
-            }
+            if (splines.Length == 1 && pathEditor.selectedPoints.Count == 1) spline.Break(pathEditor.selectedPoints[0]);
             else
             {
-                for (int i = 0; i < _splines.Length; i++)
-                {
-                    _splines[i].Break();
-                    EditorUtility.SetDirty(_splines[i]);
-                }
+                for (int i = 0; i < splines.Length; i++) splines[i].Break();
             }
         }
 
         public void CloseSpline()
         {
             RecordUndo("Close path");
-            for (int i = 0; i < _splines.Length; i++)
+            for (int i = 0; i < splines.Length; i++)
             {
-                _splines[i].Close();
+                splines[i].Close();
             }
         }
 
         void ReversePointOrder()
         {
-            for (int i = 0; i < _splines.Length; i++)
+            for (int i = 0; i < splines.Length; i++)
             {
-                ReversePointOrder(_splines[i]);
+                ReversePointOrder(splines[i]);
             }
         }
 
@@ -471,31 +374,19 @@ namespace Dreamteck.Splines.Editor
         public override void DrawScene(SceneView current)
         {
             base.DrawScene(current);
-            for (int i = 0; i < _splines.Length; i++)
+            if (drawComputer)
             {
-                if (drawComputer)
+                for (int i = 0; i < splines.Length; i++)
                 {
-                    DSSplineDrawer.DrawSplineComputer(_splines[i]);
+                    DSSplineDrawer.DrawSplineComputer(splines[i]);
                 }
 
-                if (drawPivot)
-                {
-                    var trs = _splines[i].transform;
-                    float size = HandleUtility.GetHandleSize(trs.position);
-                    Handles.color = Color.red;
-                    Handles.DrawLine(trs.position, trs.position + trs.right * size * 0.5f);
-                    Handles.color = Color.green;
-                    Handles.DrawLine(trs.position, trs.position + trs.up * size * 0.5f);
-                    Handles.color = Color.blue;
-                    Handles.DrawLine(trs.position, trs.position + trs.forward * size * 0.5f);
-                }
             }
-
             if (drawConnectedComputers)
             {
-                for (int i = 0; i < _splines.Length; i++)
+                for (int i = 0; i < splines.Length; i++)
                 {
-                    List<SplineComputer> computers = _splines[i].GetConnectedComputers();
+                    List<SplineComputer> computers = splines[i].GetConnectedComputers();
                     for (int j = 1; j < computers.Count; j++)
                     {
                         DSSplineDrawer.DrawSplineComputer(computers[j], 0.0, 1.0, 0.5f);
@@ -504,56 +395,76 @@ namespace Dreamteck.Splines.Editor
             }
 
 
-            if (_pathEditor.currentModule == null)
+
+            if (pathEditor.currentModule == null)
             {
-                if(_splines.Length > 1 || Tools.current != Tool.None)
+                if(splines.Length > 1)
                 {
-                    _transformTool = 0;
+                    transformTool = 0;
                 }
-                switch (_transformTool)
+                switch (transformTool)
                 {
                     case 1:
-                        Vector3 position = _spline.transform.position;
-                        position = Handles.PositionHandle(position, _spline.transform.rotation);
-                        if (position != _spline.transform.position)
+                        for (int i = 0; i < splines.Length; i++)
                         {
-                            Undo.RecordObject(_spline.transform, "Move spline computer");
-                            _spline.transform.position = position;
-                            _pathEditor.ApplyModifiedProperties(true);
+                            Vector3 position = splines[i].transform.position;
+                            position = Handles.PositionHandle(position, splines[i].transform.rotation);
+                            if (position != splines[i].transform.position)
+                            {
+                                RecordUndo("Move spline computer");
+                                Undo.RecordObject(splines[i].transform, "Move spline computer");
+                                splines[i].transform.position = position;
+                                splines[i].SetPoints(pathEditor.points);
+                                pathEditor.Refresh();
+                            }
                         }
                         break;
                     case 2:
-                        Quaternion rotation = _spline.transform.rotation;
-                        rotation = Handles.RotationHandle(rotation, _spline.transform.position);
-                        if (rotation != _spline.transform.rotation)
+                        for (int i = 0; i < splines.Length; i++)
                         {
-                            Undo.RecordObject(_spline.transform, "Rotate spline computer");
-                            _spline.transform.rotation = rotation;
-                            _pathEditor.ApplyModifiedProperties(true);
+                            Quaternion rotation = splines[i].transform.rotation;
+                            rotation = Handles.RotationHandle(rotation, splines[i].transform.position);
+                            if (rotation != splines[i].transform.rotation)
+                            {
+                                RecordUndo("Rotate spline computer");
+                                Undo.RecordObject(splines[i].transform, "Rotate spline computer");
+                                splines[i].transform.rotation = rotation;
+                                splines[i].SetPoints(pathEditor.points);
+                                pathEditor.Refresh();
+                            }
                         }
                         break;
                     case 3:
-                        Vector3 scale = _spline.transform.localScale;
-                        scale = Handles.ScaleHandle(scale, _spline.transform.position, _spline.transform.rotation,
-                            HandleUtility.GetHandleSize(_spline.transform.position));
-                        if (scale != _spline.transform.localScale)
+                        for (int i = 0; i < splines.Length; i++)
                         {
-                            Undo.RecordObject(_spline.transform, "Scale spline computer");
-                            _spline.transform.localScale = scale;
-                            _pathEditor.ApplyModifiedProperties(true);
+                            Vector3 scale = splines[i].transform.localScale;
+                            scale = Handles.ScaleHandle(scale, splines[i].transform.position, splines[i].transform.rotation,
+                                HandleUtility.GetHandleSize(splines[i].transform.position));
+                            if (scale != splines[i].transform.localScale)
+                            {
+                                RecordUndo("Scale spline computer");
+                                Undo.RecordObject(splines[i].transform, "Scale spline computer");
+                                splines[i].transform.localScale = scale;
+                                splines[i].SetPoints(pathEditor.points);
+                                pathEditor.Refresh();
+                            }
                         }
                         break;
                 }
-                if (_transformTool > 0)
+                if (transformTool > 0)
                 {
-                    Vector2 screenPosition = HandleUtility.WorldToGUIPoint(_spline.transform.position);
-                    screenPosition.y += 20f;
-                    Handles.BeginGUI();
-                    DreamteckEditorGUI.Label(new Rect(screenPosition.x - 120 + _spline.name.Length * 4, screenPosition.y, 120, 25), _spline.name);
-                    Handles.EndGUI();
+                    for (int i = 0; i < splines.Length; i++)
+                    {
+                        Vector2 screenPosition = HandleUtility.WorldToGUIPoint(splines[i].transform.position);
+                        screenPosition.y += 20f;
+                        Handles.BeginGUI();
+                        DreamteckEditorGUI.Label(new Rect(screenPosition.x - 120 + splines[i].name.Length * 4, screenPosition.y, 120, 25), splines[i].name);
+                        Handles.EndGUI();
+                    }
+
                 }
             }
-            if (_module >= 0 && _module < _modules.Length) _modules[_module].DrawScene();
+            if (module >= 0 && module < modules.Length) modules[module].DrawScene();
         }
     }
 }

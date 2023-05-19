@@ -122,12 +122,7 @@ namespace Dreamteck.Splines
             base.Draw(windowRect);
 
             EditorGUILayout.Space();
-            EditorGUI.BeginChangeCheck();
             terrain = (Terrain)EditorGUILayout.ObjectField("Terrain", terrain, typeof(Terrain), true);
-            if (EditorGUI.EndChangeCheck())
-            {
-                heights = null;
-            }
 
             if (splines.Count == 0) EditorGUILayout.HelpBox("No spline selected! Select an object with a SplineComputer component.", MessageType.Warning);
             if (terrain == null) EditorGUILayout.HelpBox("No terrain selected! You need to select a terrain.", MessageType.Warning);
@@ -366,6 +361,13 @@ namespace Dreamteck.Splines
             if (heights == null) GetBase();
             SplineSample[] results = new SplineSample[computer.iterations];
             computer.Evaluate(ref results, clipFrom, clipTo);
+            /*
+            for(int i = 0; i < results.Length; i++) 
+            {
+                float percent = (float)i/(results.Length-1);
+                results[i] = computer.Evaluate(percent);
+            }
+            */
             Draw(results, ref drawLayer, ref alphaLayer);          
         }
 

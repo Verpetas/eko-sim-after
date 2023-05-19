@@ -144,7 +144,7 @@ namespace Dreamteck.Splines.Editor
                             else
                             {
                                 selectedChannel = i;
-                                scaleModifierEditor = new MeshScaleModifierEditor(user, this, i);
+                                scaleModifierEditor = new MeshScaleModifierEditor(user, this, user.GetChannel(i).scaleModifier);
                                 scaleModifierEditor.alwaysOpen = true;
                             }
                         }

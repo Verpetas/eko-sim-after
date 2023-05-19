@@ -14,7 +14,7 @@
             public Color color = Color.white;
             public BlendMode blendMode = BlendMode.Lerp;
 
-            public ColorKey(double f, double t) : base(f, t)
+            public ColorKey(double f, double t, ColorModifier modifier) : base(f, t, modifier)
             {
             }
 
@@ -30,40 +30,39 @@
                 }
             }
         }
-        public ColorKey[] keys = new ColorKey[0];
+        public List<ColorKey> keys = new List<ColorKey>();
 
         public ColorModifier()
         {
-            keys = new ColorKey[0];
+            keys = new List<ColorKey>();
         }
 
         public override List<Key> GetKeys()
         {
-            return new List<Key>(keys);
+            List<Key> output = new List<Key>();
+            for (int i = 0; i < keys.Count; i++) output.Add(keys[i]);
+            return output;
         }
 
         public override void SetKeys(List<Key> input)
         {
-            keys = new ColorKey[input.Count];
-            for (int i = 0; i < input.Count; i++)
-            {
-                keys[i] = (ColorKey)input[i];
-            }
+            keys = new List<ColorKey>();
+            for (int i = 0; i < input.Count; i++) keys.Add((ColorKey)input[i]);
             base.SetKeys(input);
         }
 
         public void AddKey(double f, double t)
         {
-            ArrayUtility.Add(ref keys, new ColorKey(f, t));
+            keys.Add(new ColorKey(f, t, this));
         }
 
-        public override void Apply(ref SplineSample result)
+        public override void Apply(SplineSample result)
         {
-            if (keys.Length == 0) return;
-            base.Apply(ref result);
-            for (int i = 0; i < keys.Length; i++)
+            if (keys.Count == 0) return;
+            base.Apply(result);
+            for (int i = 0; i < keys.Count; i++)
             {
-                result.color = keys[i].Blend(result.color, keys[i].Evaluate(result.percent) * blend);
+                result.color = keys[i].Blend(result.color, keys[i].Evaluate(result.percent));
             }
         }
     }

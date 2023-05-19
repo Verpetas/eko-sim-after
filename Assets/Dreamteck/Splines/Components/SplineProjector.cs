@@ -178,11 +178,11 @@ namespace Dreamteck.Splines
             {
                 if (_mode == Mode.Accurate)
                 {
-                    spline.Project(_projectTarget.position, ref _result, clipFrom, clipTo, SplineComputer.EvaluateMode.Calculate, subdivide);
+                    spline.Project(_result, _projectTarget.position, clipFrom, clipTo, SplineComputer.EvaluateMode.Calculate, subdivide);
                 } 
                 else
                 {
-                    spline.Project(_projectTarget.position, ref _result, clipFrom, clipTo);
+                    spline.Project(_result, _projectTarget.position, clipFrom, clipTo);
                 }
                 _result.percent = ClipPercent(_result.percent);
             }
@@ -193,12 +193,12 @@ namespace Dreamteck.Splines
         {
             if (_mode == Mode.Accurate && spline != null)
             {
-                spline.Project(_projectTarget.position, ref _result, clipFrom, clipTo, SplineComputer.EvaluateMode.Calculate, subdivide);
+                spline.Project(_result, _projectTarget.position, clipFrom, clipTo, SplineComputer.EvaluateMode.Calculate, subdivide);
                 _result.percent = ClipPercent(_result.percent);
             }
             else
             {
-                Project(_projectTarget.position, ref _result);
+                Project(_projectTarget.position, _result);
             }
         }
 

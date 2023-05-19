@@ -21,14 +21,11 @@ namespace Dreamteck.Splines.Editor
             get { return _gizmosEnabled; }
         }
 
-        private bool _gizmosEnabled = true;
+        private bool _gizmosEnabled = true; 
 
-        protected readonly SerializedObject serializedObject;
-
-        public SplineEditorBase(SerializedObject serializedObject)
+        public SplineEditorBase()
         {
             Load();
-            this.serializedObject = serializedObject;
             eventModule = new EditorGUIEvents();
         }
 

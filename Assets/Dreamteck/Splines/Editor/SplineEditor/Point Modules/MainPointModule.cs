@@ -29,15 +29,16 @@ namespace Dreamteck.Splines.Editor
 
         }
 
-        protected override void OnDrawInspector()
+        public override void DrawInspector()
         {
-            string[] options = new string[points.Length + 4];
+            int pointCount = isClosed ? points.Length - 1 : points.Length;
+            string[] options = new string[pointCount + 4];
             options[0] = "- - -";
             if (selectedPoints.Count > 1) options[0] = "- Multiple -";
             options[1] = "All";
             options[2] = "None";
             options[3] = "Inverse";
-            for (int i = 0; i < points.Length; i++)
+            for (int i = 0; i < pointCount; i++)
             {
                 options[i + 4] = "Point " + (i + 1);
                 if (splineType == Spline.Type.Bezier)
@@ -76,7 +77,7 @@ namespace Dreamteck.Splines.Editor
             }
         }
 
-        protected override void OnDrawScene()
+        public override void DrawScene()
         {
             if (eventModule.v) return;
             Transform camTransform = SceneView.currentDrawingSceneView.camera.transform;
@@ -125,31 +126,23 @@ namespace Dreamteck.Splines.Editor
 
             for (int i = 0; i < points.Length; i++)
             {
+                if (isClosed && i == points.Length - 1) break;
                 bool isSelected = selectedPoints.Contains(i);
                 Vector3 lastPos = points[i].position;
                 Handles.color = Color.clear;
                 if (showPointNumbers && camTransform.InverseTransformPoint(points[i].position).z > 0f)
                 {
-                    if(Event.current.type == EventType.Repaint)
-                    {
-                        Handles.Label(points[i].position + Camera.current.transform.up * HandleUtility.GetHandleSize(points[i].position) * 0.3f, (i + 1).ToString());
-                    }
+                    Handles.Label(points[i].position + Camera.current.transform.up * HandleUtility.GetHandleSize(points[i].position) * 0.3f, (i + 1).ToString());
                 }
                 if (!eventModule.alt)
                 {
-                    if (excludeSelected && isSelected)
-                    {
-
-                        SplineEditorHandles.FreeMoveRectangle(points[i].position, HandleUtility.GetHandleSize(points[i].position) * 0.1f);
-                    }
-                    else
-                    {
-                        points[i].SetPosition(SplineEditorHandles.FreeMoveRectangle(points[i].position, HandleUtility.GetHandleSize(points[i].position) * 0.1f));
-                    }
+                    if (excludeSelected && isSelected) SplineEditorHandles.FreeMoveRectangle(points[i].position, HandleUtility.GetHandleSize(points[i].position) * 0.1f);
+                    else points[i].SetPosition(SplineEditorHandles.FreeMoveRectangle(points[i].position, HandleUtility.GetHandleSize(points[i].position) * 0.1f));
                 }
-
+                
                 if (lastPos != points[i].position)
                 {
+                    RecordUndo("Move Points");
                     pointsMoved = true;
                     if (isSelected)
                     {
@@ -159,11 +152,8 @@ namespace Dreamteck.Splines.Editor
                             points[selectedPoints[n]].SetPosition(points[selectedPoints[n]].position + (points[i].position - lastPos));
                         }
                     }
-                    else
-                    {
-                        SelectPoint(i);
-                    }
-                    RegisterChange();
+                    else SelectPoint(i);
+                    lastPos = points[i].position;
                 }
                 
 
@@ -189,11 +179,9 @@ namespace Dreamteck.Splines.Editor
                      if (isSelected)
                     {
                         Handles.color = highlightColor;
-                        if(Event.current.type == EventType.Repaint)
                         Handles.DrawWireDisc(points[i].position, -SceneView.currentDrawingSceneView.camera.transform.forward, HandleUtility.GetHandleSize(points[i].position) * 0.14f);
                     } else Handles.color = color;
-                    if (Event.current.type == EventType.Repaint)
-                        Handles.DrawSolidDisc(points[i].position, -SceneView.currentDrawingSceneView.camera.transform.forward, HandleUtility.GetHandleSize(points[i].position) * 0.09f);
+                    Handles.DrawSolidDisc(points[i].position, -SceneView.currentDrawingSceneView.camera.transform.forward, HandleUtility.GetHandleSize(points[i].position) * 0.09f);
                     Handles.color = Color.white;
                 }
             }
@@ -205,32 +193,28 @@ namespace Dreamteck.Splines.Editor
                 Handles.color = color;
                 for (int i = 0; i < selectedPoints.Count; i++)
                 {
-                    if (Event.current.type == EventType.Repaint)
-                        Handles.DrawDottedLine(points[selectedPoints[i]].position, points[selectedPoints[i]].tangent, 4f);
-                    if (Event.current.type == EventType.Repaint)
-                        Handles.DrawDottedLine(points[selectedPoints[i]].position, points[selectedPoints[i]].tangent2, 4f);
+                    Handles.DrawDottedLine(points[selectedPoints[i]].position, points[selectedPoints[i]].tangent, 4f);
+                    Handles.DrawDottedLine(points[selectedPoints[i]].position, points[selectedPoints[i]].tangent2, 4f);
                     Vector3 lastPos = points[selectedPoints[i]].tangent;
                     Vector3 newPos = SplineEditorHandles.FreeMoveCircle(points[selectedPoints[i]].tangent, HandleUtility.GetHandleSize(points[selectedPoints[i]].tangent) * 0.1f);
                     if (lastPos != newPos)
                     {
+                        RecordUndo("Move Tangent");
                         points[selectedPoints[i]].SetTangentPosition(newPos);
-                        RegisterChange();
                     }
                     lastPos = points[selectedPoints[i]].tangent2;
                     newPos = SplineEditorHandles.FreeMoveCircle(points[selectedPoints[i]].tangent2, HandleUtility.GetHandleSize(points[selectedPoints[i]].tangent2) * 0.1f);
                     if (lastPos != newPos)
                     {
+                        RecordUndo("Move Tangent");
                         points[selectedPoints[i]].SetTangent2Position(newPos);
-                        RegisterChange();
                     }
                 }
             }
-
             if (isDragging)
             {
                 if (eventModule.alt || !SceneView.currentDrawingSceneView.camera.pixelRect.Contains(Event.current.mousePosition) || !eventModule.mouseLeft) FinishDrag();
             }
-
             if (eventModule.mouseLeftUp)
             {
                 pointsMoved = false;

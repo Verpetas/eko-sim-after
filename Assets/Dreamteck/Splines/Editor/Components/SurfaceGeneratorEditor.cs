@@ -44,14 +44,10 @@ namespace Dreamteck.Splines.Editor
                         ((SplineComputer)lastExtrudeSpline).Unsubscribe(users[i]);
                     }
                 }
-
                 SplineComputer spline = (SplineComputer)extrudeSpline.objectReferenceValue;
-                if (spline != null)
+                for (int i = 0; i < users.Length; i++)
                 {
-                    for (int i = 0; i < users.Length; i++)
-                    {
-                        spline.Subscribe(users[i]);
-                    }
+                    spline.Subscribe(users[i]);
                 }
             }
 
@@ -81,12 +77,9 @@ namespace Dreamteck.Splines.Editor
                 EditorGUI.BeginChangeCheck();
                 SerializedProperty sideUvOffset = serializedObject.FindProperty("_sideUvOffset");
                 SerializedProperty sideUvScale = serializedObject.FindProperty("_sideUvScale");
-                SerializedProperty sideUVRotation = serializedObject.FindProperty("_sideUvRotation");
                 SerializedProperty uniformUvs = serializedObject.FindProperty("_uniformUvs");
 
-
                 EditorGUILayout.PropertyField(sideUvOffset, new GUIContent("Side UV Offset"));
-                EditorGUILayout.PropertyField(sideUVRotation, new GUIContent("Side UV Rotation"));
                 EditorGUILayout.PropertyField(sideUvScale, new GUIContent("Side UV Scale"));
                 EditorGUILayout.PropertyField(uniformUvs, new GUIContent("Unform UVs"));
                 if (EditorGUI.EndChangeCheck())

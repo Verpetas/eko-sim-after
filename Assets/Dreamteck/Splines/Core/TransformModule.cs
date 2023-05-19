@@ -102,11 +102,13 @@ namespace Dreamteck.Splines
         {
             get
             {
+                if (_splineResult == null) _splineResult = new SplineSample();
                 return _splineResult;
             }
             set
             {
-                _splineResult = value;
+                if (_splineResult == null) _splineResult = new SplineSample(value);
+                else _splineResult.CopyFrom(value);
             }
         }
         private SplineSample _splineResult;
@@ -122,15 +124,12 @@ namespace Dreamteck.Splines
         {
             get
             {
-                if (_2dMode)
-                {
-                    return applyPosition2D;
-                }
+                if (_2dMode) return applyPosition2D;
                 return applyPositionX || applyPositionY || applyPositionZ;
             }
             set
             {
-                applyPositionX = applyPositionY = applyPositionZ = applyPosition2D = value;
+                applyPositionX = applyPositionY = applyPositionZ = value;
             }
         }
 
@@ -143,15 +142,12 @@ namespace Dreamteck.Splines
         {
             get
             {
-                if (_2dMode)
-                {
-                    return applyRotation2D;
-                }
+                if (_2dMode) return applyRotation2D;
                 return applyRotationX || applyRotationY || applyRotationZ;
             }
             set
             {
-                applyRotationX = applyRotationY = applyRotationZ = applyRotation2D = value;
+                applyRotationX = applyRotationY = applyRotationZ = value;
             }
         }
 

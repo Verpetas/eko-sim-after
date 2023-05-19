@@ -11,8 +11,9 @@ namespace Dreamteck.Splines.Editor
         public bool allowSelection = true;
         private float addTime = 0f;
 
-        public FollowerSpeedModifierEditor(SplineUser user, SplineUserEditor editor) : base(user, editor, "_speedModifier")
+        public FollowerSpeedModifierEditor(SplineUser user, SplineUserEditor editor, FollowerSpeedModifier input) : base(user, editor, input)
         {
+            module = input;
             title = "Speed Modifiers";
         }
 
@@ -27,19 +28,16 @@ namespace Dreamteck.Splines.Editor
             if (!isOpen) return;
             if (GUILayout.Button("Add Speed Region"))
             {
-                AddKey(addTime - 0.1f, addTime + 0.1f);
-                UpdateValues();
+                ((FollowerSpeedModifier)module).AddKey(addTime - 0.1, addTime + 0.1);
+                user.Rebuild();
             }
         }
 
-        protected override void KeyGUI(SerializedProperty key)
+        protected override void KeyGUI(SplineSampleModifier.Key key)
         {
-            SerializedProperty speed = key.FindPropertyRelative("speed");
-            SerializedProperty mode = key.FindPropertyRelative("mode");
+            FollowerSpeedModifier.SpeedKey offsetKey = (FollowerSpeedModifier.SpeedKey)key;
             base.KeyGUI(key);
-            EditorGUILayout.PropertyField(mode);
-            string text = (mode.intValue == (int)FollowerSpeedModifier.SpeedKey.Mode.Add ? "Add" : "Multiply") + " Speed";
-            EditorGUILayout.PropertyField(speed, new GUIContent(text));
+            offsetKey.speed = EditorGUILayout.FloatField("Add Speed", offsetKey.speed);
         }
     }
 }

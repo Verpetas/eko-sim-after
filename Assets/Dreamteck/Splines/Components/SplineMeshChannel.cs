@@ -639,15 +639,6 @@ namespace Dreamteck.Splines
                 Rebuild();
             }
 
-            public void AddMesh(MeshDefinition meshDefinition)
-            {
-                if (!meshes.Contains(meshDefinition))
-                {
-                    meshes.Add(meshDefinition);
-                    Rebuild();
-                }
-            }
-
             public void RemoveMesh(int index)
             {
                 meshes.RemoveAt(index);

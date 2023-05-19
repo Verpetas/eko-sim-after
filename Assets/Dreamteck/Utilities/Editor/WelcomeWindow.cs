@@ -16,11 +16,10 @@ namespace Dreamteck
         protected static GUIStyle titleText;
         protected string headerTitle = "";
         private static bool init = true;
-        protected virtual Vector2 _windowSize => new Vector2(450, 500);
 
         public virtual void Load()
         {
-            minSize = maxSize = _windowSize;
+            minSize = maxSize = new Vector2(450, 500);
             buttonTitleText = new GUIStyle(GUI.skin.GetStyle("label"));
             buttonTitleText.fontStyle = FontStyle.Bold;
             titleText = new GUIStyle(GUI.skin.GetStyle("label"));
@@ -291,13 +290,13 @@ namespace Dreamteck
                     GUI.color = Color.white;
                     if (thumbnail != null)
                     {
-                        Vector2 offset = new Vector2(5, (size.y - 50) / 2);
+                        Vector2 offset = new Vector2(0, (size.y - 50) / 2);
                         GUI.DrawTexture(new Rect(offset, Vector2.one * 50), thumbnail, ScaleMode.StretchToFill);
                     }
                     GUI.Label(new Rect(60, 5, 370 - 65, 16), title, buttonTitleText);
                     GUI.Label(new Rect(60, 20, 370 - 65, 40), description, wrapText);
                     GUI.EndGroup();
-                    GUILayout.Space(5);
+                    GUILayout.Space(10);
                 }
             }
 

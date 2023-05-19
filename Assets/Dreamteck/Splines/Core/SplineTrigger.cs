@@ -1,6 +1,5 @@
 namespace Dreamteck.Splines
 {
-    using System.Collections.Generic;
     using UnityEngine;
     using UnityEngine.Events;
 
@@ -35,55 +34,6 @@ namespace Dreamteck.Splines
         {
             for (int i = 0; i < triggers.Length; i++) triggers[i].Reset();
         }
-
-        /// <summary>
-        /// Returns all triggers within the specified range
-        /// </summary>
-        public List<SplineTrigger> GetTriggers(double from, double to)
-        {
-            List<SplineTrigger> triggerList = new List<SplineTrigger>();
-            for (int i = 0; i < triggers.Length; i++)
-            {
-                if (triggers[i] == null)
-                {
-                    continue;
-                }
-                if(triggers[i].position >= from  && triggers[i].position <= to)
-                {
-                    triggerList.Add(triggers[i]);
-                }
-            }
-            return triggerList;
-        }
-
-        /// <summary>
-        /// Creates a new trigger inside the group
-        /// </summary>
-        public SplineTrigger AddTrigger(double position, SplineTrigger.Type type)
-        {
-            return AddTrigger(position, type, "Trigger " + (triggers.Length + 1), Color.white);
-        }
-
-        /// <summary>
-        /// Creates a new trigger inside the group
-        /// </summary>
-        public SplineTrigger AddTrigger(double position, SplineTrigger.Type type, string name, Color color)
-        {
-            SplineTrigger newTrigger = new SplineTrigger(type);
-            newTrigger.position = position;
-            newTrigger.color = color;
-            newTrigger.name = name;
-            ArrayUtility.Add(ref triggers, newTrigger);
-            return newTrigger;
-        }
-
-        /// <summary>
-        /// Removes the trigger at the given index from the group
-        /// </summary>
-        public void RemoveTrigger(int index)
-        {
-            ArrayUtility.RemoveAt(ref triggers, index);
-        }
     }
 
     [System.Serializable]
@@ -103,38 +53,23 @@ namespace Dreamteck.Splines
         public Color color = Color.white;
         [SerializeField]
         [HideInInspector]
-        public TriggerEvent onCross = new TriggerEvent();
+        public UnityEvent onCross = new UnityEvent();
+        public event System.Action<SplineUser> onUserCross;
 
         public SplineTrigger(Type t)
         {
             type = t;
             enabled = true;
-            onCross = new TriggerEvent();
+            onCross = new UnityEvent();
         }
 
         /// <summary>
         /// Add a new UnityAction to the trigger
         /// </summary>
         /// <param name="action"></param>
-        public void AddListener(UnityAction<SplineUser> action)
-        {
-            onCross.AddListener(action);
-        }
-
         public void AddListener(UnityAction action)
         {
-            UnityAction<SplineUser> addAction = new UnityAction<SplineUser>((user) => { action.Invoke(); });
-            onCross.AddListener(addAction);
-        }
-
-        public void RemoveListener(UnityAction<SplineUser> action)
-        {
-            onCross.RemoveListener(action);
-        }
-
-        public void RemoveAllListeners()
-        {
-            onCross.RemoveAllListeners();
+            onCross.AddListener(action);
         }
 
         public void Reset()
@@ -162,12 +97,14 @@ namespace Dreamteck.Splines
 #if UNITY_EDITOR
             if (!Application.isPlaying) return;
 #endif
-            onCross.Invoke(user);
-        }
-
-        [System.Serializable]
-        public class TriggerEvent : UnityEvent<SplineUser>
-        { 
+            onCross.Invoke();
+            if (user)
+            {
+                if (onUserCross != null)
+                {
+                    onUserCross(user);
+                }
+            }
         }
     }
 }

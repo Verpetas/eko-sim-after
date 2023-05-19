@@ -75,6 +75,10 @@
             EditorGUILayout.PropertyField(dontLerpDirection, new GUIContent("Don't Lerp Direction"));
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(physicsMode, new GUIContent("Physics Mode"));
+            if(EditorGUI.EndChangeCheck())
+            {
+                for (int i = 0; i < tracers.Length; i++) tracers[i].EditorAwake();
+            }
 
             if (tracer.physicsMode == SplineTracer.PhysicsMode.Rigidbody)
             {

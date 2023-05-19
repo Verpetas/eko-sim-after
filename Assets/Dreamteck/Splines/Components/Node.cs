@@ -158,16 +158,6 @@ namespace Dreamteck.Splines
         {
             if (TransformChanged())
             {
-#if UNITY_EDITOR
-                if (!Application.isPlaying)
-                {
-                    UnityEditor.EditorUtility.SetDirty(this);
-                    for (int i = 0; i < connections.Length; i++)
-                    {
-                        UnityEditor.EditorUtility.SetDirty(connections[i].spline);
-                    }
-                }
-#endif
                 UpdateConnectedComputers();
                 SampleTransform();
             }
@@ -245,7 +235,6 @@ namespace Dreamteck.Splines
                     RemoveConnection(i);
                     continue;
                 }
-
                 if (connections[i].spline == excludeComputer) continue;
 
                 if (type == Type.Smooth && i != 0)
@@ -273,14 +262,8 @@ namespace Dreamteck.Splines
         public void UpdatePoint(SplineComputer computer, int pointIndex, SplinePoint point, bool updatePosition = true)
         {
 #if UNITY_EDITOR
-            if (!Application.isPlaying)
-            {
-                transform.position = point.position;
-            }
-            else
-            {
-                _trs.position = point.position;
-            }
+            if (!Application.isPlaying) transform.position = point.position;
+            else _trs.position = point.position;
 #else
             _trs.position = point.position;
 #endif

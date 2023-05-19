@@ -13,7 +13,7 @@ namespace Dreamteck.Splines.Editor
         SplineTrigger.Type addTriggerType = SplineTrigger.Type.Double;
         private int setDistanceGroup, setDistanceTrigger;
 
-        public SplineTriggersEditor(SplineComputer spline, SerializedObject serializedObject) : base(serializedObject)
+        public SplineTriggersEditor(SplineComputer spline) : base()
         {
             this.spline = spline;
         }

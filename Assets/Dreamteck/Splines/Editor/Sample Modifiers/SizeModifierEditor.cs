@@ -11,8 +11,9 @@ namespace Dreamteck.Splines.Editor
         public bool allowSelection = true;
         private float addTime = 0f;
 
-        public SizeModifierEditor(SplineUser user, SplineUserEditor editor) : base(user, editor, "_sizeModifier")
+        public SizeModifierEditor(SplineUser user, SplineUserEditor editor, SizeModifier input) : base(user, editor, input)
         {
+            module = input;
             title = "Size Modifiers";
         }
 
@@ -27,16 +28,16 @@ namespace Dreamteck.Splines.Editor
             if (!isOpen) return;
             if (GUILayout.Button("Add New Size"))
             {
-                AddKey(addTime - 0.1f, addTime + 0.1f);
-                UpdateValues();
+                ((SizeModifier)module).AddKey(addTime - 0.1, addTime + 0.1);
+                user.Rebuild();
             }
         }
 
-        protected override void KeyGUI(SerializedProperty key)
+        protected override void KeyGUI(SplineSampleModifier.Key key)
         {
-            SerializedProperty size = key.FindPropertyRelative("size");
+            SizeModifier.SizeKey offsetKey = (SizeModifier.SizeKey)key;
             base.KeyGUI(key);
-            EditorGUILayout.PropertyField(size);
+            offsetKey.size = EditorGUILayout.FloatField("Size", offsetKey.size);
         }
     }
 }

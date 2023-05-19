@@ -14,56 +14,55 @@ namespace Dreamteck.Splines
             public Transform target = null;
             public Vector3 rotation = Vector3.zero;
 
-            public RotationKey(Vector3 rotation, double f, double t) : base(f, t)
+            public RotationKey(Vector3 rotation, double f, double t, RotationModifier modifier) : base(f, t, modifier)
             {
                 this.rotation = rotation;
             }
         }
 
-        public RotationKey[] keys = new RotationKey[0];
+        public List<RotationKey> keys = new List<RotationKey>();
 
         public RotationModifier()
         {
-            keys = new RotationKey[0];
+            keys = new List<RotationKey>();
         }
 
         public override List<Key> GetKeys()
         {
-            return new List<Key>(keys);
+            List<Key> output = new List<Key>();
+            for (int i = 0; i < keys.Count; i++) output.Add(keys[i]);
+            return output;
         }
 
         public override void SetKeys(List<Key> input)
         {
-            keys = new RotationKey[input.Count];
-            for (int i = 0; i < input.Count; i++)
-            {
-                keys[i] = (RotationKey)input[i];
-            }
+            keys = new List<RotationKey>();
+            for (int i = 0; i < input.Count; i++) keys.Add((RotationKey)input[i]);
             base.SetKeys(input);
         }
 
         public void AddKey(Vector3 rotation, double f, double t)
         {
-            ArrayUtility.Add(ref keys, new RotationKey(rotation, f, t));
+            keys.Add(new RotationKey(rotation, f, t, this));
         }
 
-        public override void Apply(ref SplineSample result)
+        public override void Apply(SplineSample result)
         {
-            if (keys.Length == 0) return;
-            base.Apply(ref result);
+            if (keys.Count == 0) return;
+            base.Apply(result);
 
             Quaternion offset = Quaternion.identity, look = result.rotation;
-            for (int i = 0; i < keys.Length; i++)
+            for (int i = 0; i < keys.Count; i++)
             {
                 if (keys[i].useLookTarget && keys[i].target != null)
                 {
                     Quaternion lookDir = Quaternion.LookRotation(keys[i].target.position - result.position);
-                    look = Quaternion.Slerp(look, lookDir, keys[i].Evaluate(result.percent) * blend);
+                    look = Quaternion.Slerp(look, lookDir, keys[i].Evaluate(result.percent));
                 }
                 else
                 {
                     Quaternion euler = Quaternion.Euler(keys[i].rotation.x, keys[i].rotation.y, keys[i].rotation.z);
-                    offset = Quaternion.Slerp(offset, offset * euler, keys[i].Evaluate(result.percent) * blend);
+                    offset = Quaternion.Slerp(offset, offset * euler, keys[i].Evaluate(result.percent));
                 }
             }
             Quaternion rotation = look * offset;

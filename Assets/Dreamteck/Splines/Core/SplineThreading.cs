@@ -150,7 +150,7 @@ namespace Dreamteck.Splines
                 }
                 catch (System.Exception ex)
                 {
-                    if(ex.Message != "") Debug.LogError("THREAD EXCEPTION " + ex.Message);
+                    if(ex.Message != "") Debug.Log("THREAD EXCEPTION " + ex.Message);
                     break;
                 }
             }
@@ -184,7 +184,6 @@ namespace Dreamteck.Splines
 
         public static void PrewarmThreads()
         {
-#if !UNITY_WSA
             for (int i = 0; i < threads.Length; i++)
             {
                 if (!threads[i].isAlive)
@@ -192,7 +191,6 @@ namespace Dreamteck.Splines
                     threads[i].Restart();
                 }
             }
-#endif
         }
 
         public static void Stop()

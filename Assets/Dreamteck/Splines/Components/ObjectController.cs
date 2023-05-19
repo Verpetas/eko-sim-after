@@ -538,6 +538,11 @@ namespace Dreamteck.Splines
 
         private void Remove()
         {
+#if UNITY_EDITOR
+#if !UNITY_2018_3_OR_NEWER
+            if (PrefabUtility.GetPrefabType(gameObject) == PrefabType.Prefab) return;
+#endif
+#endif
             if (_spawnCount >= spawned.Length) return;
             for (int i = spawned.Length - 1; i >= _spawnCount; i--)
             {
@@ -589,6 +594,11 @@ namespace Dreamteck.Splines
 
         public void Spawn()
         {
+#if UNITY_EDITOR
+#if !UNITY_2018_3_OR_NEWER
+            if (PrefabUtility.GetPrefabType(gameObject) == PrefabType.Prefab) return;
+#endif
+#endif
             if (_objectMethod == ObjectMethod.Instantiate)
             {
                 if (delayedSpawn && Application.isPlaying)
@@ -716,14 +726,14 @@ namespace Dreamteck.Splines
                 
                 if (objectPositioning == Positioning.Clip)
                 {
-                    spline.Evaluate(percent, ref evalResult);
+                    spline.Evaluate(percent, evalResult);
                 }
                 else
                 {
-                    Evaluate(percent, ref evalResult);
+                    Evaluate(percent, evalResult);
                 }
 
-                ModifySample(ref evalResult);
+                ModifySample(evalResult);
                 spawned[i].position = evalResult.position;
 
                 if (_applyScale)

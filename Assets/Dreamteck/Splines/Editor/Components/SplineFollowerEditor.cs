@@ -36,7 +36,7 @@ namespace Dreamteck.Splines.Editor
 
             if (followers.Length == 1)
             {
-                speedModifierEditor = new FollowerSpeedModifierEditor(followers[0], this);
+                speedModifierEditor = new FollowerSpeedModifierEditor(followers[0], this, followers[0].speedModifier);
             }
         }
 
@@ -52,7 +52,6 @@ namespace Dreamteck.Splines.Editor
             SerializedProperty startPosition = serializedObject.FindProperty("_startPosition");
             SerializedProperty autoStartPosition = serializedObject.FindProperty("autoStartPosition");
             SerializedProperty follow = serializedObject.FindProperty("_follow");
-            SerializedProperty direction = serializedObject.FindProperty("_direction");
             SerializedProperty unityOnEndReached = serializedObject.FindProperty("_unityOnEndReached");
             SerializedProperty unityOnBeginningReached = serializedObject.FindProperty("_unityOnBeginningReached");
 
@@ -67,7 +66,7 @@ namespace Dreamteck.Splines.Editor
                     if (autoStartPosition.boolValue)
                     {
                         SplineSample sample = new SplineSample();
-                        followers[0].Project(followers[0].transform.position, ref sample);
+                        followers[0].Project(followers[0].transform.position, sample);
                         if (Application.isPlaying)
                         {
                             for (int i = 0; i < followers.Length; i++)
@@ -82,22 +81,14 @@ namespace Dreamteck.Splines.Editor
             if (followMode.intValue == (int)SplineFollower.FollowMode.Uniform)
             {
                 SerializedProperty followSpeed = serializedObject.FindProperty("_followSpeed");
-
-                if(followSpeed.floatValue < 0f)
-                {
-                    direction.intValue = (int)Spline.Direction.Backward;
-                } else if (followSpeed.floatValue > 0f)
-                {
-                    direction.intValue = (int)Spline.Direction.Forward;
-                }
-
                 SerializedProperty motion = serializedObject.FindProperty("_motion");
                 SerializedProperty motionHasOffset = motion.FindPropertyRelative("_hasOffset");
 
                 EditorGUILayout.PropertyField(followSpeed, new GUIContent("Follow Speed"));
-
-
-
+                if (followSpeed.floatValue < 0f)
+                {
+                    followSpeed.floatValue = 0f;
+                }
                 if (motionHasOffset.boolValue)
                 {
                     EditorGUILayout.PropertyField(preserveUniformSpeedWithOffset, new GUIContent("Preserve Uniform Speed With Offset"));
@@ -165,20 +156,7 @@ namespace Dreamteck.Splines.Editor
                 }
             }
 
-            int lastDirection = direction.intValue;
             base.BodyGUI();
-
-            if(lastDirection != direction.intValue)
-            {
-                SerializedProperty followSpeed = serializedObject.FindProperty("_followSpeed");
-                if(direction.intValue == (int)Spline.Direction.Forward)
-                {
-                    followSpeed.floatValue = Mathf.Abs(followSpeed.floatValue);
-                } else
-                {
-                    followSpeed.floatValue = -Mathf.Abs(followSpeed.floatValue);
-                }
-            }
         }
 
 
@@ -195,7 +173,7 @@ namespace Dreamteck.Splines.Editor
             if (user.spline == null) return;
             if (user.autoStartPosition)
             {
-                user.spline.Project(user.transform.position, ref result, user.clipFrom, user.clipTo);
+                user.spline.Project(result, user.transform.position, user.clipFrom, user.clipTo);
                 DrawResult(result);
             } else if(!user.follow) DrawResult(user.result);
 

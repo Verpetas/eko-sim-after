@@ -19,7 +19,6 @@ namespace Dreamteck.Splines
         public virtual void Open(EditorWindow window)
         {
             windowInstance = window;
-            GetSplines();
         }
 
         public virtual void Close()

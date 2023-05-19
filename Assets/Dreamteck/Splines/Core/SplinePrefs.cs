@@ -81,7 +81,7 @@ namespace Dreamteck.Splines
                 default2D = false;
                 startInCreationMode = true;
                 defaultColor = Color.white;
-                highlightColor = new Color(0.0313f, 0.737f, 0.796f, 1f);
+                highlightColor = new Color(0f, 0.564f, 1f, 1f);
                 highlightContentColor = new Color(1f, 1f, 1f, 0.95f);
                 showPointNumbers = false;
                 defaultComputerSpace = SplineComputer.Space.Local;
