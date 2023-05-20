@@ -20,7 +20,7 @@ public class PalmManager : MonoBehaviour
     [SerializeField] float leafDensity = 12;
     [SerializeField] float leafRandomness = 0.3f;
 
-    [SerializeField] AnimationCurve segmentPopCurve;
+    [SerializeField] AnimationCurve popCurve;
     [SerializeField] float segmentPopDuration = 0.4f;
 
     Transform[] trunkSegments;
@@ -31,6 +31,10 @@ public class PalmManager : MonoBehaviour
     float maxLeafAngleOffset = 10f;
     int visibleSegmentCount = 1;
 
+    int palmTreelayer;
+    LayerMask palmTreelayerMask;
+
+
     private void Awake()
     {
         trunk = transform.Find("Trunk");
@@ -38,6 +42,9 @@ public class PalmManager : MonoBehaviour
 
         trunkSegments = new Transform[segmentCount];
         leafInstances = new List<Transform>();
+
+        palmTreelayer = LayerMask.NameToLayer("PalmTree");
+        palmTreelayerMask |= (1 << palmTreelayer);
     }
 
     private void Start()
@@ -45,10 +52,10 @@ public class PalmManager : MonoBehaviour
         GenerateTrunk();
         GenerateLeaves();
 
-        StartCoroutine(DisplayGrowth());
+        StartCoroutine(HandleGrowInterraction());
     }
 
-    IEnumerator DisplayGrowth()
+    IEnumerator HandleGrowInterraction()
     {
         int segmentIndex = 0;
 
@@ -64,18 +71,26 @@ public class PalmManager : MonoBehaviour
                 {
                     trunkSegments[visibleSegmentCount].gameObject.SetActive(true);
                     visibleSegmentCount++;
+
+                    UpdateLeaves(visibleSegmentCount);
+
                     segmentIndex = 0;
-
-                    leaves.position = trunkSegments[segmentIndex].position;
-
-                    SplineComputer leafSC = leafInstances[0].GetComponent<SplineComputer>();
-                    leafSC.Rebuild();
                 }
                 else segmentIndex++;
             }
 
             yield return new WaitForSeconds(0.2f);
         }
+    }
+
+    void UpdateLeaves(int currentSegmentIndex)
+    {
+        leaves.rotation = trunkSegments[visibleSegmentCount - 1].rotation;
+        leaves.position = trunkSegments[visibleSegmentCount - 1].position + leaves.up * 0.5f;
+
+        float leafSize = 0.5f + 0.5f * ((float)currentSegmentIndex / segmentCount);
+        leaves.localScale = Vector3.one * leafSize;
+        StartCoroutine(PopSegment(leaves));
     }
 
     IEnumerator PopSegment(Transform segment)
@@ -87,7 +102,7 @@ public class PalmManager : MonoBehaviour
         while (true)
         {
             float popStage = (Time.time - startTime) / segmentPopDuration;
-            segment.localScale = Vector3.Lerp(startScale, peakScale, segmentPopCurve.Evaluate(popStage));
+            segment.localScale = Vector3.Lerp(startScale, peakScale, popCurve.Evaluate(popStage));
 
             if (popStage > 1)
             {
@@ -106,9 +121,17 @@ public class PalmManager : MonoBehaviour
         for (int i = 0; i < segmentCount; i++)
         {
             trunkSegments[i] = Instantiate(trunkSegment, trunk).transform;
-            trunkSegments[i].position = i == 0 ? Vector3.zero : trunkSegments[i - 1].TransformPoint(segmentPosRelative);
+
+            if (i == 0)
+                trunkSegments[i].localPosition = Vector3.zero;
+            else
+                trunkSegments[i].position = trunkSegments[i - 1].TransformPoint(segmentPosRelative);
+
             trunkSegments[i].localScale = segmentScale;
             trunkSegments[i].rotation = CalculateSegmentRotation(i);
+            trunkSegments[i].gameObject.layer = palmTreelayer;
+
+            trunkSegments[i].AddComponent<MeshCollider>();
 
             segmentScale *= subsequentSegmentScaleRatio;
 
@@ -118,7 +141,7 @@ public class PalmManager : MonoBehaviour
 
     void GenerateLeaves()
     {
-        Transform trunkTop = trunkSegments[segmentCount - 1];
+        Transform trunkTop = trunkSegments[0];
 
         leaves.rotation = trunkTop.rotation;
         leaves.position = trunkTop.position + leaves.up * 0.5f;
@@ -133,7 +156,7 @@ public class PalmManager : MonoBehaviour
             angleOffset = Random.Range(-maxLeafAngleOffset, maxLeafAngleOffset);
         }
 
-        //Invoke("DestroyAllNodes", 1f);
+        leaves.localScale = Vector3.one * 0.5f;
     }
 
     Quaternion CalculateSegmentRotation(int segmentIndex)
@@ -152,24 +175,21 @@ public class PalmManager : MonoBehaviour
         Vector3 rotationVector = new Vector3(Random.Range(-15, 15), angle, Random.Range(-30, 0));
         leafInstance.localRotation = Quaternion.Euler(rotationVector);
 
-        for (int i = 1; i < 4; i++)
+        SplineComputer leafSC = leafInstance.GetComponent<SplineComputer>();
+        SplinePoint[] splinePoints = leafSC.GetPoints();
+
+        for (int i = 1; i < splinePoints.Length; i++)
         {
-            Transform splinePoint = leafInstance.GetChild(i);
-            splinePoint.position += RandomVector(leafRandomness);
+            splinePoints[i].position += RandomVector(leafRandomness);
+        }
+        leafSC.SetPoints(splinePoints);
+
+        foreach (Transform splinePoint in leafInstance)
+        {
+            Destroy(splinePoint.gameObject);
         }
 
         return leafInstance;
-    }
-
-    void DestroyAllNodes()
-    {
-        foreach (Transform leaf in leafInstances)
-        {
-            foreach (Transform node in leaf)
-            {
-                Destroy(node.gameObject);
-            }
-        }
     }
 
     static Vector3 RandomVector(float offset)
