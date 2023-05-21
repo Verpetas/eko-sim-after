@@ -6,8 +6,8 @@ public class PopulationManager : MonoBehaviour
 {
     [SerializeField] float minMatchDstThreshold = 50f;
 
-    List<Transform> spawnedDinosaurs = new List<Transform>();
-    public List<Transform> idleDinosaurs = new List<Transform>(); // to remove public later
+    [SerializeField] List<Transform> spawnedDinosaurs = new List<Transform>();
+    [SerializeField] List<Transform> idleDinosaurs = new List<Transform>(); // to remove public later
 
     float matchDstThresholdSqr; 
 

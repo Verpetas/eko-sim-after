@@ -52,10 +52,10 @@ public class PalmManager : MonoBehaviour
         GenerateTrunk();
         GenerateLeaves();
 
-        StartCoroutine(HandleGrowInterraction());
+        StartCoroutine(HandleGrowInteraction());
     }
 
-    IEnumerator HandleGrowInterraction()
+    IEnumerator HandleGrowInteraction()
     {
         int segmentIndex = 0;
 
