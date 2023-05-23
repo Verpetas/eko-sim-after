@@ -1,7 +1,9 @@
 using Dreamteck.Splines;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
@@ -10,6 +12,7 @@ public class PalmManager : MonoBehaviour
 
     [SerializeField] GameObject trunkSegment;
     [SerializeField] GameObject leaf;
+    [SerializeField] GameObject coconut;
 
     [SerializeField] int segmentCount = 14;
     [SerializeField] float maxSegmentAngle = 12.5f;
@@ -21,30 +24,37 @@ public class PalmManager : MonoBehaviour
     [SerializeField] float leafRandomness = 0.3f;
 
     [SerializeField] AnimationCurve popCurve;
-    [SerializeField] float segmentPopDuration = 0.4f;
+    [SerializeField] float growSpeed = 2f;
+
+    [SerializeField] bool beingWatered;
+
+    VegetationManager vegetationManager;
+
+    float segmentPopDuration = 0.4f;
 
     Transform[] trunkSegments;
     List<Transform> leafInstances;
+    [NonSerialized]
+    public List<Transform> coconutInstances;
 
     Transform trunk;
     Transform leaves;
+    Transform coconuts;
     float maxLeafAngleOffset = 10f;
     int visibleSegmentCount = 1;
-
-    int palmTreelayer;
-    LayerMask palmTreelayerMask;
 
 
     private void Awake()
     {
+        vegetationManager = transform.parent.GetComponent<VegetationManager>();
+
         trunk = transform.Find("Trunk");
         leaves = transform.Find("Leaves");
+        coconuts = transform.Find("Coconuts");
 
         trunkSegments = new Transform[segmentCount];
         leafInstances = new List<Transform>();
-
-        palmTreelayer = LayerMask.NameToLayer("PalmTree");
-        palmTreelayerMask |= (1 << palmTreelayer);
+        coconutInstances = new List<Transform>();
     }
 
     private void Start()
@@ -61,11 +71,16 @@ public class PalmManager : MonoBehaviour
 
         while (true)
         {
-            if (visibleSegmentCount == segmentCount) yield break;
-
-            if (Input.GetKey(KeyCode.Space))
+            if (visibleSegmentCount == segmentCount)
             {
-                StartCoroutine(PopSegment(trunkSegments[segmentIndex]));
+                SpawnCoconuts();
+                vegetationManager.AddCoconutTree(transform);
+                yield break;
+            }
+                
+            if (beingWatered)
+            {
+                StartCoroutine(PopObject(trunkSegments[segmentIndex]));
 
                 if (segmentIndex >= visibleSegmentCount)
                 {
@@ -79,7 +94,7 @@ public class PalmManager : MonoBehaviour
                 else segmentIndex++;
             }
 
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(0.2f / growSpeed);
         }
     }
 
@@ -90,18 +105,19 @@ public class PalmManager : MonoBehaviour
 
         float leafSize = 0.5f + 0.5f * ((float)currentSegmentIndex / segmentCount);
         leaves.localScale = Vector3.one * leafSize;
-        StartCoroutine(PopSegment(leaves));
+        StartCoroutine(PopObject(leaves));
     }
 
-    IEnumerator PopSegment(Transform segment)
+    IEnumerator PopObject(Transform segment)
     {
         float startTime = Time.time;
         Vector3 startScale = segment.localScale;
-        Vector3 peakScale = startScale * 1.5f;
+        Vector3 peakScale = startScale * 2f;
 
         while (true)
         {
-            float popStage = (Time.time - startTime) / segmentPopDuration;
+            float elapsedTime = Time.time - startTime;
+            float popStage = (elapsedTime * growSpeed) / segmentPopDuration;
             segment.localScale = Vector3.Lerp(startScale, peakScale, popCurve.Evaluate(popStage));
 
             if (popStage > 1)
@@ -129,9 +145,6 @@ public class PalmManager : MonoBehaviour
 
             trunkSegments[i].localScale = segmentScale;
             trunkSegments[i].rotation = CalculateSegmentRotation(i);
-            trunkSegments[i].gameObject.layer = palmTreelayer;
-
-            trunkSegments[i].AddComponent<MeshCollider>();
 
             segmentScale *= subsequentSegmentScaleRatio;
 
@@ -146,14 +159,14 @@ public class PalmManager : MonoBehaviour
         leaves.rotation = trunkTop.rotation;
         leaves.position = trunkTop.position + leaves.up * 0.5f;
 
-        float angleOffset = Random.Range(-maxLeafAngleOffset, maxLeafAngleOffset);
+        float angleOffset = UnityEngine.Random.Range(-maxLeafAngleOffset, maxLeafAngleOffset);
         float angleInterval = 360 / leafDensity;
 
         for (float angle = angleOffset; angle < 360f; angle += angleOffset + angleInterval)
         {
             leafInstances.Add(SetUpLeaf(angle));
 
-            angleOffset = Random.Range(-maxLeafAngleOffset, maxLeafAngleOffset);
+            angleOffset = UnityEngine.Random.Range(-maxLeafAngleOffset, maxLeafAngleOffset);
         }
 
         leaves.localScale = Vector3.one * 0.5f;
@@ -172,7 +185,7 @@ public class PalmManager : MonoBehaviour
     Transform SetUpLeaf(float angle)
     {
         Transform leafInstance = Instantiate(leaf, leaves).transform;
-        Vector3 rotationVector = new Vector3(Random.Range(-15, 15), angle, Random.Range(-30, 0));
+        Vector3 rotationVector = new Vector3(UnityEngine.Random.Range(-15, 15), angle, UnityEngine.Random.Range(-30, 0));
         leafInstance.localRotation = Quaternion.Euler(rotationVector);
 
         SplineComputer leafSC = leafInstance.GetComponent<SplineComputer>();
@@ -192,10 +205,39 @@ public class PalmManager : MonoBehaviour
         return leafInstance;
     }
 
+    void SpawnCoconuts()
+    {
+        int coconutCount = UnityEngine.Random.Range(1, 3);
+        Transform trunkTop = trunkSegments[segmentCount - 1];
+
+        for (int i = 0; i < coconutCount; i++)
+        {
+            Transform coconutInstance = Instantiate(coconut, coconuts).transform;
+            Vector2 coconutPosOffset = UnityEngine.Random.insideUnitCircle.normalized * 0.01f;
+            coconutInstance.position = trunkTop.TransformPoint(new Vector3(coconutPosOffset.x, 0, coconutPosOffset.y));
+
+            PopObject(coconutInstance);
+
+            coconutInstances.Add(coconutInstance);
+        }
+    }
+
     static Vector3 RandomVector(float offset)
     {
-        return new Vector3(Random.Range(-offset, offset), Random.Range(-offset, offset), Random.Range(-offset, offset));
+        return new Vector3(UnityEngine.Random.Range(-offset, offset), UnityEngine.Random.Range(-offset, offset), UnityEngine.Random.Range(-offset, offset));
 
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.tag == "WateringCan")
+            beingWatered = true;
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.tag == "WateringCan")
+            beingWatered = false;
     }
 
 }

@@ -4,17 +4,18 @@ using UnityEngine;
 using TMPro;
 using Unity.VisualScripting;
 
-public class SpawnItemChanger : MonoBehaviour
+public class ItemController : MonoBehaviour
 {
     [SerializeField] TMP_Text selectedItemType;
     [SerializeField] TMP_Text selectedItem;
 
-    [SerializeField] Camera worldCamera; 
+    [SerializeField] Camera worldCamera;
+
+    [SerializeField] DinosaurSpawner dinosaurSpawner;
+    [SerializeField] PlantSpawner plantSpawner;
+    [SerializeField] WateringCan wateringCan;
 
     LayerMask groundLayerMask;
-
-    DinosaurSpawner dinosaurSpawner;
-    PlantSpawner plantSpawner;
 
     List<Dinosaur> dinosaurTypes;
     List<GameObject> seedTypes;
@@ -29,9 +30,6 @@ public class SpawnItemChanger : MonoBehaviour
     {
         itemTypeSelection = ItemType.Dinosaur;
         dinosaurSelectionIndex = seedSelectionIndex = 0;
-
-        dinosaurSpawner = GameObject.FindWithTag("PopulationManager").GetComponent<DinosaurSpawner>();
-        plantSpawner = GameObject.FindWithTag("VegetationManager").GetComponent<PlantSpawner>();
 
         dinosaurTypes = dinosaurSpawner.GetDinosaurTypes();
         seedTypes = plantSpawner.GetSeedTypes();
@@ -55,23 +53,38 @@ public class SpawnItemChanger : MonoBehaviour
     void HandleItemUseInput()
     {
         if (Input.GetMouseButtonDown(0))
-        {
-            Ray ray = worldCamera.ScreenPointToRay(Input.mousePosition);
+            HandleMousePress();
 
-            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, groundLayerMask))
+        if (Input.GetMouseButton(0))
+            HandleMouseHold();
+    }
+
+    void HandleMousePress()
+    {
+        Ray ray = worldCamera.ScreenPointToRay(Input.mousePosition);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, groundLayerMask))
+        {
+            if (itemTypeSelection == ItemType.Dinosaur)
             {
-                if (itemTypeSelection == ItemType.Dinosaur)
-                {
-                    dinosaurSpawner.SpawnDinosaur(dinosaurTypes[dinosaurSelectionIndex], hit.point);
-                }
-                if (itemTypeSelection == ItemType.Seed)
-                {
-                    plantSpawner.SapawnPlant(seedTypes[seedSelectionIndex], hit.point);
-                }
-                if (itemTypeSelection == ItemType.Tool)
-                {
-                    // use tool
-                }
+                dinosaurSpawner.SpawnDinosaur(dinosaurTypes[dinosaurSelectionIndex], hit.point);
+            }
+            if (itemTypeSelection == ItemType.Seed)
+            {
+                plantSpawner.SapawnPlant(seedTypes[seedSelectionIndex], hit.point);
+            }
+        }
+    }
+
+    void HandleMouseHold()
+    {
+        Ray ray = worldCamera.ScreenPointToRay(Input.mousePosition);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, groundLayerMask))
+        {
+            if (itemTypeSelection == ItemType.Tool)
+            {
+                wateringCan.UseWateringCan(hit.point);
             }
         }
     }
