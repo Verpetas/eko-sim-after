@@ -16,22 +16,25 @@ public class BodyPrep : MonoBehaviour
 
     [SerializeField] Transform apple;
 
-    Dinosaur dinosaur;
     MeshGen meshGen;
     int boneCount;
     float[] spineBendsGlobal;
     Transform root;
     List<Transform> legBones = new List<Transform>();
     LayerMask dinosaurLayerMask;
-    DinosaurManager dinosaurManager;
     RigBuilder rigBuilder;
     int dinosaurLayer;
     GameObject colliderGO;
 
+    DinosaurSetup dinosaurSetup;
+    DinosaurManager dinosaurManager;
+    Dinosaur dinosaur;
+
     private void Awake()
     {
-        dinosaur = wrapper.parent.GetComponent<DinosaurSetup>().Dinosaur;
+        dinosaurSetup = wrapper.parent.GetComponent<DinosaurSetup>();
         dinosaurManager = wrapper.parent.GetComponent<DinosaurManager>();
+        dinosaur = dinosaurSetup.Dinosaur;
 
         meshGen = GetComponent<MeshGen>();
         boneCount = dinosaur.spineBends.Length;
@@ -80,7 +83,7 @@ public class BodyPrep : MonoBehaviour
         AttachLegs();
         SwapColliders();
 
-        InitializeDinosaurController();
+        PrepareDinosaur();
     }
 
     void AdjustBodySize()
@@ -229,15 +232,18 @@ public class BodyPrep : MonoBehaviour
     void SwapColliders()
     {
         DestroyImmediate(colliderGO);
-        dinosaurManager.AddCollider(
+        dinosaurSetup.AddCollider(
             dinosaur.colliderSize.x * dinosaur.bodySize,
             dinosaur.colliderSize.y * dinosaur.bodySize);
     }
 
-    void InitializeDinosaurController()
+    void PrepareDinosaur()
     {
-        dinosaurManager.PrepareDinosaur();
+        dinosaurSetup.AssignSpawnPosition();
+        
         dinosaurManager.enabled = true;
+        dinosaurManager.AddRB();
+        dinosaurManager.EnablePathfinding();
     }
 
 }

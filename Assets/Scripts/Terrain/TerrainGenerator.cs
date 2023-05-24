@@ -17,6 +17,9 @@ public class TerrainGenerator : MonoBehaviour {
 
     public GameObject oceanTile;
 
+    public TerrainAltitudeInterval[] walkableRegions;
+    public float minWalkableAltitude = 4f;
+
     Node[,] nodeGrid;
 	Grid terrain;
 
@@ -105,11 +108,13 @@ public class TerrainGenerator : MonoBehaviour {
         int startNodeX = chunkVertsPerLine * (int)chunkCoord.x;
         int startNodeY = chunkVertsPerLine * (int)chunkCoord.y;
 
+        Node defaultOceanNode = new Node(false, Vector3.zero, 0, 0, 0);
+
         for (int y = startNodeY; y < startNodeY + chunkVertsPerLine; y++)
         {
             for (int x = startNodeX; x < startNodeX + chunkVertsPerLine; x++)
             {
-                nodeGrid[x, y] = new Node(false, Vector3.zero, 0, 0);
+                nodeGrid[x, y] = defaultOceanNode;
             }
         }
     }
@@ -175,8 +180,22 @@ public class TerrainGenerator : MonoBehaviour {
 	void AddNode(Vector3 vertex, int nodeX, int nodeY, Vector2 chunkCoord)
 	{
         Vector3 vertexPosActual = vertex + GetVertexOffset(chunkWidth, chunkCoord);
-        bool walkable = vertexPosActual.y > 6 && vertexPosActual.y < 25;
-        nodeGrid[nodeX, nodeY] = new Node(walkable, vertexPosActual, nodeX, nodeY);
+
+        int nodeTerrainPenalty = 0;
+        for (int i = 0; i < walkableRegions.Length; i++)
+        {
+            if (vertexPosActual.y < walkableRegions[i].upToHeight)
+            {
+                nodeTerrainPenalty = walkableRegions[i].terrainPenalty;
+                break;
+            }
+        }
+        bool walkable = vertexPosActual.y > minWalkableAltitude;
+
+        nodeGrid[nodeX, nodeY] = new Node(walkable, vertexPosActual, nodeX, nodeY, nodeTerrainPenalty);
+
+        //bool walkable = vertexPosActual.y > 6 && vertexPosActual.y < 25;
+        //nodeGrid[nodeX, nodeY] = new Node(walkable, vertexPosActual, nodeX, nodeY);
 
         //if (walkable)
         //{
@@ -207,4 +226,12 @@ public class TerrainGenerator : MonoBehaviour {
 		return terrain;
 	}
 
+}
+
+[System.Serializable]
+public class TerrainAltitudeInterval
+{
+    public string intervalName;
+    public float upToHeight;
+    public int terrainPenalty;
 }

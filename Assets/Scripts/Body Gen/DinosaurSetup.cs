@@ -20,21 +20,34 @@ public class DinosaurSetup : MonoBehaviour
 
     private void Start()
     {
-        InitializeCreation();
+        InitializeBodyCreation();
     }
 
-    void InitializeCreation()
+    void InitializeBodyCreation()
     {
-        InitializeBodyPart("LegPair_0");
-        if (!dinosaur.bipedal) InitializeBodyPart("LegPair_1");
+        InitializeBodyPartCreation("LegPair_0");
+        if (!dinosaur.bipedal) InitializeBodyPartCreation("LegPair_1");
 
-        InitializeBodyPart("Body");
-    }   
+        InitializeBodyPartCreation("Body");
+    }
 
-    void InitializeBodyPart(string bodyPartName)
+    void InitializeBodyPartCreation(string bodyPartName)
     {
         Transform bodyPart = root.Find(bodyPartName);
         bodyPart.gameObject.SetActive(true);
+    }
+
+    public void AddCollider(float radius, float height)
+    {
+        CapsuleCollider collider = gameObject.AddComponent<CapsuleCollider>();
+        collider.radius = radius;
+        collider.height = height;
+    }
+
+    public void AssignSpawnPosition()
+    {
+        transform.position = spawnPos + Vector3.up * 10f;
+        transform.rotation = spawnRot;
     }
 
     public Dinosaur Dinosaur

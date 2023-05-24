@@ -6,24 +6,18 @@ using UnityEngine;
 
 public class DinosaurManager : MonoBehaviour
 {
-    [SerializeField] float gravity = -10f;
+    [SerializeField] float gravityFalling = -10f;
+    [SerializeField] float dragGrounded = 1;
     public bool touchingGround = false;
 
-    Unit unitInstance;
-
-    float groundedDrag = 1;
+    float gravity;
     Rigidbody rb;
+    Unit unitInstance;
 
     private void Awake()
     {
         unitInstance = transform.GetComponent<Unit>();
-    }
-
-    public void PrepareDinosaur()
-    {
-        AssignSpawnPosition();
-        AddRB();
-        EnablePathfinding();
+        gravity = gravityFalling;
     }
 
     void Update()
@@ -31,30 +25,16 @@ public class DinosaurManager : MonoBehaviour
         ApplyGravity();
     }
 
-    public void AddCollider(float radius, float height)
+    public void EnablePathfinding()
     {
-        CapsuleCollider collider = gameObject.AddComponent<CapsuleCollider>();
-        collider.radius = radius;
-        collider.height = height;
+        unitInstance.enabled = true;
     }
 
-    void AssignSpawnPosition()
-    {
-        DinosaurSetup dinosaurSetup = transform.GetComponent<DinosaurSetup>();
-        transform.position = dinosaurSetup.SpawnPos + Vector3.up * 10f;
-        transform.rotation = dinosaurSetup.SpawnRot;
-    }
-
-    void AddRB()
+    public void AddRB()
     {
         rb = gameObject.AddComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezeRotation;
         rb.useGravity = false;
-    }
-
-    void EnablePathfinding()
-    {
-        unitInstance.enabled = true;
     }
 
     void ApplyGravity()
@@ -67,7 +47,8 @@ public class DinosaurManager : MonoBehaviour
         if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
         {
             touchingGround = true;
-            rb.drag = groundedDrag;
+            rb.drag = dragGrounded;
+            gravity = 0;
         }
     }
 
@@ -77,32 +58,8 @@ public class DinosaurManager : MonoBehaviour
         {
             touchingGround = false;
             rb.drag = 0;
+            gravity = gravityFalling;
         }
     }
-
-    //void UpdateDinosaurPos()
-    //{
-    //    if (Input.GetKey(KeyCode.UpArrow))
-    //    {
-    //        rb.AddForce(transform.forward * speed * Time.deltaTime);
-    //    }
-
-    //    if (Input.GetKey(KeyCode.DownArrow))
-    //    {
-    //        rb.AddForce(-transform.forward * speed * Time.deltaTime);
-    //    }
-    //}
-
-    //void UpdateDinosaurRot()
-    //{
-    //    if (Input.GetKey(KeyCode.LeftArrow))
-    //    {
-    //        transform.Rotate(-Vector3.up * 100 * Time.deltaTime);
-    //    }
-    //    if (Input.GetKey(KeyCode.RightArrow))
-    //    {
-    //        transform.Rotate(Vector3.up * 100 * Time.deltaTime);
-    //    }
-    //}
 
 }

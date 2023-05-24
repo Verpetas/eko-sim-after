@@ -18,14 +18,16 @@ public class DinosaurSpawner : MonoBehaviour
 
     public void SpawnDinosaur(Dinosaur dinosaur, Vector3 spawnPos)
     {
-        GameObject dinosaurInstance = Instantiate(dinosaurBase);
+        Transform dinosaurInstance = Instantiate(dinosaurBase).transform;
         DinosaurSetup dinosaurSetup = dinosaurInstance.GetComponent<DinosaurSetup>();
         dinosaurSetup.Dinosaur = dinosaur;
         dinosaurSetup.SpawnPos = spawnPos;
         dinosaurSetup.SpawnRot = Quaternion.Euler(0, Random.Range(0, 360), 0);
         dinosaurSetup.enabled = true;
 
-        populationManager.AddDinosaur(dinosaurInstance.transform);
+        dinosaurInstance.parent = transform;
+
+        populationManager.AddDinosaur(dinosaurInstance);
     }
 
     public List<Dinosaur> GetDinosaurTypes()

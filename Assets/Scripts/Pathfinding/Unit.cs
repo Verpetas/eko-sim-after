@@ -42,7 +42,6 @@ public class Unit : MonoBehaviour {
 		}
         else
         {
-            Debug.Log("Path failed");
             StopCoroutine("FollowPath");
             DropTarget();
         }
@@ -74,7 +73,7 @@ public class Unit : MonoBehaviour {
 		while (true)
 		{
             Vector3 groundPoint = new Vector3();
-            if (Physics.Raycast(transform.position, -transform.up, out RaycastHit hit, 500f, groundMask))
+            if (Physics.Raycast(transform.position, -transform.up, out RaycastHit hit, Mathf.Infinity, groundMask))
             {
                 groundPoint = hit.point;
             }
@@ -134,6 +133,7 @@ public class Unit : MonoBehaviour {
     void DropTarget()
     {
         target = null;
+        path = null;
         populationManager.AddToIdle(transform);
     }
 
