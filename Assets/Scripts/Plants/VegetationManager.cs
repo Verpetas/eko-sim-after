@@ -7,6 +7,8 @@ public class VegetationManager : MonoBehaviour
     [SerializeField] List<Transform> spawnedPalmTrees;
     [SerializeField] List<Transform> coconutTrees;
 
+    [SerializeField] List<Transform> availableFood;
+
     private void Awake()
     {
         spawnedPalmTrees = new List<Transform>();
@@ -22,4 +24,20 @@ public class VegetationManager : MonoBehaviour
     {
         coconutTrees.Add(palmTree);
     }
+
+    public void AddToFood(List<Transform> addedFood)
+    {
+        availableFood.AddRange(addedFood);
+    }
+
+    public void RemoveFoodFromAvailable(Transform foodInstance)
+    {
+        availableFood.Remove(foodInstance);
+    }
+
+    public List<Transform> AvailableFood
+    {
+        get { return availableFood; }
+    }
+
 }

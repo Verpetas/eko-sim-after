@@ -4,73 +4,51 @@ using UnityEngine;
 
 public class PopulationManager : MonoBehaviour
 {
-    [SerializeField] float minMatchDstThreshold = 50f;
+    [SerializeField] float minPairDstThreshold = 50f;
 
     [SerializeField] List<Transform> spawnedDinosaurs = new List<Transform>();
-    [SerializeField] List<Transform> idleDinosaurs = new List<Transform>();
+    [SerializeField] Queue<Transform> availableDinosaurs = new Queue<Transform>();
 
-    float matchDstThresholdSqr; 
+    float pairDstThresholdSqr; 
 
     private void Awake()
     {
-        matchDstThresholdSqr = minMatchDstThreshold * minMatchDstThreshold;
+        pairDstThresholdSqr = minPairDstThreshold * minPairDstThreshold;
     }
 
     private void Start()
     {
-        StartCoroutine("TryFindMatch");
+        StartCoroutine(TryFindPair());
     }
 
-    IEnumerator TryFindMatch()
+    IEnumerator TryFindPair()
     {
         while (true)
         {
-            int idleDinosaurCount = idleDinosaurs.Count;
-
-            if (idleDinosaurCount > 1)
-            {
-                int firstDinosaurIndex;
-                int secondDinosaurIndex;
-
-                firstDinosaurIndex = secondDinosaurIndex = Random.Range(0, idleDinosaurCount);
-
-                while (firstDinosaurIndex == secondDinosaurIndex)
-                {
-                    secondDinosaurIndex = Random.Range(0, idleDinosaurCount);
-                }
-
-                Transform dinosaurFirst = idleDinosaurs[firstDinosaurIndex].transform;
-                Transform dinosaurSecond = idleDinosaurs[secondDinosaurIndex].transform;
-
-                if ((dinosaurFirst.position - dinosaurSecond.position).sqrMagnitude > matchDstThresholdSqr)
-                    CreateMatch(dinosaurFirst, dinosaurSecond);
-            }
+            if (availableDinosaurs.Count > 1)
+                CreatePair(availableDinosaurs.Dequeue(), availableDinosaurs.Dequeue());
 
             yield return new WaitForSeconds(0.5f);
         }
     }
 
-    void CreateMatch(Transform dinosaurFirst, Transform dinosaurSecond)
+    void CreatePair(Transform dinosaurFirst, Transform dinosaurSecond)
     {
         Unit unitInstanceFist = dinosaurFirst.GetComponent<Unit>();
         Unit unitInstanceSecond = dinosaurSecond.GetComponent<Unit>();
 
         unitInstanceFist.target = dinosaurSecond.transform;
         unitInstanceSecond.target = dinosaurFirst.transform;
-
-        idleDinosaurs.Remove(dinosaurFirst);
-        idleDinosaurs.Remove(dinosaurSecond);
     }
 
     public void AddDinosaur(Transform dinosaur)
     {
         spawnedDinosaurs.Add(dinosaur);
-        idleDinosaurs.Add(dinosaur);
     }
 
-    public void AddToIdle(Transform dinosaur)
+    public void AddDinosaurToAvailable(Transform dinosaur)
     {
-        idleDinosaurs.Add(dinosaur);
+        availableDinosaurs.Enqueue(dinosaur);
     }
 
 }

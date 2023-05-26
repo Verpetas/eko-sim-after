@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class Unit : MonoBehaviour {
 
@@ -8,7 +9,7 @@ public class Unit : MonoBehaviour {
 
     const float moveForce = 10000f;
 
-	public float waypointDistanceThreshold = 1.5f; 
+	public float waypointDistanceThreshold = 5f; 
 	public Transform target;
 	public float speed = 20f;
 	public float turnSpeed = 0.5f;
@@ -19,15 +20,23 @@ public class Unit : MonoBehaviour {
 	int targetIndex;
 	Rigidbody seekerRB;
     DinosaurManager dinosaurManager;
-    PopulationManager populationManager;
+    DinosaurSetup dinosaurSetup;
+
+    Action<bool, Transform> foodApproachCallback;
 
     void Start()
     {
         seekerRB = transform.GetComponent<Rigidbody>();
         dinosaurManager = transform.GetComponent<DinosaurManager>();
-        populationManager = GameObject.FindWithTag("PopulationManager").GetComponent<PopulationManager>();
+        dinosaurSetup = transform.GetComponent<DinosaurSetup>();
 
         StartCoroutine(UpdatePath());
+    }
+
+    public void SetFoodTarget(Transform target, Action<bool, Transform> approachCallback)
+    {
+        this.target = target;
+        this.foodApproachCallback = approachCallback;
     }
 
     public void OnPathFound(Vector3[] newPath, bool pathSuccessful)
@@ -43,7 +52,7 @@ public class Unit : MonoBehaviour {
         else
         {
             StopCoroutine("FollowPath");
-            DropTarget();
+            DropTarget(false);
         }
 	}
 
@@ -69,6 +78,7 @@ public class Unit : MonoBehaviour {
 
 	IEnumerator FollowPath()
 	{
+        float distanceThreshold = waypointDistanceThreshold;
 		Vector3 currentWaypoint = path[0];
 		while (true)
 		{
@@ -78,14 +88,19 @@ public class Unit : MonoBehaviour {
                 groundPoint = hit.point;
             }
 
-            if (Vector3.Distance(groundPoint, currentWaypoint) < waypointDistanceThreshold)
+            if (Vector3.Distance(groundPoint, currentWaypoint) < distanceThreshold)
             {
                 targetIndex ++;
-				if (targetIndex >= path.Length)
-				{
-                    DropTarget();
-					yield break;
-				}
+                if (targetIndex >= path.Length)
+                {
+                    DropTarget(true);
+                    yield break;
+                }
+                else if (targetIndex == path.Length - 1)
+                {
+                    distanceThreshold = dinosaurSetup.Dinosaur.Reach;
+                }
+
 				currentWaypoint = path[targetIndex];
 			}
 
@@ -130,11 +145,14 @@ public class Unit : MonoBehaviour {
         return forceDirection;
     }
 
-    void DropTarget()
+    void DropTarget(bool success)
     {
+        if (target.tag == "Food")
+            foodApproachCallback(success, target);
+
         target = null;
         path = null;
-        populationManager.AddToIdle(transform);
+        seekingTarget = false;
     }
 
     public void OnDrawGizmos() {

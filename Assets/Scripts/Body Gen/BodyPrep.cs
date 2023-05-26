@@ -14,8 +14,6 @@ public class BodyPrep : MonoBehaviour
     [SerializeField] float tailBounciness = 75f;
     [SerializeField] float tailDampness = 0.2f;
 
-    [SerializeField] Transform apple;
-
     MeshGen meshGen;
     int boneCount;
     float[] spineBendsGlobal;
@@ -29,6 +27,8 @@ public class BodyPrep : MonoBehaviour
     DinosaurSetup dinosaurSetup;
     DinosaurManager dinosaurManager;
     Dinosaur dinosaur;
+
+    ChainIKConstraint neckIK;
 
     private void Awake()
     {
@@ -216,15 +216,19 @@ public class BodyPrep : MonoBehaviour
         GameObject neckIKGO = new GameObject("ChainIK_Neck");
         neckIKGO.transform.parent = rig;
 
-        ChainIKConstraint neckIK = neckIKGO.AddComponent<ChainIKConstraint>();
-        neckIK.Reset();
+        GameObject headTarget = new GameObject("Target");
+        headTarget.transform.parent = neckIKGO.transform;
+        headTarget.transform.position = meshGen.boneTransforms[boneCount - 1].position;
 
+        neckIK = neckIKGO.AddComponent<ChainIKConstraint>();
+
+        neckIK.Reset();
         neckIK.weight = 0;
         neckIK.data.tip = meshGen.boneTransforms[boneCount - 1];
         neckIK.data.root = meshGen.boneTransforms[boneCount - dinosaur.neckLength - 1];
         neckIK.data.chainRotationWeight = 1;
         neckIK.data.tipRotationWeight = 0;
-        neckIK.data.target = apple;
+        neckIK.data.target = headTarget.transform;
 
         rigBuilder.Build();
     }
@@ -244,6 +248,7 @@ public class BodyPrep : MonoBehaviour
         dinosaurManager.enabled = true;
         dinosaurManager.AddRB();
         dinosaurManager.EnablePathfinding();
+        dinosaurManager.NeckIK = neckIK;
     }
 
 }

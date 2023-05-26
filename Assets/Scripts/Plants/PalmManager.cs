@@ -75,6 +75,7 @@ public class PalmManager : MonoBehaviour
             {
                 SpawnCoconuts();
                 vegetationManager.AddCoconutTree(transform);
+                vegetationManager.AddToFood(coconutInstances);
                 yield break;
             }
                 

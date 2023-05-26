@@ -21,6 +21,11 @@ public class Dinosaur : ScriptableObject
     public Vector2[] legWidths;
 
     public DinosaurWalkingProperties walkingProperties;
+
+    public float Reach
+    {
+        get { return neckLength * bodySize * 10f; }
+    }
 }
 
 [Serializable]
