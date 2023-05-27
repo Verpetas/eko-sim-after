@@ -68,7 +68,7 @@ public class DinosaurManager : MonoBehaviour
     {
         vegetationManager.RemoveFoodFromAvailable(food);
 
-        unitInstance.SetFoodTarget(food, OnFoodApproach);
+        unitInstance.SetTarget(food, OnFoodApproach);
         searching = true;
     }
 

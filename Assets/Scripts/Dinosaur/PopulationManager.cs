@@ -26,7 +26,8 @@ public class PopulationManager : MonoBehaviour
         while (true)
         {
             if (availableDinosaurs.Count > 1)
-                CreatePair(availableDinosaurs.Dequeue(), availableDinosaurs.Dequeue());
+                Debug.Log("Here creates pair");
+                //CreatePair(availableDinosaurs.Dequeue(), availableDinosaurs.Dequeue());
 
             yield return new WaitForSeconds(0.5f);
         }
@@ -34,11 +35,9 @@ public class PopulationManager : MonoBehaviour
 
     void CreatePair(Transform dinosaurFirst, Transform dinosaurSecond)
     {
-        Unit unitInstanceFist = dinosaurFirst.GetComponent<Unit>();
-        Unit unitInstanceSecond = dinosaurSecond.GetComponent<Unit>();
-
-        unitInstanceFist.target = dinosaurSecond.transform;
-        unitInstanceSecond.target = dinosaurFirst.transform;
+        DinosaurPair connection = gameObject.AddComponent<DinosaurPair>();
+        connection.DinosaurFirst = dinosaurFirst;
+        connection.DinosaurSecond = dinosaurSecond;
     }
 
     public void AddDinosaur(Transform dinosaur)

@@ -22,7 +22,7 @@ public class Unit : MonoBehaviour {
     DinosaurManager dinosaurManager;
     DinosaurSetup dinosaurSetup;
 
-    Action<bool, Transform> foodApproachCallback;
+    Action<bool, Transform> approachCallback;
 
     void Start()
     {
@@ -33,10 +33,10 @@ public class Unit : MonoBehaviour {
         StartCoroutine(UpdatePath());
     }
 
-    public void SetFoodTarget(Transform target, Action<bool, Transform> approachCallback)
+    public void SetTarget(Transform target, Action<bool, Transform> approachCallback)
     {
         this.target = target;
-        this.foodApproachCallback = approachCallback;
+        this.approachCallback = approachCallback;
     }
 
     public void OnPathFound(Vector3[] newPath, bool pathSuccessful)
@@ -52,7 +52,8 @@ public class Unit : MonoBehaviour {
         else
         {
             StopCoroutine("FollowPath");
-            DropTarget(false);
+            approachCallback(false, target);
+            DropTarget();
         }
 	}
 
@@ -93,10 +94,11 @@ public class Unit : MonoBehaviour {
                 targetIndex ++;
                 if (targetIndex >= path.Length)
                 {
-                    DropTarget(true);
+                    approachCallback(true, target);
+                    DropTarget();
                     yield break;
                 }
-                else if (targetIndex == path.Length - 1)
+                else if (targetIndex == path.Length - 1 && target.tag == "Food")
                 {
                     distanceThreshold = dinosaurSetup.Dinosaur.Reach;
                 }
@@ -145,11 +147,8 @@ public class Unit : MonoBehaviour {
         return forceDirection;
     }
 
-    void DropTarget(bool success)
+    void DropTarget()
     {
-        if (target.tag == "Food")
-            foodApproachCallback(success, target);
-
         target = null;
         path = null;
         seekingTarget = false;
