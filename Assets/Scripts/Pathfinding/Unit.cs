@@ -7,26 +7,28 @@ public class Unit : MonoBehaviour {
     const float minPathUpdateTime = 0.2f;
     const float pathUpdateMoveThreshold = 0.5f;
 
-    const float moveForce = 10000f;
-
-	public float waypointDistanceThreshold = 5f; 
-	public Transform target;
-	public float speed = 20f;
-	public float turnSpeed = 0.5f;
-	public LayerMask groundMask;
-    public bool seekingTarget = false;
+	public float waypointDistanceThreshold = 5f;
 
     Vector3[] path;
-	int targetIndex;
-	Rigidbody seekerRB;
+    int targetIndex;
+    public Transform target;
+    public bool seekingTarget = false;
+
+    LayerMask groundMask;
+
     DinosaurManager dinosaurManager;
     DinosaurSetup dinosaurSetup;
 
     Action<bool, Transform> approachCallback;
 
+    private void Awake()
+    {
+        int groundLayer = LayerMask.NameToLayer("Ground");
+        groundMask |= 1 << groundLayer;
+    }
+
     void Start()
     {
-        seekerRB = transform.GetComponent<Rigidbody>();
         dinosaurManager = transform.GetComponent<DinosaurManager>();
         dinosaurSetup = transform.GetComponent<DinosaurSetup>();
 
@@ -100,52 +102,17 @@ public class Unit : MonoBehaviour {
                 }
                 else if (targetIndex == path.Length - 1 && target.tag == "Food")
                 {
-                    distanceThreshold = dinosaurSetup.Dinosaur.Reach;
+                    distanceThreshold = dinosaurSetup.Dinosaur.Reach * dinosaurManager.currentGrowthAmount;
                 }
 
 				currentWaypoint = path[targetIndex];
 			}
 
-            if (dinosaurManager.touchingGround)
-            {
-                TurnTowardsWaypoint(currentWaypoint);
-
-                if (seekerRB.velocity.sqrMagnitude < speed)
-                    seekerRB.AddForce(DirectForce(transform.forward) * moveForce * Time.deltaTime);
-            }
+            dinosaurManager.Move(currentWaypoint);
 
             yield return null;
-
 		}
 	}
-
-    void TurnTowardsWaypoint(Vector3 target)
-    {
-        Vector3 direction = target - transform.position;
-        Vector3 targetDir = Vector3.ProjectOnPlane(direction, transform.up);
-        float angle = Vector3.SignedAngle(targetDir, transform.forward, transform.up);
-
-        if (angle > 0.5f)
-        {
-            transform.rotation = Quaternion.AngleAxis(-turnSpeed, transform.up) * transform.rotation;
-        }
-        else if (angle < -0.5f)
-        {
-            transform.rotation = Quaternion.AngleAxis(turnSpeed, transform.up) * transform.rotation;
-        }
-    }
-
-    Vector3 DirectForce(Vector3 waypoint)
-    {
-        Vector3 bodyUp = transform.up;
-        RaycastHit hit;
-        Physics.Raycast(transform.position, -bodyUp, out hit, 500f, groundMask);
-
-        Vector3 bodyDirection = Vector3.ProjectOnPlane(waypoint, bodyUp);
-        Vector3 forceDirection = (Quaternion.FromToRotation(bodyUp, hit.normal) * bodyDirection).normalized;
-
-        return forceDirection;
-    }
 
     void DropTarget()
     {

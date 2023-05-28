@@ -55,7 +55,7 @@ namespace DitzelGames.FastIK
             Init();
         }
 
-        void Init()
+        public void Init()
         {
             //initial array
             Bones = new Transform[ChainLength + 1];

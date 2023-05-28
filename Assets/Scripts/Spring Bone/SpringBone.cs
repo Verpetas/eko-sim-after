@@ -27,8 +27,6 @@ public class SpringBone : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        bodySize = transform.lossyScale.x;
-
         currentTipPos = transform.TransformPoint(springEnd);
         if (transform.parent != null) {
             parBone = transform.parent.GetComponentInParent<SpringBone>();
@@ -84,5 +82,11 @@ public class SpringBone : MonoBehaviour {
         transform.rotation =
             Quaternion.FromToRotation(transform.TransformDirection(springEnd), (currentTipPos - transform.position).normalized)
             * transform.rotation;
+    }
+
+    public float BodySize
+    {
+        get { return bodySize; }
+        set { bodySize = value; }
     }
 }

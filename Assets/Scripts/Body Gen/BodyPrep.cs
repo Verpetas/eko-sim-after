@@ -30,6 +30,8 @@ public class BodyPrep : MonoBehaviour
 
     ChainIKConstraint neckIK;
 
+    SpringBone[] tailSprings;
+
     private void Awake()
     {
         dinosaurSetup = wrapper.parent.GetComponent<DinosaurSetup>();
@@ -46,6 +48,8 @@ public class BodyPrep : MonoBehaviour
 
         dinosaurLayer = LayerMask.NameToLayer("Dinosaur");
         dinosaurLayerMask |= (1 << dinosaurLayer);
+
+        tailSprings = new SpringBone[dinosaur.tailLength];
     }
 
     void CalculateGlobalSpineBends()
@@ -60,6 +64,8 @@ public class BodyPrep : MonoBehaviour
 
     public void PrepareBody()
     {
+        meshGen.skinnedMeshRenderer.enabled = false;
+
         AdjustBodySize();
 
         for (int i = 0; i < boneCount; i++)
@@ -200,15 +206,17 @@ public class BodyPrep : MonoBehaviour
     {
         for (int i = 0; i < dinosaur.tailLength; i++)
         {
-            SpringBone springBone = meshGen.boneTransforms[i].AddComponent<SpringBone>();
+            tailSprings[i] = meshGen.boneTransforms[i].AddComponent<SpringBone>();
 
-            springBone.useSpecifiedRotation = true;
-            springBone.customRotation = meshGen.boneTransforms[i].localRotation.eulerAngles;
-            springBone.stiffness = tailStiffness;
-            springBone.bounciness = tailBounciness;
-            springBone.dampness = tailDampness;
-            springBone.springEnd = meshGen.boneTransforms[i].localRotation * -Vector3.forward * 50f;
+            tailSprings[i].useSpecifiedRotation = true;
+            tailSprings[i].customRotation = meshGen.boneTransforms[i].localRotation.eulerAngles;
+            tailSprings[i].stiffness = tailStiffness;
+            tailSprings[i].bounciness = tailBounciness;
+            tailSprings[i].dampness = tailDampness;
+            tailSprings[i].springEnd = meshGen.boneTransforms[i].localRotation * -Vector3.forward * 50f;
         }
+
+        UpdateTail(1f);
     }
 
     void AddNeckIK()
@@ -246,9 +254,26 @@ public class BodyPrep : MonoBehaviour
         dinosaurSetup.AssignSpawnPosition();
         
         dinosaurManager.enabled = true;
+        dinosaurManager.NeckIK = neckIK;
+        dinosaurManager.Body = this;
+
         dinosaurManager.AddRB();
         dinosaurManager.EnablePathfinding();
-        dinosaurManager.NeckIK = neckIK;
+    }
+
+    public void UpdateTail(float dinosaurGrowth)
+    {
+        foreach (SpringBone tailSpring in tailSprings)
+        {
+            tailSpring.BodySize = dinosaurGrowth * dinosaur.bodySize;
+        }
+
+        rigBuilder.Build();
+    }
+
+    public SkinnedMeshRenderer MeshRenderer
+    {
+        get { return meshGen.skinnedMeshRenderer; }
     }
 
 }

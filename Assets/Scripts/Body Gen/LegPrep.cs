@@ -18,9 +18,18 @@ public class LegPrep : MonoBehaviour
     float legPairSize;
     float legPairSizeRelative;
 
+    GameObject target;
+    GameObject hint;
+    FastIKFabric legIK;
+    IKFootSolver legIKSolver;
+
+    DinosaurManager dinosaurManager;
+
     private void Awake()
     {
-        dinosaur = bodyRoot.parent.parent.GetComponent<DinosaurSetup>().Dinosaur;
+        Transform topMost = bodyRoot.parent.parent;
+        dinosaur = topMost.GetComponent<DinosaurSetup>().Dinosaur;
+        dinosaurManager = topMost.GetComponent<DinosaurManager>();
 
         meshGen = GetComponent<MeshGen>();
         boneCount = dinosaur.legWidths.Length;
@@ -28,6 +37,8 @@ public class LegPrep : MonoBehaviour
 
     public void PrepareLeg()
     {
+        meshGen.skinnedMeshRenderer.enabled = false;
+
         legRoot = transform.Find("Root");
 
         legPairSize = GetLegPairSize();
@@ -41,6 +52,8 @@ public class LegPrep : MonoBehaviour
 
         AddTipBone();
         SetUpIK();
+
+        dinosaurManager.Leg = this;
     }
 
     float GetLegPairSize()
@@ -85,42 +98,61 @@ public class LegPrep : MonoBehaviour
         GameObject legIKGO = new GameObject("2BoneIK_" + gameObject.name + "_" + legPairNo);
         legIKGO.transform.SetParent(rig);
 
-        GameObject target = new GameObject("Target");
+        target = new GameObject("Target");
         target.transform.SetParent(legIKGO.transform);
 
-        GameObject hint = new GameObject("Hint");
+        hint = new GameObject("Hint");
         hint.transform.SetParent(legIKGO.transform);
 
-        AssignLegIKConstraint(target, hint);
-        AssignIKLegSolver(target);
+        AssignLegIKConstraint();
+        AssignIKLegSolver();
+        AssignWalkProperties(1f);
     }
 
-    void AssignLegIKConstraint(GameObject target, GameObject hint)
+    void AssignLegIKConstraint()
     {
-        FastIKFabric legIK = tipBone.AddComponent<FastIKFabric>();
+        legIK = tipBone.AddComponent<FastIKFabric>();
         Destroy(legIK.Target.gameObject); // removes redundant target
         legIK.Target = target.transform;
         legIK.Pole = hint.transform;
     }
 
-    void AssignIKLegSolver(GameObject target)
+    void AssignIKLegSolver()
     {
-        IKFootSolver legIKSolver = target.AddComponent<IKFootSolver>();
+        legIKSolver = target.AddComponent<IKFootSolver>();
         legIKSolver.legRoot = legRoot;
         legIKSolver.bodyRoot = bodyRoot;
-        AssignWalkProperties(legIKSolver);
     }
 
-    void AssignWalkProperties(IKFootSolver legIKSolver)
+    void AssignWalkProperties(float growth)
     {
         legIKSolver.AssignWalkProperties(
             dinosaur.walkingProperties.stepSpeed,
-            dinosaur.walkingProperties.stepDistance * dinosaur.bodySize * legPairSizeRelative,
-            dinosaur.walkingProperties.stepLength * dinosaur.bodySize * legPairSizeRelative,
-            dinosaur.walkingProperties.stepHeight * dinosaur.bodySize * legPairSizeRelative,
+            dinosaur.walkingProperties.stepDistance * dinosaur.bodySize * legPairSizeRelative * growth,
+            dinosaur.walkingProperties.stepLength * dinosaur.bodySize * legPairSizeRelative * growth,
+            dinosaur.walkingProperties.stepHeight * dinosaur.bodySize * legPairSizeRelative * growth,
             dinosaur.walkingProperties.footOffset,
             dinosaur.walkingProperties.bodyBobAmount * dinosaur.bodySize
             );
+    }
+
+    public void UpdateLegs(float dinosaurGrowth)
+    {
+        legIKSolver.enabled = false;
+        legIK.enabled = false;
+
+        meshGen.boneTransforms[0].localRotation = meshGen.boneTransforms[1].localRotation = tipBone.transform.localRotation = Quaternion.identity;
+
+        legIK.Init();
+        legIK.enabled = true;
+        legIKSolver.enabled = true;
+
+        AssignWalkProperties(dinosaurGrowth);
+    }
+
+    public SkinnedMeshRenderer MeshRenderer
+    {
+        get { return meshGen.skinnedMeshRenderer; }
     }
 
 }

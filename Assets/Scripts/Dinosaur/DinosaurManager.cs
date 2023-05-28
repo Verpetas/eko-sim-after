@@ -8,11 +8,20 @@ using UnityEngine.Animations.Rigging;
 
 public class DinosaurManager : MonoBehaviour
 {
-    [SerializeField] float neckSpeed = 1f; 
+    [SerializeField] float neckSpeed = 1f;
+    [SerializeField] float growSpeed = 1f;
+    [SerializeField] float subsequentGrowAmountRatio = 1.05f;
+    public float currentGrowthAmount = 1f;
+
+    [SerializeField] float speed = 20f;
+    [SerializeField] float turnSpeed = 0.5f;
+    const float moveForce = 10000f;
 
     public bool touchingGround = false;
     float gravityFalling = -5f;
     float dragGrounded = 1;
+
+    LayerMask groundMask;
 
     float gravity;
     Rigidbody rb;
@@ -26,6 +35,9 @@ public class DinosaurManager : MonoBehaviour
 
     ChainIKConstraint neckIK;
 
+    BodyPrep body;
+    List<LegPrep> legs;
+
     private void Awake()
     {
         unitInstance = transform.GetComponent<Unit>();
@@ -33,17 +45,53 @@ public class DinosaurManager : MonoBehaviour
         vegetationManager = GameObject.FindWithTag("VegetationManager").GetComponent<VegetationManager>();
 
         gravity = gravityFalling;
+
+        body = new BodyPrep();
+        legs = new List<LegPrep>();
+
+        int groundLayer = LayerMask.NameToLayer("Ground");
+        groundMask |= 1 << groundLayer;
     }
 
     private void Start()
     {
+        StartCoroutine(Grow());
         StartCoroutine(TryFindFood());
         StartCoroutine(CheckReadyToPair());
+
+        UpdateDinosaurScale(currentGrowthAmount);
+        MakeBodyVisible();
     }
 
     void Update()
     {
         ApplyGravity();
+    }
+
+    IEnumerator Grow()
+    {
+        while (true)
+        {
+            yield return null; //new WaitForSeconds(1f / growSpeed);
+
+            if (Input.GetKeyDown(KeyCode.Z))
+            {
+                currentGrowthAmount *= subsequentGrowAmountRatio;
+                UpdateDinosaurScale(currentGrowthAmount);
+            }
+        }
+    }
+
+    void UpdateDinosaurScale(float scale)
+    {
+        transform.localScale = Vector3.one * scale;
+
+        body.UpdateTail(scale);
+
+        foreach (LegPrep leg in legs)
+        {
+            leg.UpdateLegs(scale);
+        }
     }
 
     IEnumerator TryFindFood()
@@ -153,6 +201,54 @@ public class DinosaurManager : MonoBehaviour
         searching = false;
     }
 
+    public void Move(Vector3 waypoint)
+    {
+        if (touchingGround)
+        {
+            TurnTowardsWaypoint(waypoint);
+
+            if (rb.velocity.sqrMagnitude < speed * currentGrowthAmount)
+                rb.AddForce(DirectMoveForce(transform.forward) * moveForce * Time.deltaTime);
+        }
+    }
+
+    void TurnTowardsWaypoint(Vector3 target)
+    {
+        Vector3 direction = target - transform.position;
+        Vector3 targetDir = Vector3.ProjectOnPlane(direction, transform.up);
+        float angle = Vector3.SignedAngle(targetDir, transform.forward, transform.up);
+
+        if (angle > 0.5f)
+        {
+            transform.rotation = Quaternion.AngleAxis(-turnSpeed, transform.up) * transform.rotation;
+        }
+        else if (angle < -0.5f)
+        {
+            transform.rotation = Quaternion.AngleAxis(turnSpeed, transform.up) * transform.rotation;
+        }
+    }
+
+    Vector3 DirectMoveForce(Vector3 waypoint)
+    {
+        Vector3 bodyUp = transform.up;
+        RaycastHit hit;
+        Physics.Raycast(transform.position, -bodyUp, out hit, 500f, groundMask);
+
+        Vector3 bodyDirection = Vector3.ProjectOnPlane(waypoint, bodyUp);
+        Vector3 forceDirection = (Quaternion.FromToRotation(bodyUp, hit.normal) * bodyDirection).normalized;
+
+        return forceDirection;
+    }
+
+    void MakeBodyVisible()
+    {
+        body.MeshRenderer.enabled = true;
+        foreach (LegPrep leg in legs)
+        {
+            leg.MeshRenderer.enabled = true;
+        }
+    }
+
     public void EnablePathfinding()
     {
         unitInstance.enabled = true;
@@ -173,6 +269,16 @@ public class DinosaurManager : MonoBehaviour
     public ChainIKConstraint NeckIK
     {
         set { neckIK = value; }
+    }
+
+    public BodyPrep Body
+    {
+        set { body = value; }
+    }
+
+    public LegPrep Leg
+    {
+        set { legs.Add(value); }
     }
 
     private void OnCollisionStay(Collision collision)
