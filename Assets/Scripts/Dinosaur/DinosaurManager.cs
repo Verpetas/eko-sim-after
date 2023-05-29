@@ -36,7 +36,7 @@ public class DinosaurManager : MonoBehaviour
     ChainIKConstraint neckIK;
 
     BodyPrep body;
-    List<LegPrep> legs;
+    LegPrep[] legs;
 
     private void Awake()
     {
@@ -46,15 +46,15 @@ public class DinosaurManager : MonoBehaviour
 
         gravity = gravityFalling;
 
-        body = new BodyPrep();
-        legs = new List<LegPrep>();
-
         int groundLayer = LayerMask.NameToLayer("Ground");
         groundMask |= 1 << groundLayer;
     }
 
     private void Start()
     {
+        body = gameObject.GetComponentsInChildren<BodyPrep>()[0];
+        legs = gameObject.GetComponentsInChildren<LegPrep>();
+
         StartCoroutine(Grow());
         StartCoroutine(TryFindFood());
         StartCoroutine(CheckReadyToPair());
@@ -240,6 +240,13 @@ public class DinosaurManager : MonoBehaviour
         return forceDirection;
     }
 
+    public void FinishPairing()
+    {
+        Debug.Log("Finished pairing");
+        //hungry = true;
+        //searching = false;
+    }
+
     void MakeBodyVisible()
     {
         body.MeshRenderer.enabled = true;
@@ -269,16 +276,6 @@ public class DinosaurManager : MonoBehaviour
     public ChainIKConstraint NeckIK
     {
         set { neckIK = value; }
-    }
-
-    public BodyPrep Body
-    {
-        set { body = value; }
-    }
-
-    public LegPrep Leg
-    {
-        set { legs.Add(value); }
     }
 
     private void OnCollisionStay(Collision collision)

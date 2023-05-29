@@ -26,8 +26,7 @@ public class PopulationManager : MonoBehaviour
         while (true)
         {
             if (availableDinosaurs.Count > 1)
-                Debug.Log("Here creates pair");
-                //CreatePair(availableDinosaurs.Dequeue(), availableDinosaurs.Dequeue());
+                CreatePair(availableDinosaurs.Dequeue(), availableDinosaurs.Dequeue());
 
             yield return new WaitForSeconds(0.5f);
         }

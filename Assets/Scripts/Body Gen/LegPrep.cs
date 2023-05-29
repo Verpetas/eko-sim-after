@@ -53,7 +53,7 @@ public class LegPrep : MonoBehaviour
         AddTipBone();
         SetUpIK();
 
-        dinosaurManager.Leg = this;
+        //dinosaurManager.Leg = this;
     }
 
     float GetLegPairSize()
@@ -61,17 +61,17 @@ public class LegPrep : MonoBehaviour
         string legPairName = transform.parent.name;
         int legPairIndex = legPairName[legPairName.Length - 1] - '0';
 
-        return dinosaur.legPairSizes[legPairIndex];
+        return dinosaur.legPairSizeRatios[legPairIndex] * dinosaur.bodySize;
     }
 
     float GetLegPairSizeRelative(float currentPairSize)
     {
         float legPairSizeRelative = 1f;
 
-        for (int i = 0; i < dinosaur.legPairSizes.Count; i++)
+        for (int i = 0; i < dinosaur.legPairSizeRatios.Count; i++)
         {
-            if (dinosaur.legPairSizes[i] > currentPairSize)
-                legPairSizeRelative = currentPairSize / dinosaur.legPairSizes[i];
+            if (dinosaur.legPairSizeRatios[i] > currentPairSize)
+                legPairSizeRelative = currentPairSize / dinosaur.legPairSizeRatios[i];
         }
 
         return legPairSizeRelative;
@@ -131,7 +131,6 @@ public class LegPrep : MonoBehaviour
             dinosaur.walkingProperties.stepDistance * dinosaur.bodySize * legPairSizeRelative * growth,
             dinosaur.walkingProperties.stepLength * dinosaur.bodySize * legPairSizeRelative * growth,
             dinosaur.walkingProperties.stepHeight * dinosaur.bodySize * legPairSizeRelative * growth,
-            dinosaur.walkingProperties.footOffset,
             dinosaur.walkingProperties.bodyBobAmount * dinosaur.bodySize
             );
     }

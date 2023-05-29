@@ -255,7 +255,7 @@ public class BodyPrep : MonoBehaviour
         
         dinosaurManager.enabled = true;
         dinosaurManager.NeckIK = neckIK;
-        dinosaurManager.Body = this;
+        //dinosaurManager.Body = this;
 
         dinosaurManager.AddRB();
         dinosaurManager.EnablePathfinding();

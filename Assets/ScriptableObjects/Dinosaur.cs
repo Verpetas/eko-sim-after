@@ -8,7 +8,7 @@ public class Dinosaur : ScriptableObject
 {
     public bool bipedal;
     public List<int> legBoneIndices;
-    public List<float> legPairSizes;
+    public List<float> legPairSizeRatios;
     public Vector2 colliderSize;
     public float bodySize;
 
@@ -21,6 +21,21 @@ public class Dinosaur : ScriptableObject
     public Vector2[] legWidths;
 
     public DinosaurWalkingProperties walkingProperties;
+
+    public void Init(bool bipedal, List<int> legBoneIndices, List<float> legPairSizeRatios, Vector2 colliderSize, float bodySize, int tailLength, int neckLength, float[] spineBends, Vector2[] spineWidths, Vector2[] legWidths, DinosaurWalkingProperties walkingProperties)
+    {
+        this.bipedal = bipedal;
+        this.legBoneIndices = legBoneIndices;
+        this.legPairSizeRatios = legPairSizeRatios;
+        this.colliderSize = colliderSize;
+        this.bodySize = bodySize;
+        this.tailLength = tailLength;
+        this.neckLength = neckLength;
+        this.spineBends = spineBends;
+        this.spineWidths = spineWidths;
+        this.legWidths = legWidths;
+        this.walkingProperties = walkingProperties;
+    }
 
     public float Reach
     {
@@ -35,6 +50,16 @@ public class DinosaurWalkingProperties
     public float stepDistance;
     public float stepLength;
     public float stepHeight;
-    public Vector3 footOffset;
+    //public Vector3 footOffset;
     public float bodyBobAmount;
+
+    public DinosaurWalkingProperties(float stepSpeed, float stepDistance, float stepLength, float stepHeight, float bodyBobAmount)
+    {
+        this.stepSpeed = stepSpeed;
+        this.stepDistance = stepDistance;
+        this.stepLength = stepLength;
+        this.stepHeight = stepHeight;
+        this.bodyBobAmount = bodyBobAmount;
+    }
+
 }

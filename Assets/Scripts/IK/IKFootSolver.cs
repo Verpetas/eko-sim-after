@@ -45,13 +45,12 @@ public class IKFootSolver : MonoBehaviour
         lerp = 1;
     }
 
-    public void AssignWalkProperties(float speed, float stepDistance, float stepLength, float stepHeight, Vector3 footOffset, float bodyBobAmount)
+    public void AssignWalkProperties(float speed, float stepDistance, float stepLength, float stepHeight, float bodyBobAmount)
     {
         this.speed = speed;
         this.stepDistance = stepDistance;
         this.stepLength = stepLength;
         this.stepHeight = stepHeight;
-        this.footOffset = footOffset;
         this.bodyBobAmount = bodyBobAmount;
     }
 
