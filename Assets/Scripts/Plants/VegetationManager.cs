@@ -1,18 +1,30 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class VegetationManager : MonoBehaviour
 {
     [SerializeField] List<Transform> spawnedPalmTrees;
-    [SerializeField] List<Transform> coconutTrees;
+    public bool plantsAutoGrow = false;
 
-    [SerializeField] List<Transform> availableFood;
+    List<CoconutTree> coconutTrees;
 
     private void Awake()
     {
         spawnedPalmTrees = new List<Transform>();
-        coconutTrees = new List<Transform>();
+        coconutTrees = new List<CoconutTree>();
+    }
+
+    private void Update()
+    {
+        HandlePlantAoutGrowToggle();
+    }
+
+    void HandlePlantAoutGrowToggle()
+    {
+        if (Input.GetKeyDown(KeyCode.X))
+            plantsAutoGrow = !plantsAutoGrow;
     }
 
     public void AddPalmTree(Transform palmTree)
@@ -20,24 +32,56 @@ public class VegetationManager : MonoBehaviour
         spawnedPalmTrees.Add(palmTree);
     }
 
-    public void AddCoconutTree(Transform palmTree)
+    public void AddCoconutTree(CoconutTree coconutTree)
     {
-        coconutTrees.Add(palmTree);
+        coconutTrees.Add(coconutTree);
     }
 
-    public void AddToFood(List<Transform> addedFood)
+    public void RemoveCoconutTree(CoconutTree coconutTree)
     {
-        availableFood.AddRange(addedFood);
+        coconutTrees.Remove(coconutTree);
     }
 
-    public void RemoveFoodFromAvailable(Transform foodInstance)
+    public List<CoconutTree> CoconutTrees
     {
-        availableFood.Remove(foodInstance);
+        get { return coconutTrees; }
+    }
+}
+
+
+public class CoconutTree
+{
+    Transform tree;
+    List<Transform> coconuts;
+
+    VegetationManager vegetationManager;
+
+    public CoconutTree(Transform tree, List<Transform> coconuts)
+    {
+        this.tree = tree;
+        this.coconuts = coconuts;
+
+        vegetationManager = GameObject.FindWithTag("VegetationManager").GetComponent<VegetationManager>();
     }
 
-    public List<Transform> AvailableFood
+    public Transform PickRandomCoconut()
     {
-        get { return availableFood; }
+        int randomCoconutIndex = Random.Range(0, coconuts.Count);
+        Transform pickedCoconut = coconuts[randomCoconutIndex];
+
+        coconuts.Remove(pickedCoconut);
+        if (coconuts.Count < 1) vegetationManager.RemoveCoconutTree(this);
+
+        return pickedCoconut;
     }
 
+    public Transform Tree
+    {
+        get { return tree; }
+    }
+
+    public List<Transform> Coconuts
+    {
+        get { return coconuts; }
+    }
 }

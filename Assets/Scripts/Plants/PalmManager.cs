@@ -74,12 +74,11 @@ public class PalmManager : MonoBehaviour
             if (visibleSegmentCount == segmentCount)
             {
                 SpawnCoconuts();
-                vegetationManager.AddCoconutTree(transform);
-                vegetationManager.AddToFood(coconutInstances);
+                CreateCoconutTree();
                 yield break;
             }
                 
-            if (beingWatered)
+            if (beingWatered || vegetationManager.plantsAutoGrow)
             {
                 StartCoroutine(PopObject(trunkSegments[segmentIndex]));
 
@@ -208,7 +207,7 @@ public class PalmManager : MonoBehaviour
 
     void SpawnCoconuts()
     {
-        int coconutCount = UnityEngine.Random.Range(1, 3);
+        int coconutCount = UnityEngine.Random.Range(1, 4);
         Transform trunkTop = trunkSegments[segmentCount - 1];
 
         for (int i = 0; i < coconutCount; i++)
@@ -221,6 +220,12 @@ public class PalmManager : MonoBehaviour
 
             coconutInstances.Add(coconutInstance);
         }
+    }
+
+    void CreateCoconutTree()
+    {
+        CoconutTree coconutTree = new CoconutTree(transform, coconutInstances);
+        vegetationManager.AddCoconutTree(coconutTree);
     }
 
     static Vector3 RandomVector(float offset)

@@ -115,39 +115,46 @@ public class DinosaurPair : MonoBehaviour
         List<int> legBoneIndices = new List<int>();
         List<float> legPairSizeRatios = new List<float>();
 
-        int mergedLegPairCount; // how many leg pairs are going to be sampled from both dinosaurs
-        if (!dinosaurFirst.bipedal && !dinosaurSecond.bipedal)
+        int legPairCount;
+        float legPairSizeRatio;
+
+        if (dinosaurFirst.bipedal == dinosaurSecond.bipedal)
         {
-            mergedLegPairCount = 2;
-            bipedal = false;
+            legPairCount = dinosaurFirst.legBoneIndices.Count;
+            bipedal = dinosaurFirst.bipedal;
+
+            for (int i = 0; i < legPairCount; i++)
+            {
+                legPairSizeRatio = DetermineHeredity(dinosaurFirst.legPairSizeRatios[i], dinosaurSecond.legPairSizeRatios[i]);
+                legPairSizeRatios.Add(legPairSizeRatio);
+            }
+
+            legBoneIndices = (Random.value > 0.5f) ? dinosaurFirst.legBoneIndices : dinosaurSecond.legBoneIndices;
         }
         else
-            mergedLegPairCount = 1;
-
-
-        for (int i = 0; i < mergedLegPairCount; i++)
         {
-            int legBoneIndex = Mathf.RoundToInt(DetermineHeredity(dinosaurFirst.legBoneIndices[i], dinosaurSecond.legBoneIndices[i]));
-            legBoneIndices.Add(legBoneIndex);
-
-            float legPairSizeRatio = DetermineHeredity(dinosaurFirst.legPairSizeRatios[i], dinosaurSecond.legPairSizeRatios[i]);
+            legPairSizeRatio = DetermineHeredity(dinosaurFirst.legPairSizeRatios[0], dinosaurSecond.legPairSizeRatios[0]);
             legPairSizeRatios.Add(legPairSizeRatio);
+
+            Dinosaur fourLeggedDinosaur = !dinosaurFirst.bipedal ? dinosaurFirst : dinosaurSecond;
+            Dinosaur twoLeggedDinosaur = dinosaurFirst.bipedal ? dinosaurFirst : dinosaurSecond;
+
+            if (Random.value > 0.5f) // 50/50 chance that 2 and 4 - legged dinosaurs combo will result in either
+            {
+                bipedal = false;
+
+                legPairSizeRatio = fourLeggedDinosaur.legPairSizeRatios[1];
+                legPairSizeRatios.Add(legPairSizeRatio);
+
+                legBoneIndices = fourLeggedDinosaur.legBoneIndices;
+            }
+            else
+            {
+                bipedal = true;
+                legBoneIndices = twoLeggedDinosaur.legBoneIndices;
+            }    
         }
-
-        Dinosaur fourLeggedDinosaur;
-        if (!(dinosaurFirst.bipedal && dinosaurSecond.bipedal) && Random.value > 0.5f) // 50/50 chance that 2 and 4 - legged dinosaurs combo will result in either
-        {
-            bipedal = false;
-
-            fourLeggedDinosaur = !dinosaurFirst.bipedal ? dinosaurFirst : dinosaurSecond;
-
-            int legBoneIndex = Mathf.RoundToInt(DetermineHeredity(fourLeggedDinosaur.legBoneIndices[1], fourLeggedDinosaur.legBoneIndices[1]));
-            legBoneIndices.Add(legBoneIndex);
-
-            float legPairSizeRatio = DetermineHeredity(fourLeggedDinosaur.legPairSizeRatios[1], fourLeggedDinosaur.legPairSizeRatios[1]);
-            legPairSizeRatios.Add(legPairSizeRatio);
-        }
-        else bipedal = true;
+        
 
         // determine walk properties
         heredityRatio = Random.Range(0.25f, 0.75f);

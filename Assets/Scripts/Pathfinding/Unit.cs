@@ -53,8 +53,10 @@ public class Unit : MonoBehaviour {
 		}
         else
         {
+            bool success = newPath.Length == 0;
+
+            approachCallback(success, target);
             StopCoroutine("FollowPath");
-            approachCallback(false, target);
             DropTarget();
         }
 	}
@@ -102,7 +104,7 @@ public class Unit : MonoBehaviour {
                 }
                 else if (targetIndex == path.Length - 1 && target.tag == "Food")
                 {
-                    distanceThreshold = dinosaurSetup.Dinosaur.Reach * dinosaurManager.currentGrowthAmount;
+                    distanceThreshold = dinosaurSetup.Dinosaur.Reach * dinosaurManager.CurrentGrowth;
                 }
 
 				currentWaypoint = path[targetIndex];

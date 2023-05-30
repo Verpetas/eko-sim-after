@@ -2,19 +2,29 @@ using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
 public class DinosaurManager : MonoBehaviour
 {
-    [SerializeField] float neckSpeed = 1f;
-    [SerializeField] float growSpeed = 1f;
-    [SerializeField] float subsequentGrowAmountRatio = 1.05f;
-    public float currentGrowthAmount = 1f;
+    [SerializeField] float startingGrowth = 0.85f;
+    [SerializeField] float maxGrowth = 1.3f;
 
     [SerializeField] float speed = 20f;
     [SerializeField] float turnSpeed = 0.5f;
+    [SerializeField] float neckSpeed = 1f;
+
+    [SerializeField] int hungerBars = 3;
+
+    float currentGrowth;
+    float growthInterval;
+    bool fullyGrown = false;
+
+    int currentHunger;
+    bool searching = false;
+
     const float moveForce = 10000f;
 
     public bool touchingGround = false;
@@ -30,13 +40,12 @@ public class DinosaurManager : MonoBehaviour
     VegetationManager vegetationManager;
     PopulationManager populationManager;
 
-    bool hungry = true;
-    bool searching = false;
-
     ChainIKConstraint neckIK;
 
     BodyPrep body;
     LegPrep[] legs;
+
+    CoconutTree lastPickedCocoTree;
 
     private void Awake()
     {
@@ -48,6 +57,10 @@ public class DinosaurManager : MonoBehaviour
 
         int groundLayer = LayerMask.NameToLayer("Ground");
         groundMask |= 1 << groundLayer;
+
+        currentHunger = hungerBars;
+        currentGrowth = startingGrowth;
+        growthInterval = (maxGrowth - startingGrowth) / hungerBars;
     }
 
     private void Start()
@@ -55,11 +68,10 @@ public class DinosaurManager : MonoBehaviour
         body = gameObject.GetComponentsInChildren<BodyPrep>()[0];
         legs = gameObject.GetComponentsInChildren<LegPrep>();
 
-        StartCoroutine(Grow());
         StartCoroutine(TryFindFood());
         StartCoroutine(CheckReadyToPair());
 
-        UpdateDinosaurScale(currentGrowthAmount);
+        UpdateDinosaurScale(currentGrowth);
         MakeBodyVisible();
     }
 
@@ -68,18 +80,12 @@ public class DinosaurManager : MonoBehaviour
         ApplyGravity();
     }
 
-    IEnumerator Grow()
+    void Grow()
     {
-        while (true)
-        {
-            yield return null; //new WaitForSeconds(1f / growSpeed);
+        currentGrowth += growthInterval;
+        UpdateDinosaurScale(currentGrowth);
 
-            if (Input.GetKeyDown(KeyCode.Z))
-            {
-                currentGrowthAmount *= subsequentGrowAmountRatio;
-                UpdateDinosaurScale(currentGrowthAmount);
-            }
-        }
+        if (Mathf.Abs(maxGrowth - currentGrowth) < 0.01f) fullyGrown = true;
     }
 
     void UpdateDinosaurScale(float scale)
@@ -98,24 +104,42 @@ public class DinosaurManager : MonoBehaviour
     {
         while (true)
         {
-            int foodInstanceCount = vegetationManager.AvailableFood.Count;
-
-            if (foodInstanceCount > 0 && hungry && !searching)
-            {
-                int randomFoodIndex = Random.Range(0, foodInstanceCount);
-                Transform foundFood = vegetationManager.AvailableFood[randomFoodIndex];
-
-                RouteToFood(foundFood);
-            }
-
             yield return new WaitForSeconds(0.5f);
+
+            if (vegetationManager.CoconutTrees.Any() && currentHunger > 0 && !searching)
+            {
+                CoconutTree foundCocoTree = FindClosestCocoTree();
+                if (foundCocoTree != null)
+                    RouteToFood(foundCocoTree.PickRandomCoconut());
+
+                lastPickedCocoTree = foundCocoTree;
+            }
         }
+    }
+
+    CoconutTree FindClosestCocoTree()
+    {
+        int cocoTreeCount = vegetationManager.CoconutTrees.Count;
+
+        CoconutTree closestTree = null;
+        float shortestSqrDst = float.MaxValue;
+
+        for (int i = 0; i < cocoTreeCount; i++)
+        {
+            CoconutTree currCocoTree = vegetationManager.CoconutTrees[i];
+            float sqrDstToTree = Vector3.SqrMagnitude(transform.position - currCocoTree.Tree.position);
+            if (sqrDstToTree < shortestSqrDst && currCocoTree != lastPickedCocoTree)
+            {
+                shortestSqrDst = sqrDstToTree;
+                closestTree = currCocoTree;
+            }
+        }
+
+        return closestTree;
     }
 
     void RouteToFood(Transform food)
     {
-        vegetationManager.RemoveFoodFromAvailable(food);
-
         unitInstance.SetTarget(food, OnFoodApproach);
         searching = true;
     }
@@ -183,7 +207,7 @@ public class DinosaurManager : MonoBehaviour
     {
         while (true)
         {
-            if (!hungry && !searching)
+            if (currentHunger < 1 && !searching)
             {
                 populationManager.AddDinosaurToAvailable(transform);
                 searching = true;
@@ -197,7 +221,9 @@ public class DinosaurManager : MonoBehaviour
     {
         Destroy(food.gameObject);
 
-        hungry = false;
+        if (!fullyGrown) Grow();
+
+        currentHunger--;
         searching = false;
     }
 
@@ -207,7 +233,7 @@ public class DinosaurManager : MonoBehaviour
         {
             TurnTowardsWaypoint(waypoint);
 
-            if (rb.velocity.sqrMagnitude < speed * currentGrowthAmount)
+            if (rb.velocity.sqrMagnitude < speed * currentGrowth)
                 rb.AddForce(DirectMoveForce(transform.forward) * moveForce * Time.deltaTime);
         }
     }
@@ -242,9 +268,8 @@ public class DinosaurManager : MonoBehaviour
 
     public void FinishPairing()
     {
-        Debug.Log("Finished pairing");
-        //hungry = true;
-        //searching = false;
+        currentHunger = hungerBars;
+        searching = false;
     }
 
     void MakeBodyVisible()
@@ -276,6 +301,11 @@ public class DinosaurManager : MonoBehaviour
     public ChainIKConstraint NeckIK
     {
         set { neckIK = value; }
+    }
+
+    public float CurrentGrowth
+    {
+        get { return currentGrowth; }
     }
 
     private void OnCollisionStay(Collision collision)
