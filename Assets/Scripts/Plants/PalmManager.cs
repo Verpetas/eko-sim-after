@@ -6,6 +6,7 @@ using Unity.VisualScripting;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using static UnityEditor.Progress;
 
 public class PalmManager : MonoBehaviour
 {
@@ -80,8 +81,6 @@ public class PalmManager : MonoBehaviour
                 
             if (beingWatered || vegetationManager.plantsAutoGrow)
             {
-                StartCoroutine(PopObject(trunkSegments[segmentIndex]));
-
                 if (segmentIndex >= visibleSegmentCount)
                 {
                     trunkSegments[visibleSegmentCount].gameObject.SetActive(true);
@@ -91,7 +90,13 @@ public class PalmManager : MonoBehaviour
 
                     segmentIndex = 0;
                 }
-                else segmentIndex++;
+                else
+                {
+                    if (segmentIndex < visibleSegmentCount - 1)
+                        StartCoroutine(PopItem(trunkSegments[segmentIndex]));
+
+                    segmentIndex++;
+                }
             }
 
             yield return new WaitForSeconds(0.2f / growSpeed);
@@ -105,24 +110,24 @@ public class PalmManager : MonoBehaviour
 
         float leafSize = 0.5f + 0.5f * ((float)currentSegmentIndex / segmentCount);
         leaves.localScale = Vector3.one * leafSize;
-        StartCoroutine(PopObject(leaves));
+        StartCoroutine(PopItem(leaves));
     }
 
-    IEnumerator PopObject(Transform segment)
+    IEnumerator PopItem(Transform item)
     {
         float startTime = Time.time;
-        Vector3 startScale = segment.localScale;
+        Vector3 startScale = item.localScale;
         Vector3 peakScale = startScale * 2f;
 
         while (true)
         {
             float elapsedTime = Time.time - startTime;
             float popStage = (elapsedTime * growSpeed) / segmentPopDuration;
-            segment.localScale = Vector3.Lerp(startScale, peakScale, popCurve.Evaluate(popStage));
+            item.localScale = Vector3.Lerp(startScale, peakScale, popCurve.Evaluate(popStage));
 
             if (popStage > 1)
             {
-                segment.localScale = startScale;
+                item.localScale = startScale;
                 yield break;
             }
             else yield return null;
@@ -216,7 +221,7 @@ public class PalmManager : MonoBehaviour
             Vector2 coconutPosOffset = UnityEngine.Random.insideUnitCircle.normalized * 0.01f;
             coconutInstance.position = trunkTop.TransformPoint(new Vector3(coconutPosOffset.x, 0, coconutPosOffset.y));
 
-            PopObject(coconutInstance);
+            PopItem(coconutInstance);
 
             coconutInstances.Add(coconutInstance);
         }
