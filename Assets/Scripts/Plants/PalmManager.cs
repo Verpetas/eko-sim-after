@@ -29,6 +29,8 @@ public class PalmManager : MonoBehaviour
 
     [SerializeField] bool beingWatered;
 
+    [SerializeField] Material exhaustedPalmLeafMat;
+
     VegetationManager vegetationManager;
 
     float segmentPopDuration = 0.4f;
@@ -231,6 +233,15 @@ public class PalmManager : MonoBehaviour
     {
         CoconutTree coconutTree = new CoconutTree(transform, coconutInstances);
         vegetationManager.AddCoconutTree(coconutTree);
+    }
+
+    public void MakePalmExhausted()
+    {
+        foreach (Transform leaf in leaves)
+        {
+            MeshRenderer meshFilter = leaf.GetComponent<MeshRenderer>();
+            meshFilter.material = exhaustedPalmLeafMat;
+        }
     }
 
     static Vector3 RandomVector(float offset)

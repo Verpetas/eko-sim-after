@@ -219,12 +219,24 @@ public class DinosaurManager : MonoBehaviour
 
     void EatFood(Transform food)
     {
+        CheckFoodExhausted(food);
+
         Destroy(food.gameObject);
 
         if (!fullyGrown) Grow();
 
         currentHunger--;
         searching = false;
+    }
+
+    void CheckFoodExhausted(Transform food)
+    {
+        if (food.parent.childCount <= 1)
+        {
+            PalmManager palmManager = food.parent.parent.GetComponent<PalmManager>();
+            palmManager.MakePalmExhausted();
+
+        }
     }
 
     public void Move(Vector3 waypoint)

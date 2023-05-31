@@ -106,7 +106,7 @@ public class ItemController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
             itemTypeSelection = ItemType.Tool;
-            selectedItem.text = "No Tools Yet";
+            selectedItem.text = "Watering Can";
         }
 
         selectedItemType.text = itemTypeSelection.ToString() + " Selected:";
@@ -134,7 +134,7 @@ public class ItemController : MonoBehaviour
 
             if (itemTypeSelection == ItemType.Tool)
             {
-                selectedItem.text = "No Tools Yet";
+                selectedItem.text = "Watering Can";
             }
         }
     }

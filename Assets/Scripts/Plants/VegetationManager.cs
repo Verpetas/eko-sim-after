@@ -6,6 +6,7 @@ using UnityEngine;
 public class VegetationManager : MonoBehaviour
 {
     [SerializeField] List<Transform> spawnedPalmTrees;
+    [SerializeField] PlantsAutoGrowToggle plantsAutoGrowToggle;
     public bool plantsAutoGrow = false;
 
     List<CoconutTree> coconutTrees;
@@ -24,7 +25,10 @@ public class VegetationManager : MonoBehaviour
     void HandlePlantAoutGrowToggle()
     {
         if (Input.GetKeyDown(KeyCode.X))
+        {
             plantsAutoGrow = !plantsAutoGrow;
+            plantsAutoGrowToggle.ToggleText(plantsAutoGrow);
+        }
     }
 
     public void AddPalmTree(Transform palmTree)
@@ -37,7 +41,7 @@ public class VegetationManager : MonoBehaviour
         coconutTrees.Add(coconutTree);
     }
 
-    public void RemoveCoconutTree(CoconutTree coconutTree)
+    public void RemoveFromCocoTreePool(CoconutTree coconutTree)
     {
         coconutTrees.Remove(coconutTree);
     }
@@ -70,7 +74,7 @@ public class CoconutTree
         Transform pickedCoconut = coconuts[randomCoconutIndex];
 
         coconuts.Remove(pickedCoconut);
-        if (coconuts.Count < 1) vegetationManager.RemoveCoconutTree(this);
+        if (coconuts.Count < 1) vegetationManager.RemoveFromCocoTreePool(this);
 
         return pickedCoconut;
     }
