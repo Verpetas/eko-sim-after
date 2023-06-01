@@ -235,7 +235,6 @@ public class DinosaurManager : MonoBehaviour
         {
             PalmManager palmManager = food.parent.parent.GetComponent<PalmManager>();
             palmManager.MakePalmExhausted();
-
         }
     }
 

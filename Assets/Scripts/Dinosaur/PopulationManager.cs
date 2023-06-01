@@ -9,13 +9,6 @@ public class PopulationManager : MonoBehaviour
     [SerializeField] List<Transform> spawnedDinosaurs = new List<Transform>();
     [SerializeField] Queue<Transform> availableDinosaurs = new Queue<Transform>();
 
-    float pairDstThresholdSqr; 
-
-    private void Awake()
-    {
-        pairDstThresholdSqr = minPairDstThreshold * minPairDstThreshold;
-    }
-
     private void Start()
     {
         StartCoroutine(TryFindPair());
