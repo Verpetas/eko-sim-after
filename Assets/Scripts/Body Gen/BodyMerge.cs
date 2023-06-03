@@ -37,7 +37,7 @@ public class BodyMerge : MonoBehaviour
 
         //AdjustRotation();
 
-        RestructureBones();
+        //RestructureBones();
     }
 
     void CalculateGlobalRots()
