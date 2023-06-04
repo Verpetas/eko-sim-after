@@ -7,15 +7,40 @@ public class WateringCan : MonoBehaviour
     [SerializeField] float useHeight = 10f;
 
     ParticleSystem water;
+    CapsuleCollider canCollider;
+    bool isUsed = false;
 
     private void Awake()
     {
         water = GetComponent<ParticleSystem>();
+        canCollider = GetComponent<CapsuleCollider>();
     }
 
-    public void UseWateringCan(Vector3 usePos)
+    private void Update()
     {
-        transform.position = usePos + useHeight * Vector3.up;
+        if (isUsed)
+            UseWateringCan();
+    }
+
+    public void StartWatering()
+    {
+        isUsed = true;
+        canCollider.enabled = true;
+    }
+
+    public void StopWatering()
+    {
+        isUsed = false;
+        canCollider.enabled = false;
+    }
+
+    public void UpdateCanPos(Vector3 mousePos)
+    {
+        transform.position = mousePos + useHeight * Vector3.up;
+    }
+
+    public void UseWateringCan()
+    {
         water.Play();
     }
 }

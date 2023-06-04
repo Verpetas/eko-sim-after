@@ -46,6 +46,7 @@ public class PalmManager : MonoBehaviour
     float maxLeafAngleOffset = 10f;
     int visibleSegmentCount = 1;
 
+    SphereCollider palmCollider;
 
     private void Awake()
     {
@@ -58,6 +59,8 @@ public class PalmManager : MonoBehaviour
         trunkSegments = new Transform[segmentCount];
         leafInstances = new List<Transform>();
         coconutInstances = new List<Transform>();
+
+        palmCollider = GetComponent<SphereCollider>();
     }
 
     private void Start()
@@ -100,6 +103,8 @@ public class PalmManager : MonoBehaviour
                     segmentIndex++;
                 }
             }
+
+            beingWatered = false;
 
             yield return new WaitForSeconds(0.2f / growSpeed);
         }
@@ -254,12 +259,8 @@ public class PalmManager : MonoBehaviour
     {
         if (other.tag == "WateringCan")
             beingWatered = true;
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.tag == "WateringCan")
-            beingWatered = false;
+        else if (other.tag == "Ground")
+            Physics.IgnoreCollision(palmCollider, other);
     }
 
 }

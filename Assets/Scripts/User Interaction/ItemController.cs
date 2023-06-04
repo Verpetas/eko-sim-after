@@ -57,21 +57,31 @@ public class ItemController : MonoBehaviour
 
         if (Input.GetMouseButton(0))
             HandleMouseHold();
+
+        if (Input.GetMouseButtonUp(0))
+            HandleMouseRelease();
     }
 
     void HandleMousePress()
     {
-        Ray ray = worldCamera.ScreenPointToRay(Input.mousePosition);
-
-        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, groundLayerMask))
+        if (itemTypeSelection == ItemType.Tool)
         {
-            if (itemTypeSelection == ItemType.Dinosaur)
+            wateringCan.StartWatering();
+        }
+        else
+        {
+            Ray ray = worldCamera.ScreenPointToRay(Input.mousePosition);
+
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, groundLayerMask))
             {
-                dinosaurSpawner.SpawnDinosaur(dinosaurTypes[dinosaurSelectionIndex], hit.point);
-            }
-            if (itemTypeSelection == ItemType.Seed)
-            {
-                plantSpawner.SapawnPlant(seedTypes[seedSelectionIndex], hit.point);
+                if (itemTypeSelection == ItemType.Dinosaur)
+                {
+                    dinosaurSpawner.SpawnDinosaur(dinosaurTypes[dinosaurSelectionIndex], hit.point);
+                }
+                if (itemTypeSelection == ItemType.Seed)
+                {
+                    plantSpawner.SapawnPlant(seedTypes[seedSelectionIndex], hit.point);
+                }
             }
         }
     }
@@ -84,9 +94,15 @@ public class ItemController : MonoBehaviour
         {
             if (itemTypeSelection == ItemType.Tool)
             {
-                wateringCan.UseWateringCan(hit.point);
+                wateringCan.UpdateCanPos(hit.point);
             }
         }
+    }
+
+    void HandleMouseRelease()
+    {
+        if (itemTypeSelection == ItemType.Tool)
+            wateringCan.StopWatering();
     }
 
     void HandleItemTypeSwitchInput()
