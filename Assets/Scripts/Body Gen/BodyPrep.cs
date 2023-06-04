@@ -67,6 +67,7 @@ public class BodyPrep : MonoBehaviour
         meshGen.skinnedMeshRenderer.enabled = false;
 
         AdjustBodySize();
+        AssignSkin();
 
         for (int i = 0; i < boneCount; i++)
         {
@@ -95,6 +96,11 @@ public class BodyPrep : MonoBehaviour
     void AdjustBodySize()
     {
         transform.localScale = Vector3.one * dinosaur.bodySize;
+    }
+
+    void AssignSkin()
+    {
+        meshGen.skinnedMeshRenderer.sharedMaterial = dinosaur.bodySkin;
     }
 
     void BendBody(int boneIndex)

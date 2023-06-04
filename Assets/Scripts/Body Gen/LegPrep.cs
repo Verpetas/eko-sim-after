@@ -23,13 +23,10 @@ public class LegPrep : MonoBehaviour
     FastIKFabric legIK;
     IKFootSolver legIKSolver;
 
-    DinosaurManager dinosaurManager;
-
     private void Awake()
     {
         Transform topMost = bodyRoot.parent.parent;
         dinosaur = topMost.GetComponent<DinosaurSetup>().Dinosaur;
-        dinosaurManager = topMost.GetComponent<DinosaurManager>();
 
         meshGen = GetComponent<MeshGen>();
         boneCount = dinosaur.legWidths.Length;
@@ -41,9 +38,11 @@ public class LegPrep : MonoBehaviour
 
         legRoot = transform.Find("Root");
 
-        legPairSize = GetLegPairSize();
+        float legPairSize = GetLegPairSize();
         legPairSizeRelative = GetLegPairSizeRelative(legPairSize);
         transform.parent.localScale = Vector3.one * legPairSize;
+
+        AssignSkin();
 
         for (int i = 0; i < boneCount; i++)
         {
@@ -52,8 +51,6 @@ public class LegPrep : MonoBehaviour
 
         AddTipBone();
         SetUpIK();
-
-        //dinosaurManager.Leg = this;
     }
 
     float GetLegPairSize()
@@ -75,6 +72,11 @@ public class LegPrep : MonoBehaviour
         }
 
         return legPairSizeRelative;
+    }
+
+    void AssignSkin()
+    {
+        meshGen.skinnedMeshRenderer.sharedMaterial = dinosaur.legSkin;
     }
 
     void StretchLeg(int boneIndex)

@@ -11,8 +11,6 @@ public class MeshGen : MonoBehaviour
     [SerializeField] int rings = 20;
     [SerializeField] float length = 15;
     [SerializeField] int boneCount = 10;
-
-    [SerializeField] Material bodyMaterial;
     [SerializeField] bool legGen;
 
     [NonSerialized] public SkinnedMeshRenderer skinnedMeshRenderer;
@@ -63,7 +61,6 @@ public class MeshGen : MonoBehaviour
         skinnedMeshRenderer.sharedMesh = mesh = model.AddComponent<MeshFilter>().sharedMesh = new Mesh();
         skinnedMeshRenderer.rootBone = root.transform;
         skinnedMeshRenderer.updateWhenOffscreen = true;
-        skinnedMeshRenderer.sharedMaterial = bodyMaterial;
 
         if (legGen)
         { mesh.name = "Leg"; gameObject.tag = "Dinosaur_Leg"; }
@@ -81,7 +78,6 @@ public class MeshGen : MonoBehaviour
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
         mesh.uv = uv.ToArray();
-        //mesh.uv8 = uv.ToArray();
 
         CalculateBones();
 
@@ -90,8 +86,6 @@ public class MeshGen : MonoBehaviour
         mesh.boneWeights = boneWeights.ToArray();
 
         mesh.RecalculateNormals();
-
-        //GetComponent<BodyMerge>().FormOffspring();
 
         // initialize shaping process
         if (legGen)

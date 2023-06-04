@@ -20,6 +20,9 @@ public class Dinosaur : ScriptableObject
     public Vector2[] spineWidths;
     public Vector2[] legWidths;
 
+    public Material bodySkin;
+    public Material legSkin;
+
     public DinosaurWalkingProperties walkingProperties;
 
     public void Init(bool bipedal, List<int> legBoneIndices, List<float> legPairSizeRatios, Vector2 colliderSize, float bodySize, int tailLength, int neckLength, float[] spineBends, Vector2[] spineWidths, Vector2[] legWidths, DinosaurWalkingProperties walkingProperties)
