@@ -9,13 +9,13 @@ public class LegPrep : MonoBehaviour
 
     [SerializeField] Transform rig;
     [SerializeField] Transform bodyRoot;
+    [SerializeField] Material legSkin;
 
     Dinosaur dinosaur;
     MeshGen meshGen;
     int boneCount;
     GameObject tipBone;
     Transform legRoot;
-    float legPairSize;
     float legPairSizeRelative;
 
     GameObject target;
@@ -76,7 +76,8 @@ public class LegPrep : MonoBehaviour
 
     void AssignSkin()
     {
-        meshGen.skinnedMeshRenderer.sharedMaterial = dinosaur.legSkin;
+        meshGen.skinnedMeshRenderer.material = legSkin;
+        meshGen.skinnedMeshRenderer.material.color = dinosaur.skinColor;
     }
 
     void StretchLeg(int boneIndex)

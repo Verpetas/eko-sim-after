@@ -154,7 +154,10 @@ public class DinosaurPair : MonoBehaviour
                 legBoneIndices = twoLeggedDinosaur.legBoneIndices;
             }    
         }
-        
+
+        // determine skin color
+        heredityRatio = Random.Range(0.25f, 0.75f);
+        Color skinColor = dinosaurFirst.skinColor * heredityRatio + dinosaurSecond.skinColor * (1 - heredityRatio);
 
         // determine walk properties
         heredityRatio = Random.Range(0.25f, 0.75f);
@@ -178,6 +181,7 @@ public class DinosaurPair : MonoBehaviour
             spineBends,
             spineWidths,
             legWidths,
+            skinColor,
             walkProperties
             );
 

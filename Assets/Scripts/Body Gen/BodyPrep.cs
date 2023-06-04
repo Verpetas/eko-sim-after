@@ -13,6 +13,7 @@ public class BodyPrep : MonoBehaviour
     [SerializeField] float tailStiffness = 75f;
     [SerializeField] float tailBounciness = 75f;
     [SerializeField] float tailDampness = 0.2f;
+    [SerializeField] Material bodySkin;
 
     MeshGen meshGen;
     int boneCount;
@@ -100,7 +101,8 @@ public class BodyPrep : MonoBehaviour
 
     void AssignSkin()
     {
-        meshGen.skinnedMeshRenderer.sharedMaterial = dinosaur.bodySkin;
+        meshGen.skinnedMeshRenderer.material = bodySkin;
+        meshGen.skinnedMeshRenderer.material.color = dinosaur.skinColor;
     }
 
     void BendBody(int boneIndex)
@@ -202,7 +204,6 @@ public class BodyPrep : MonoBehaviour
                 Transform legL = legPair.Find("Leg_L");
                 Transform legR = legPair.Find("Leg_R");
                 legL.position = info.point;
-                //legL.localPosition *= 1.2f;
                 legR.localPosition = new Vector3(-legL.localPosition.x, 0, 0);
             }
         }
