@@ -17,6 +17,8 @@ public class TerrainGenerator : MonoBehaviour {
 
     public GameObject oceanTile;
 
+    public bool randomizeSeed = true;
+
     public TerrainAltitudeInterval[] walkableRegions;
     public float minWalkableAltitude = 4f;
 
@@ -50,6 +52,8 @@ public class TerrainGenerator : MonoBehaviour {
 
         textureSettings.ApplyToMaterial(mapMaterial);
 		textureSettings.UpdateMeshHeights(mapMaterial, heightMapSettings.minHeight, heightMapSettings.maxHeight);
+
+        heightMapSettings.noiseSettings.seed = Random.Range(0, 1000000);
 
 		GenerateChunks();
 	}
