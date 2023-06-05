@@ -58,7 +58,12 @@ public class TerrainGenerator : MonoBehaviour {
 		GenerateChunks();
 	}
 
-	void GenerateChunks()
+    private void Start()
+    {
+        SetCameraPos();
+    }
+
+    void GenerateChunks()
 	{
 		GenerateChunkLocations();
 
@@ -206,6 +211,13 @@ public class TerrainGenerator : MonoBehaviour {
         //    GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         //    sphere.transform.position = vertexPosActual;
         //}
+    }
+
+    void SetCameraPos()
+    {
+        CameraController cameraContoller = GameObject.FindWithTag("CameraHolder").GetComponent<CameraController>();
+        Vector2 camPosOnPlane = (farthestChunkCoord - closestChunkCoord + Vector2.one) * (chunkWidth / 2);
+        cameraContoller.PositionCamera(camPosOnPlane);
     }
 
 	Vector3 GetVertexOffset(float chunkSize, Vector2 chunkCoord)

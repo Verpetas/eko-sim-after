@@ -37,10 +37,7 @@ public class CameraController : MonoBehaviour
         plane = new Plane(Vector3.up, Vector3.zero);
 
         zoomAmount = new Vector3(0, -zoomSpeed, zoomSpeed);
-    }
 
-    void Start()
-    {
         newPos = transform.position;
         newRot = transform.rotation;
         newZoom = worldCameraTransform.localPosition;
@@ -172,6 +169,11 @@ public class CameraController : MonoBehaviour
         {
             newZoom -= zoomAmount;
         }
+    }
+
+    public void PositionCamera(Vector2 pointOnPlane)
+    {
+        newPos = transform.position = new Vector3(pointOnPlane.x, transform.position.y, pointOnPlane.y);
     }
 
 }
