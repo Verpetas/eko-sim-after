@@ -102,7 +102,7 @@ public class DinosaurPair : MonoBehaviour
 
         // determine body and collider size
         heredityRatio = Random.Range(0.25f, 0.75f);
-        float bodySize = dinosaurFirst.bodySize * heredityRatio + dinosaurSecond.bodySize * (1 - heredityRatio);
+        float bodySize = DetermineHeredity(dinosaurFirst.bodySize, dinosaurSecond.bodySize, heredityRatio);
         Vector2 colliderSize = dinosaurFirst.colliderSize * heredityRatio + dinosaurSecond.colliderSize * (1 - heredityRatio);
 
         /*
@@ -143,9 +143,7 @@ public class DinosaurPair : MonoBehaviour
             {
                 bipedal = false;
 
-                legPairSizeRatio = fourLeggedDinosaur.legPairSizeRatios[1];
-                legPairSizeRatios.Add(legPairSizeRatio);
-
+                legPairSizeRatios.Add(fourLeggedDinosaur.legPairSizeRatios[1]);
                 legBoneIndices = fourLeggedDinosaur.legBoneIndices;
             }
             else
@@ -162,11 +160,11 @@ public class DinosaurPair : MonoBehaviour
         // determine walk properties
         heredityRatio = Random.Range(0.25f, 0.75f);
         DinosaurWalkingProperties walkProperties = new DinosaurWalkingProperties(
-            DetermineHeredity(dinosaurFirst.walkingProperties.stepSpeed, dinosaurSecond.walkingProperties.stepSpeed, heredityRatio),
+            DetermineHeredity(dinosaurFirst.walkingProperties.stepSpeed, dinosaurSecond.walkingProperties.stepSpeed),
             DetermineHeredity(dinosaurFirst.walkingProperties.stepDistance, dinosaurSecond.walkingProperties.stepDistance, heredityRatio),
             DetermineHeredity(dinosaurFirst.walkingProperties.stepLength, dinosaurSecond.walkingProperties.stepLength, heredityRatio),
-            DetermineHeredity(dinosaurFirst.walkingProperties.stepHeight, dinosaurSecond.walkingProperties.stepHeight, heredityRatio),
-            DetermineHeredity(dinosaurFirst.walkingProperties.bodyBobAmount, dinosaurSecond.walkingProperties.bodyBobAmount, heredityRatio)
+            DetermineHeredity(dinosaurFirst.walkingProperties.stepHeight, dinosaurSecond.walkingProperties.stepHeight),
+            DetermineHeredity(dinosaurFirst.walkingProperties.bodyBobAmount, dinosaurSecond.walkingProperties.bodyBobAmount)
             );
 
         Dinosaur newDinosaur = ScriptableObject.CreateInstance<Dinosaur>();

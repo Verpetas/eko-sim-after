@@ -56,6 +56,7 @@ public class TerrainGenerator : MonoBehaviour {
         heightMapSettings.noiseSettings.seed = Random.Range(0, 1000000);
 
 		GenerateChunks();
+        InitiateObjectScatter();
 	}
 
     private void Start()
@@ -211,6 +212,13 @@ public class TerrainGenerator : MonoBehaviour {
         //    GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         //    sphere.transform.position = vertexPosActual;
         //}
+    }
+
+    void InitiateObjectScatter()
+    {
+        Vector2 mapCorner = new Vector2(nodeGrid.GetLength(0), nodeGrid.GetLength(1)) * 4;
+        ObjectScatterer objectScatterer = GetComponent<ObjectScatterer>();
+        objectScatterer.ScatterObjects(mapCorner, chunksToGenerateNo);
     }
 
     void SetCameraPos()
