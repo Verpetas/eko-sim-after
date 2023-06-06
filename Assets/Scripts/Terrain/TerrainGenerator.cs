@@ -250,6 +250,11 @@ public class TerrainGenerator : MonoBehaviour {
 		return terrain;
 	}
 
+    public float SeaLevel
+    {
+        get { return walkableRegions[0].upToHeight; }
+    }
+
 }
 
 [System.Serializable]
