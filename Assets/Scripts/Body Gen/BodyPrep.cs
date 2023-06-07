@@ -15,23 +15,25 @@ public class BodyPrep : MonoBehaviour
     [SerializeField] float tailDampness = 0.2f;
     [SerializeField] Material bodySkin;
 
-    MeshGen meshGen;
     int boneCount;
     float[] spineBendsGlobal;
-    Transform root;
     List<Transform> legBones = new List<Transform>();
-    LayerMask dinosaurLayerMask;
+    MeshGen meshGen;
+
+    Transform root;
     RigBuilder rigBuilder;
-    int dinosaurLayer;
+    ChainIKConstraint neckIK;
+
+    SpringBone[] tailSprings;
+
     GameObject colliderGO;
+
+    int dinosaurLayer;
+    LayerMask dinosaurLayerMask;
 
     DinosaurSetup dinosaurSetup;
     DinosaurManager dinosaurManager;
     Dinosaur dinosaur;
-
-    ChainIKConstraint neckIK;
-
-    SpringBone[] tailSprings;
 
     private void Awake()
     {

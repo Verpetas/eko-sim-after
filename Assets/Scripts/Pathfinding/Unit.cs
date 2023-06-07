@@ -4,10 +4,10 @@ using System;
 
 public class Unit : MonoBehaviour {
 
+    [SerializeField] float waypointDistanceThreshold = 5f;
+
     const float minPathUpdateTime = 0.2f;
     const float pathUpdateMoveThreshold = 0.5f;
-
-	public float waypointDistanceThreshold = 5f;
 
     Vector3[] path;
     int targetIndex;

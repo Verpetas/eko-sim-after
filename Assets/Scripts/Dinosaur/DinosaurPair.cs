@@ -107,9 +107,9 @@ public class DinosaurPair : MonoBehaviour
 
         /*
             determine:
-            * leg pair count,
+            * leg pair count (bipedal or not),
             * at whitch bone along the spine legs are attached to the body,
-            * and the sizes of each leg pair
+            * and the relative (to body) sizes of each leg pair
         */
         bool bipedal;
         List<int> legBoneIndices = new List<int>();

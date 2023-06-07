@@ -14,7 +14,7 @@ public class DinosaurManager : MonoBehaviour
 
     [SerializeField] float speed = 20f;
     [SerializeField] float turnSpeed = 0.5f;
-    [SerializeField] float neckSpeed = 1f;
+    [SerializeField] float neckSpeed = 5f;
 
     [SerializeField] int hungerBars = 3;
 

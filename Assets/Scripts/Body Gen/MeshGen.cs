@@ -6,11 +6,11 @@ using System;
 public class MeshGen : MonoBehaviour
 {
 
-    [SerializeField] int segments = 20;
-    [SerializeField] float radius = 1;
-    [SerializeField] int rings = 20;
-    [SerializeField] float length = 15;
-    [SerializeField] int boneCount = 10;
+    [SerializeField] int segments;
+    [SerializeField] float radius;
+    [SerializeField] int rings;
+    [SerializeField] float length;
+    [SerializeField] int boneCount;
     [SerializeField] bool legGen;
 
     [NonSerialized] public SkinnedMeshRenderer skinnedMeshRenderer;
@@ -119,7 +119,7 @@ public class MeshGen : MonoBehaviour
             }
         }
 
-        // middle
+        // middle dome
         for (int ringIndex = 0; ringIndex < rings * boneCount; ringIndex++)
         {
             float boneIndexFloat = (float)ringIndex / rings;
@@ -265,13 +265,6 @@ public class MeshGen : MonoBehaviour
             boneTransforms[boneIndex].localRotation = Quaternion.identity;
             bindPoses[boneIndex] = boneTransforms[boneIndex].worldToLocalMatrix * transform.localToWorldMatrix;
 
-            //if (boneIndex > 0)
-            //{
-            //    HingeJoint hingeJoint = boneTransforms[boneIndex].GetComponent<HingeJoint>();
-            //    hingeJoint.anchor = new Vector3(0, 0, -length / 2f);
-            //    hingeJoint.connectedBody = boneTransforms[boneIndex - 1].GetComponent<Rigidbody>();
-            //}
-
             CreateBlendshapesAtLength(boneIndex, boneTransforms[boneIndex].localPosition.z);
 
             if (legGen && boneIndex == 1)
@@ -291,17 +284,10 @@ public class MeshGen : MonoBehaviour
 
     void CreateBlendshapesAtLength(float boneIndex, float lengthAlongSpine)
     {
-        //Vector3[] deltaVertices = new Vector3[vertices.Count];
         Vector3[] deltaVerticesX = new Vector3[vertices.Count];
         Vector3[] deltaVerticesY = new Vector3[vertices.Count];
         for (int vertIndex = 0; vertIndex < vertices.Count; vertIndex++)
         {
-            // Round
-            //float distanceToBone = Mathf.Clamp(Vector3.Distance(vertices[vertIndex], boneTransforms[boneIndex].localPosition), 0, 2f * length);
-            //Vector3 directionToBone = (vertices[vertIndex] - boneTransforms[boneIndex].localPosition).normalized;
-
-            //deltaVertices[vertIndex] = directionToBone * (2f * length - distanceToBone);
-
             float dstAlongBoneMultiplier;
             if (legGen)
             {
@@ -310,7 +296,6 @@ public class MeshGen : MonoBehaviour
             else
                 dstAlongBoneMultiplier = 2f;
 
-            // Smooth - https://www.desmos.com/calculator/wmpvvtmor8
             float maxDistanceAlongBone = length * dstAlongBoneMultiplier;
             float maxHeightAboveBone = radius * 8f;
 

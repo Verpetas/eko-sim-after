@@ -7,20 +7,20 @@ using static UnityEngine.UI.Image;
 
 public class TerrainGenerator : MonoBehaviour {
 
-	public MeshSettings meshSettings;
-	public HeightMapSettings heightMapSettings;
-	public TextureData textureSettings;
+	[SerializeField] MeshSettings meshSettings;
+    [SerializeField] HeightMapSettings heightMapSettings;
+    [SerializeField] TextureData textureSettings;
 
-	public Material mapMaterial;
+    [SerializeField] Material mapMaterial;
 
-	public int chunksToGenerateNo = 21;
+    [SerializeField] int chunksToGenerateNo = 21;
 
-    public GameObject oceanTile;
+    [SerializeField] GameObject oceanTile;
 
-    public bool randomizeSeed = true;
+    [SerializeField] bool randomizeSeed = true;
 
-    public TerrainAltitudeInterval[] walkableRegions;
-    public float minWalkableAltitude = 4f;
+    [SerializeField] TerrainAltitudeInterval[] walkableRegions;
+    [SerializeField] float minWalkableAltitude = 4f;
 
     Node[,] nodeGrid;
 	Grid terrain;
@@ -203,15 +203,6 @@ public class TerrainGenerator : MonoBehaviour {
         bool walkable = vertexPosActual.y > minWalkableAltitude;
 
         nodeGrid[nodeX, nodeY] = new Node(walkable, vertexPosActual, nodeX, nodeY, nodeTerrainPenalty);
-
-        //bool walkable = vertexPosActual.y > 6 && vertexPosActual.y < 25;
-        //nodeGrid[nodeX, nodeY] = new Node(walkable, vertexPosActual, nodeX, nodeY);
-
-        //if (walkable)
-        //{
-        //    GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        //    sphere.transform.position = vertexPosActual;
-        //}
     }
 
     void InitiateObjectScatter()

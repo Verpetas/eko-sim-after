@@ -16,9 +16,6 @@ public class IKFootSolver : MonoBehaviour
     Vector3 oldNormal, currentNormal, newNormal;
     float lerp;
 
-    // added
-    Vector3 gizmoPoint;
-
     [SerializeField] float bodyBobAmount;
     public Transform bodyRoot;
     public Transform legRoot;
@@ -78,13 +75,10 @@ public class IKFootSolver : MonoBehaviour
         transform.position = currentPosition;
         transform.up = currentNormal;
 
-        //Ray ray = new Ray(body.position + (body.right * footSpacing), Vector3.down);
         Ray ray = new Ray(legRoot.position, Vector3.down);
 
         if (Physics.Raycast(ray, out RaycastHit info, Mathf.Infinity, terrainLayer.value))
         {
-            gizmoPoint = info.point;
-
             if (Vector3.Distance(newPosition, info.point) > stepDistance && !otherFoot.IsMoving() && lerp >= 1)
             {
                 int direction = bodyRoot.InverseTransformPoint(info.point).z > bodyRoot.InverseTransformPoint(newPosition).z ? 1 : -1;
@@ -130,9 +124,6 @@ public class IKFootSolver : MonoBehaviour
     {
         Gizmos.color = Color.red;
         Gizmos.DrawSphere(newPosition, 0.25f);
-
-        Gizmos.color = Color.blue;
-        Gizmos.DrawSphere(gizmoPoint, 0.25f);
     }
 
 

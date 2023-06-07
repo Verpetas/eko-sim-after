@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class PopulationManager : MonoBehaviour
 {
-    [SerializeField] float minPairDstThreshold = 50f;
 
     [SerializeField] List<Transform> spawnedDinosaurs = new List<Transform>();
     [SerializeField] Queue<Transform> availableDinosaurs = new Queue<Transform>();
