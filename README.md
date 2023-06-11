@@ -5,6 +5,16 @@ A project I have been working on.
 Doc with a brief explanation of what I did:\
 https://docs.google.com/document/d/1bDrPIjDjEfHzHTdThG-k6hGF3hbsx_P6qhXrTlToUIU/edit#heading=h.1vzce570003t
 
+How it works:
+* You can spawn dinosaurs
+* You can spawn palm trees
+* You can make palm trees grow by watering them or by enabling their auto-growth
+* Once a palm tree is fully grown dinosaurs will start going towards them and eating their coconuts
+* Once a dinosaur has eaten 3 coconuts, it is ready to pair
+* Two dinosaurs, that are ready to pair, will form a pair and go towards each other
+* When they meet, they create a new fully functional dinosaur that inverits both of their features
+* The cycle repeats with paired dinosaurs going to look for food again
+
 \
 **Controls**
 
