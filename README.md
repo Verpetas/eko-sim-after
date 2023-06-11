@@ -14,6 +14,7 @@ How it works:
 * Two dinosaurs, that are ready to pair, will form a pair and go towards each other
 * When they meet, they create a new fully functional dinosaur that inverits both of their features
 * The cycle repeats with paired dinosaurs going to look for food again
+* The dinosaurs will stand still if / while there are no available coconuts in the world to go to
 
 \
 **Controls**
